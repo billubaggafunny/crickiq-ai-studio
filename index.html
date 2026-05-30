@@ -1,85 +1,109 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
     <title>CrickIQ – Cricket Scorer & Analyst</title>
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#7300E0" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
     <meta name="apple-mobile-web-app-title" content="CrickIQ" />
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
       @font-face {
-        font-family: 'LatiniaBlack';
-        src: url('/LatiniaBlack.ttf') format('truetype');
+        font-family: "LatiniaBlack";
+        src: url("/LatiniaBlack.ttf") format("truetype");
         font-weight: normal;
         font-style: normal;
       }
       @font-face {
-        font-family: 'SharpCardinal';
-        src: url('/SharpCardinal.ttf') format('truetype');
+        font-family: "SharpCardinal";
+        src: url("/SharpCardinal.ttf") format("truetype");
         font-weight: normal;
         font-style: normal;
       }
       :root {
-        --color-primary: #FFFFFF;
-        --color-secondary: #F8F6FD;
+        --color-primary: #ffffff;
+        --color-secondary: #f8f6fd;
         --color-text-primary: #111827;
-        --color-text-secondary: rgba(0,0,0,0.65);
-        --color-highlight: #EF4444;
-        --color-border: rgba(113,147,237,0.15);
+        --color-text-secondary: rgba(0, 0, 0, 0.65);
+        --color-highlight: #ef4444;
+        --color-border: rgba(113, 147, 237, 0.15);
 
-        --color-accent: #2563EB; /* 4.5:1 contrast against white */
-        --color-accent-light: #3B82F6;
-        
-        --color-brand-teal: #0F766E; /* teal-700 */
-        --color-brand-lightblue: #1D4ED8; /* blue-700 */
-        --color-brand-blue: #4338CA; /* indigo-700 */
-        --color-brand-lavender: #6D28D9; /* purple-700 */
-        --color-success: #15803D; /* green-700 */
-        --color-warning: #B45309; /* amber-700 */
-        --color-danger: #B91C1C; /* red-700 */
+        --color-accent: #2563eb; /* 4.5:1 contrast against white */
+        --color-accent-light: #3b82f6;
+
+        --color-brand-teal: #0f766e; /* teal-700 */
+        --color-brand-lightblue: #1d4ed8; /* blue-700 */
+        --color-brand-blue: #4338ca; /* indigo-700 */
+        --color-brand-lavender: #6d28d9; /* purple-700 */
+        --color-success: #15803d; /* green-700 */
+        --color-warning: #b45309; /* amber-700 */
+        --color-danger: #b91c1c; /* red-700 */
+
+        --brand-gradient: linear-gradient(90deg, #001e6b 0%, #0056ff 100%);
+
+        /* Light Theme Foundation Tokens (Phase 1) */
+        --color-light-primary-blue: #0056ff;
+        --color-light-secondary-blue: #2277ff;
+        --color-light-background: #f7f9fc;
+        --color-light-card: #ffffff;
+        --color-light-accent: #e3e7fc;
+        --color-light-text-primary: #111827;
+        --color-light-text-secondary: #4b5563;
+        --color-light-border: #dce3f0;
+        --color-light-success: #16a34a;
+        --color-light-warning: #f59e0b;
+        --color-light-error: #dc2626;
       }
       html.dark {
         /* Dark theme counterparts */
         --color-primary: #1a1a1a;
         --color-secondary: #2a2a2a;
-        --color-text-primary: #F9FAFB;
-        --color-text-secondary: rgba(255,255,255,0.7);
-        --color-highlight: #EF4444;
+        --color-text-primary: #f9fafb;
+        --color-text-secondary: rgba(255, 255, 255, 0.7);
+        --color-highlight: #ef4444;
         --color-border: rgba(255, 255, 255, 0.15);
-        
-        --color-accent: #7193ED;
-        --color-accent-light: #74BDE8;
-        
-        --color-brand-teal: #68CFCB; 
-        --color-brand-lightblue: #74BDE8;
-        --color-brand-blue: #7193ED;
-        --color-brand-lavender: #BF9FF2;
-        --color-success: #22C55E;
-        --color-warning: #F59E0B;
-        --color-danger: #EF4444;
+
+        --color-accent: #7193ed;
+        --color-accent-light: #74bde8;
+
+        --color-brand-teal: #68cfcb;
+        --color-brand-lightblue: #74bde8;
+        --color-brand-blue: #7193ed;
+        --color-brand-lavender: #bf9ff2;
+        --color-success: #22c55e;
+        --color-warning: #f59e0b;
+        --color-danger: #ef4444;
+
+        /* Preserve Dark Theme gradient */
+        --brand-gradient: linear-gradient(90deg, #bf9ff2 0%, #7193ed 100%);
       }
-      
+
       /* Placeholders */
       ::placeholder {
         color: var(--color-text-secondary) !important;
         opacity: 1 !important;
       }
-      
+
       /* Font size classes */
       html.font-size-small {
-          font-size: 14px;
+        font-size: 14px;
       }
       html.font-size-medium {
-          font-size: 15px;
+        font-size: 15px;
       }
       html.font-size-standard {
-          font-size: 16px;
+        font-size: 16px;
       }
 
       body {
@@ -93,7 +117,9 @@
         -ms-user-select: none; /* IE10+ */
         user-select: none; /* Standard */
       }
-      html, body, #root {
+      html,
+      body,
+      #root {
         height: 100%;
       }
       .dark body {
@@ -103,10 +129,10 @@
 
       /* Base card style for glass effect */
       .glass-card {
-        background-color: #FFFFFF;
+        background-color: #ffffff;
         backdrop-filter: blur(10px);
         border-radius: 10px;
-        border: 1px solid rgba(113,147,237,0.10);
+        border: 1px solid rgba(113, 147, 237, 0.1);
         box-shadow: none;
       }
       .dark .glass-card {
@@ -115,26 +141,30 @@
 
       /* Hide scrollbar utility */
       .no-scrollbar::-webkit-scrollbar {
-          display: none;
+        display: none;
       }
       .no-scrollbar {
-          -ms-overflow-style: none;  /* IE and Edge */
-          scrollbar-width: none;  /* Firefox */
+        -ms-overflow-style: none; /* IE and Edge */
+        scrollbar-width: none; /* Firefox */
       }
 
       /* Allow text selection where needed */
-      input, textarea, [contenteditable="true"] {
+      input,
+      textarea,
+      [contenteditable="true"] {
         -webkit-user-select: text;
         -moz-user-select: text;
         -ms-user-select: text;
         user-select: text;
       }
-      
+
       @keyframes blink {
-        50% { opacity: 0.3; }
+        50% {
+          opacity: 0.3;
+        }
       }
       .blinking {
-        animation: blink 1.s linear infinite;
+        animation: blink 1s linear infinite;
       }
 
       /* Custom Checkbox styles */
@@ -162,10 +192,10 @@
         margin-right: 8px;
       }
       .custom-checkbox:hover input ~ .checkmark {
-        background-color: rgba(0,0,0,0.1);
+        background-color: rgba(0, 0, 0, 0.1);
       }
       .dark .custom-checkbox:hover input ~ .checkmark {
-        background-color: rgba(255,255,255,0.1);
+        background-color: rgba(255, 255, 255, 0.1);
       }
       .custom-checkbox input:checked ~ .checkmark {
         background-color: var(--color-accent);
@@ -193,98 +223,151 @@
 
       /* Dynamic Island Animation */
       @keyframes fadeIn {
-        from { opacity: 0; transform: scale(0.95); }
-        to { opacity: 1; transform: scale(1); }
+        from {
+          opacity: 0;
+          transform: scale(0.95);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
       }
       .animate-fade-in {
-          animation: fadeIn 0.4s ease-out forwards;
+        animation: fadeIn 0.4s ease-out forwards;
       }
 
       /* Safe Area Insets */
-      .safe-pad-t { padding-top: env(safe-area-inset-top); }
-      .safe-pad-b { padding-bottom: env(safe-area-inset-bottom); }
-      .safe-pad-l { padding-left: env(safe-area-inset-left); }
-      .safe-pad-r { padding-right: env(safe-area-inset-right); }
-      .safe-top-position { top: calc(1rem + env(safe-area-inset-top)); }
+      .safe-pad-t {
+        padding-top: env(safe-area-inset-top);
+      }
+      .safe-pad-b {
+        padding-bottom: env(safe-area-inset-bottom);
+      }
+      .safe-pad-l {
+        padding-left: env(safe-area-inset-left);
+      }
+      .safe-pad-r {
+        padding-right: env(safe-area-inset-right);
+      }
+      .safe-top-position {
+        top: calc(1rem + env(safe-area-inset-top));
+      }
     </style>
     <script>
       tailwind.config = {
-        darkMode: 'class',
+        darkMode: "class",
         theme: {
           borderRadius: {
-            'none': '0px',
-            'sm': '1px',
-            DEFAULT: '2px',
-            'md': '3px',
-            'lg': '4px',
-            'xl': '6px',
-            '2xl': '8px',
-            '3xl': '12px',
-            'full': '9999px',
-            '20px': '10px'
+            none: "0px",
+            sm: "1px",
+            DEFAULT: "2px",
+            md: "3px",
+            lg: "4px",
+            xl: "6px",
+            "2xl": "8px",
+            "3xl": "12px",
+            full: "9999px",
+            "20px": "10px",
           },
           extend: {
             backgroundImage: {
-              'brand-gradient': 'linear-gradient(90deg, #BF9FF2 0%, #7193ED 100%)',
+              "brand-gradient": "var(--brand-gradient)",
+              futurewave: "linear-gradient(90deg, #2277FF 0%, #8DB8FF 100%)",
+              "midnight-surge":
+                "linear-gradient(90deg, #001E6B 0%, #0056FF 100%)",
             },
             fontSize: {
-              'h1': ['28px', { lineHeight: '36px', fontWeight: '700' }],
-              'h2': ['22px', { lineHeight: '30px', fontWeight: '600' }],
-              'h3': ['18px', { lineHeight: '26px', fontWeight: '600' }],
-              'body': ['16px', { lineHeight: '24px', fontWeight: '400' }],
-              'caption': ['13px', { lineHeight: '18px', fontWeight: '400' }],
-              'button': ['16px', { lineHeight: '20px', fontWeight: '600' }],
-              'tab': ['16px', { lineHeight: 'normal', fontWeight: '600' }],
-              'table-header': ['14px', { lineHeight: 'normal', fontWeight: '600' }],
-              'table-cell': ['16px', { lineHeight: 'normal', fontWeight: '500' }],
-              'table-secondary': ['13px', { lineHeight: 'normal', fontWeight: '400' }],
-              'form-label': ['14px', { lineHeight: 'normal', fontWeight: '500' }],
-              'form-input': ['16px', { lineHeight: 'normal', fontWeight: '400' }],
-              'form-error': ['13px', { lineHeight: 'normal', fontWeight: '500' }],
-              'status': ['14px', { lineHeight: 'normal', fontWeight: '600' }],
+              h1: ["28px", { lineHeight: "36px", fontWeight: "700" }],
+              h2: ["22px", { lineHeight: "30px", fontWeight: "600" }],
+              h3: ["18px", { lineHeight: "26px", fontWeight: "600" }],
+              body: ["16px", { lineHeight: "24px", fontWeight: "400" }],
+              caption: ["13px", { lineHeight: "18px", fontWeight: "400" }],
+              button: ["16px", { lineHeight: "20px", fontWeight: "600" }],
+              tab: ["16px", { lineHeight: "normal", fontWeight: "600" }],
+              "table-header": [
+                "14px",
+                { lineHeight: "normal", fontWeight: "600" },
+              ],
+              "table-cell": [
+                "16px",
+                { lineHeight: "normal", fontWeight: "500" },
+              ],
+              "table-secondary": [
+                "13px",
+                { lineHeight: "normal", fontWeight: "400" },
+              ],
+              "form-label": [
+                "14px",
+                { lineHeight: "normal", fontWeight: "500" },
+              ],
+              "form-input": [
+                "16px",
+                { lineHeight: "normal", fontWeight: "400" },
+              ],
+              "form-error": [
+                "13px",
+                { lineHeight: "normal", fontWeight: "500" },
+              ],
+              status: ["14px", { lineHeight: "normal", fontWeight: "600" }],
             },
             colors: {
-              'brand-teal': 'var(--color-brand-teal)',
-              'brand-lightblue': 'var(--color-brand-lightblue)',
-              'brand-blue': 'var(--color-brand-blue)',
-              'brand-lavender': 'var(--color-brand-lavender)',
-              'success': 'var(--color-success)',
-              'warning': 'var(--color-warning)',
-              'danger': 'var(--color-danger)',
-              'primary': 'var(--color-primary)',
-              'secondary': 'var(--color-secondary)',
-              'accent': 'var(--color-accent)',
-              'highlight': 'var(--color-highlight)',
-              'text-primary': 'var(--color-text-primary)',
-              'text-secondary': 'var(--color-text-secondary)',
-              'border-color': 'var(--color-border)',
+              "brand-teal": "var(--color-brand-teal)",
+              "brand-lightblue": "var(--color-brand-lightblue)",
+              "brand-blue": "var(--color-brand-blue)",
+              "brand-lavender": "var(--color-brand-lavender)",
+              success: "var(--color-success)",
+              warning: "var(--color-warning)",
+              danger: "var(--color-danger)",
+              primary: "var(--color-primary)",
+              secondary: "var(--color-secondary)",
+              accent: "var(--color-accent)",
+              highlight: "var(--color-highlight)",
+              "text-primary": "var(--color-text-primary)",
+              "text-secondary": "var(--color-text-secondary)",
+              "border-color": "var(--color-border)",
+              light: {
+                "primary-blue": "var(--color-light-primary-blue)",
+                "secondary-blue": "var(--color-light-secondary-blue)",
+                background: "var(--color-light-background)",
+                card: "var(--color-light-card)",
+                accent: "var(--color-light-accent)",
+                "text-primary": "var(--color-light-text-primary)",
+                "text-secondary": "var(--color-light-text-secondary)",
+                border: "var(--color-light-border)",
+                success: "var(--color-light-success)",
+                warning: "var(--color-light-warning)",
+                error: "var(--color-light-error)",
+              },
             },
 
             fontFamily: {
-              sans: ['Inter', 'sans-serif'],
-              'display': ['"LatiniaBlack"', 'sans-serif'],
-              'sharp-cardinal': ['"SharpCardinal"', 'sans-serif'],
+              sans: ["Inter", "sans-serif"],
+              display: ['"LatiniaBlack"', "sans-serif"],
+              "sharp-cardinal": ['"SharpCardinal"', "sans-serif"],
             },
           },
         },
+      };
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <script type="importmap">
+      {
+        "imports": {
+          "react/": "https://aistudiocdn.com/react@^19.1.1/",
+          "react": "https://aistudiocdn.com/react@^19.1.1",
+          "recharts": "https://aistudiocdn.com/recharts@^3.2.1",
+          "react-dom/": "https://aistudiocdn.com/react-dom@^19.1.1/",
+          "react-dom/server": "https://aistudiocdn.com/react-dom@^19.1.1/server"
+        }
       }
     </script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <script type="importmap">
-{
-  "imports": {
-    "react/": "https://aistudiocdn.com/react@^19.1.1/",
-    "react": "https://aistudiocdn.com/react@^19.1.1",
-    "recharts": "https://aistudiocdn.com/recharts@^3.2.1",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.1.1/",
-    "react-dom/server": "https://aistudiocdn.com/react-dom@^19.1.1/server"
-  }
-}
-</script>
-<link rel="stylesheet" href="/index.css">
-</head>
+    <link rel="stylesheet" href="/index.css" />
+  </head>
   <body class="text-text-primary transition-colors duration-300 antialiased">
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
