@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>CrickIQ – Cricket Scorer & Analyst</title>
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#7300E0" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="CrickIQ" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      @font-face {
+        font-family: 'LatiniaBlack';
+        src: url('/LatiniaBlack.ttf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+      }
+      @font-face {
+        font-family: 'SharpCardinal';
+        src: url('/SharpCardinal.ttf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+      }
+      :root {
+        --color-primary: #FFFFFF;
+        --color-secondary: #F8F6FD;
+        --color-text-primary: #111827;
+        --color-text-secondary: rgba(0,0,0,0.65);
+        --color-highlight: #EF4444;
+        --color-border: rgba(113,147,237,0.15);
+
+        --color-accent: #2563EB; /* 4.5:1 contrast against white */
+        --color-accent-light: #3B82F6;
+        
+        --color-brand-teal: #0F766E; /* teal-700 */
+        --color-brand-lightblue: #1D4ED8; /* blue-700 */
+        --color-brand-blue: #4338CA; /* indigo-700 */
+        --color-brand-lavender: #6D28D9; /* purple-700 */
+        --color-success: #15803D; /* green-700 */
+        --color-warning: #B45309; /* amber-700 */
+        --color-danger: #B91C1C; /* red-700 */
+      }
+      html.dark {
+        /* Dark theme counterparts */
+        --color-primary: #1a1a1a;
+        --color-secondary: #2a2a2a;
+        --color-text-primary: #F9FAFB;
+        --color-text-secondary: rgba(255,255,255,0.7);
+        --color-highlight: #EF4444;
+        --color-border: rgba(255, 255, 255, 0.15);
+        
+        --color-accent: #7193ED;
+        --color-accent-light: #74BDE8;
+        
+        --color-brand-teal: #68CFCB; 
+        --color-brand-lightblue: #74BDE8;
+        --color-brand-blue: #7193ED;
+        --color-brand-lavender: #BF9FF2;
+        --color-success: #22C55E;
+        --color-warning: #F59E0B;
+        --color-danger: #EF4444;
+      }
+      
+      /* Placeholders */
+      ::placeholder {
+        color: var(--color-text-secondary) !important;
+        opacity: 1 !important;
+      }
+      
+      /* Font size classes */
+      html.font-size-small {
+          font-size: 14px;
+      }
+      html.font-size-medium {
+          font-size: 15px;
+      }
+      html.font-size-standard {
+          font-size: 16px;
+      }
+
+      body {
+        background-color: var(--color-secondary); /* Fallback */
+        background-image: none;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        transition: background-image 0.5s ease-in-out;
+        -webkit-user-select: none; /* Safari */
+        -moz-user-select: none; /* Firefox */
+        -ms-user-select: none; /* IE10+ */
+        user-select: none; /* Standard */
+      }
+      html, body, #root {
+        height: 100%;
+      }
+      .dark body {
+        background-color: #111;
+        background-image: none;
+      }
+
+      /* Base card style for glass effect */
+      .glass-card {
+        background-color: #FFFFFF;
+        backdrop-filter: blur(10px);
+        border-radius: 10px;
+        border: 1px solid rgba(113,147,237,0.10);
+        box-shadow: none;
+      }
+      .dark .glass-card {
+        background-color: rgba(31, 41, 55, 0.5);
+      }
+
+      /* Hide scrollbar utility */
+      .no-scrollbar::-webkit-scrollbar {
+          display: none;
+      }
+      .no-scrollbar {
+          -ms-overflow-style: none;  /* IE and Edge */
+          scrollbar-width: none;  /* Firefox */
+      }
+
+      /* Allow text selection where needed */
+      input, textarea, [contenteditable="true"] {
+        -webkit-user-select: text;
+        -moz-user-select: text;
+        -ms-user-select: text;
+        user-select: text;
+      }
+      
+      @keyframes blink {
+        50% { opacity: 0.3; }
+      }
+      .blinking {
+        animation: blink 1.s linear infinite;
+      }
+
+      /* Custom Checkbox styles */
+      .custom-checkbox {
+        display: inline-flex;
+        align-items: center;
+        cursor: pointer;
+        user-select: none;
+      }
+      .custom-checkbox input {
+        position: absolute;
+        opacity: 0;
+        cursor: pointer;
+        height: 0;
+        width: 0;
+      }
+      .custom-checkbox .checkmark {
+        position: relative;
+        height: 20px;
+        width: 20px;
+        background-color: var(--color-primary);
+        border: 2px solid var(--color-border);
+        border-radius: 3px;
+        transition: background-color 0.2s;
+        margin-right: 8px;
+      }
+      .custom-checkbox:hover input ~ .checkmark {
+        background-color: rgba(0,0,0,0.1);
+      }
+      .dark .custom-checkbox:hover input ~ .checkmark {
+        background-color: rgba(255,255,255,0.1);
+      }
+      .custom-checkbox input:checked ~ .checkmark {
+        background-color: var(--color-accent);
+        border-color: var(--color-accent);
+      }
+      .custom-checkbox.highlight input:checked ~ .checkmark {
+        background-color: var(--color-highlight);
+        border-color: var(--color-highlight);
+      }
+      .custom-checkbox .checkmark:after {
+        content: "";
+        position: absolute;
+        display: none;
+        left: 6px;
+        top: 2px;
+        width: 5px;
+        height: 10px;
+        border: solid white;
+        border-width: 0 3px 3px 0;
+        transform: rotate(45deg);
+      }
+      .custom-checkbox input:checked ~ .checkmark:after {
+        display: block;
+      }
+
+      /* Dynamic Island Animation */
+      @keyframes fadeIn {
+        from { opacity: 0; transform: scale(0.95); }
+        to { opacity: 1; transform: scale(1); }
+      }
+      .animate-fade-in {
+          animation: fadeIn 0.4s ease-out forwards;
+      }
+
+      /* Safe Area Insets */
+      .safe-pad-t { padding-top: env(safe-area-inset-top); }
+      .safe-pad-b { padding-bottom: env(safe-area-inset-bottom); }
+      .safe-pad-l { padding-left: env(safe-area-inset-left); }
+      .safe-pad-r { padding-right: env(safe-area-inset-right); }
+      .safe-top-position { top: calc(1rem + env(safe-area-inset-top)); }
+    </style>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          borderRadius: {
+            'none': '0px',
+            'sm': '1px',
+            DEFAULT: '2px',
+            'md': '3px',
+            'lg': '4px',
+            'xl': '6px',
+            '2xl': '8px',
+            '3xl': '12px',
+            'full': '9999px',
+            '20px': '10px'
+          },
+          extend: {
+            backgroundImage: {
+              'brand-gradient': 'linear-gradient(90deg, #BF9FF2 0%, #7193ED 100%)',
+            },
+            fontSize: {
+              'h1': ['28px', { lineHeight: '36px', fontWeight: '700' }],
+              'h2': ['22px', { lineHeight: '30px', fontWeight: '600' }],
+              'h3': ['18px', { lineHeight: '26px', fontWeight: '600' }],
+              'body': ['16px', { lineHeight: '24px', fontWeight: '400' }],
+              'caption': ['13px', { lineHeight: '18px', fontWeight: '400' }],
+              'button': ['16px', { lineHeight: '20px', fontWeight: '600' }],
+              'tab': ['16px', { lineHeight: 'normal', fontWeight: '600' }],
+              'table-header': ['14px', { lineHeight: 'normal', fontWeight: '600' }],
+              'table-cell': ['16px', { lineHeight: 'normal', fontWeight: '500' }],
+              'table-secondary': ['13px', { lineHeight: 'normal', fontWeight: '400' }],
+              'form-label': ['14px', { lineHeight: 'normal', fontWeight: '500' }],
+              'form-input': ['16px', { lineHeight: 'normal', fontWeight: '400' }],
+              'form-error': ['13px', { lineHeight: 'normal', fontWeight: '500' }],
+              'status': ['14px', { lineHeight: 'normal', fontWeight: '600' }],
+            },
+            colors: {
+              'brand-teal': 'var(--color-brand-teal)',
+              'brand-lightblue': 'var(--color-brand-lightblue)',
+              'brand-blue': 'var(--color-brand-blue)',
+              'brand-lavender': 'var(--color-brand-lavender)',
+              'success': 'var(--color-success)',
+              'warning': 'var(--color-warning)',
+              'danger': 'var(--color-danger)',
+              'primary': 'var(--color-primary)',
+              'secondary': 'var(--color-secondary)',
+              'accent': 'var(--color-accent)',
+              'highlight': 'var(--color-highlight)',
+              'text-primary': 'var(--color-text-primary)',
+              'text-secondary': 'var(--color-text-secondary)',
+              'border-color': 'var(--color-border)',
+            },
+
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+              'display': ['"LatiniaBlack"', 'sans-serif'],
+              'sharp-cardinal': ['"SharpCardinal"', 'sans-serif'],
+            },
+          },
+        },
+      }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script type="importmap">
+{
+  "imports": {
+    "react/": "https://aistudiocdn.com/react@^19.1.1/",
+    "react": "https://aistudiocdn.com/react@^19.1.1",
+    "recharts": "https://aistudiocdn.com/recharts@^3.2.1",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.1.1/",
+    "react-dom/server": "https://aistudiocdn.com/react-dom@^19.1.1/server"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body class="text-text-primary transition-colors duration-300 antialiased">
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>

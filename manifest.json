@@ -1,0 +1,25 @@
+{
+  "short_name": "CrickIQ",
+  "name": "CrickIQ – Cricket Scorer & Analyst",
+  "description": "A comprehensive mobile-responsive app for managing cricket tournaments, from team creation and match scheduling to live ball-by-ball scoring and detailed player statistics with vibrant charts and graphs.",
+  "icons": [
+    {
+      "src": "/vite.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/vite.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "scope": "/",
+  "theme_color": "#7300E0",
+  "background_color": "#EDE9FE",
+  "orientation": "portrait"
+}
