@@ -187,7 +187,7 @@ const QuickMatchStats: React.FC<UseCrickIQStateReturn> = ({ matches, teams }) =>
                                 .filter(p => p.inningsBatted > 0)
                                 .sort((a,b) => b.runsScored - a.runsScored)
                                 .map(p => (
-                                <Tr key={p.id} onClick={() => setViewingPlayer(p)} className="border-b border-brand-blue/15 last:border-b-0 hover:bg-white dark:hover:bg-black/20 cursor-pointer transition-colors duration-200">
+                                <Tr key={p.id} onClick={() => setViewingPlayer(p)} className="border-b border-brand-blue/15 last:border-b-0 hover:bg-secondary cursor-pointer transition-colors duration-200">
                                     <Td >
                                         <p className="font-semibold text-text-primary">{p.name}</p> 
                                         <p className="text-caption text-text-secondary flex items-center gap-2">
@@ -224,7 +224,7 @@ const QuickMatchStats: React.FC<UseCrickIQStateReturn> = ({ matches, teams }) =>
                                 .filter(p => p.inningsBowled > 0)
                                 .sort((a, b) => b.wicketsTaken - a.wicketsTaken || a.runsConceded - b.runsConceded)
                                 .map(p => (
-                                <Tr key={p.id} onClick={() => setViewingPlayer(p)} className="border-b border-brand-blue/15 last:border-b-0 hover:bg-white dark:hover:bg-black/20 cursor-pointer transition-colors duration-200">
+                                <Tr key={p.id} onClick={() => setViewingPlayer(p)} className="border-b border-brand-blue/15 last:border-b-0 hover:bg-secondary cursor-pointer transition-colors duration-200">
                                     <Td > 
                                         <p className="font-semibold text-text-primary">{p.name}</p> 
                                         <p className="text-caption text-text-secondary flex items-center gap-2">

@@ -19,7 +19,7 @@ interface LiveScoringProps extends UseCrickIQStateReturn {
 
 
 const Select: React.FC<React.SelectHTMLAttributes<HTMLSelectElement>> = (props) => (
-    <select {...props} className={`w-full p-1.5 text-body bg-white text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue ${props.className}`} />
+    <select {...props} className={`w-full p-1.5 text-body bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue ${props.className}`} />
 )
 
 const getBallDisplay = (ball: Ball) => {
@@ -56,7 +56,7 @@ const getBallDisplay = (ball: Ball) => {
         if (ball.runs === 4 || ball.runs === 6) {
             className += 'bg-brand-blue text-white';
         } else if (ball.runs <= 3) {
-            className += 'bg-white text-black border border-black';
+            className += 'bg-primary text-text-primary border border-black';
             if (ball.runs === 0) {
                 title = 'Dot ball';
             }

@@ -139,13 +139,13 @@ const PointsTable = (props: PointsTableProps) => {
                             <div className="flex bg-primary/50 p-1 rounded-2xl flex-shrink-0">
                                 <button
                                     onClick={() => setView('tournaments')}
-                                    className={`w-full sm:w-auto py-1.5 px-4 rounded-2xl font-semibold transition-colors duration-300 text-body ${view === 'tournaments' ? 'bg-brand-blue text-white shadow-sm' : 'hover:bg-white dark:hover:bg-black/20'}`}
+                                    className={`w-full sm:w-auto py-1.5 px-4 rounded-2xl font-semibold transition-colors duration-300 text-body ${view === 'tournaments' ? 'bg-brand-blue text-white shadow-sm' : 'hover:bg-secondary'}`}
                                 >
                                     Tournaments
                                 </button>
                                 <button
                                     onClick={() => setView('quickMatches')}
-                                    className={`w-full sm:w-auto py-1.5 px-4 rounded-2xl font-semibold transition-colors duration-300 text-body ${view === 'quickMatches' ? 'bg-brand-blue text-white shadow-sm' : 'hover:bg-white dark:hover:bg-black/20'}`}
+                                    className={`w-full sm:w-auto py-1.5 px-4 rounded-2xl font-semibold transition-colors duration-300 text-body ${view === 'quickMatches' ? 'bg-brand-blue text-white shadow-sm' : 'hover:bg-secondary'}`}
                                 >
                                     Quick Matches
                                 </button>
@@ -154,7 +154,7 @@ const PointsTable = (props: PointsTableProps) => {
                                 <select
                                     value={selectedTournamentId}
                                     onChange={e => setSelectedTournamentId(e.target.value)}
-                                    className="w-full p-2 bg-white text-black border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue text-body font-semibold"
+                                    className="w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue text-body font-semibold"
                                 >
                                     {tournamentOptions.map(t => (
                                         <option key={t.id} value={t.id}>{t.name}</option>

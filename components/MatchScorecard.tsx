@@ -88,7 +88,7 @@ const InningsScorecard: React.FC<{ innings: Innings; teams: Team[]; }> = ({ inni
                                     ? getDismissalText(stats.outDetails, getPlayerName)
                                     : stats.status;
                                 return (
-                                    <Tr key={player.id} className="hover:bg-white/30 dark:hover:bg-black/20">
+                                    <Tr key={player.id} className="hover:bg-secondary/30 dark:hover:bg-black/20">
                                         <Td className="font-bold text-slate-800 dark:">{player.name}</Td>
                                         <Td >{statusText}</Td>
                                         <Td className="text-right font-bold text-brand-blue">{stats.runs}</Td>
@@ -153,7 +153,7 @@ const InningsScorecard: React.FC<{ innings: Innings; teams: Team[]; }> = ({ inni
                             {Object.values(innings.bowlerScores).map((stats: BowlerScore) => {
                                 const bowlerName = getPlayerName(stats.playerId);
                                 return (
-                                    <Tr key={stats.playerId} className="hover:bg-white/30 dark:hover:bg-black/20">
+                                    <Tr key={stats.playerId} className="hover:bg-secondary/30 dark:hover:bg-black/20">
                                         <Td className="font-bold text-slate-800 dark:">{bowlerName}</Td>
                                         <Td className="text-right">{stats.overs}</Td>
                                         <Td className="text-right">{stats.maidens}</Td>
@@ -381,7 +381,7 @@ const MatchScorecard: React.FC<MatchScorecardProps> = ({ match, tournament, team
                 actionButton={
                     <button 
                         onClick={handleShareScorecard} 
-                        className="w-11 h-11 flex items-center justify-center rounded-2xl text-white hover:bg-white/20 transition-colors"
+                        className="w-11 h-11 flex items-center justify-center rounded-2xl text-white hover:bg-secondary/20 transition-colors"
                         title="Share Scorecard"
                     >
                         <ShareIcon className="w-5 h-5" />
@@ -463,7 +463,7 @@ const MatchScorecard: React.FC<MatchScorecardProps> = ({ match, tournament, team
                                 <button 
                                     key={p.playerId}
                                     onClick={() => setManOfTheMatch(match.id, p.playerId)}
-                                    className="text-left p-4 bg-white/60 dark:bg-black/20 rounded-lg hover:shadow-xl transition-all duration-200 border-2 border-transparent hover:border-brand-blue backdrop-blur-sm"
+                                    className="text-left p-4 bg-primary rounded-lg hover:shadow-xl transition-all duration-200 border-2 border-[#DCE3F0] dark:border-brand-blue/15 hover:border-brand-blue"
                                 >
                                     <p className="font-bold text-h3 text-slate-800 dark:text-text-primary">{p.name}</p>
                                     <div className="text-sm text-text-secondary mb-2 flex items-center gap-2">
@@ -491,7 +491,7 @@ const MatchScorecard: React.FC<MatchScorecardProps> = ({ match, tournament, team
                         <div className="flex justify-center p-1 space-x-1 bg-black/5 dark:bg-white/5 rounded-2xl mb-4">
                             <button
                                 onClick={() => setActiveTab('innings1')}
-                                className={`w-1/2 py-2 px-4 rounded-2xl text-button transition-all duration-300 ${activeTab === 'innings1' ? 'bg-brand-blue text-white shadow-md' : 'text-text-secondary hover:bg-white'}`}
+                                className={`w-1/2 py-2 px-4 rounded-2xl text-button transition-all duration-300 ${activeTab === 'innings1' ? 'bg-brand-blue text-white shadow-md' : 'text-text-secondary hover:bg-secondary'}`}
                             >
                                  <span className="flex items-center justify-center gap-2">
                                     <div className="w-6 h-6 flex items-center justify-center rounded-md text-button text-white text-caption" style={{ backgroundColor: teams.find(t => t.id === match.innings1!.battingTeamId)?.logo }}>
@@ -503,7 +503,7 @@ const MatchScorecard: React.FC<MatchScorecardProps> = ({ match, tournament, team
                             {match.innings2 && (
                                  <button
                                     onClick={() => setActiveTab('innings2')}
-                                    className={`w-1/2 py-2 px-4 rounded-2xl text-button transition-all duration-300 ${activeTab === 'innings2' ? 'bg-brand-blue text-white shadow-md' : 'text-text-secondary hover:bg-white'}`}
+                                    className={`w-1/2 py-2 px-4 rounded-2xl text-button transition-all duration-300 ${activeTab === 'innings2' ? 'bg-brand-blue text-white shadow-md' : 'text-text-secondary hover:bg-secondary'}`}
                                 >
                                     <span className="flex items-center justify-center gap-2">
                                         <div className="w-6 h-6 flex items-center justify-center rounded-md text-button text-white text-caption" style={{ backgroundColor: teams.find(t => t.id === match.innings2!.battingTeamId)?.logo }}>

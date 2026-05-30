@@ -262,7 +262,7 @@ const ScheduleGenerator: React.FC<UseCrickIQStateReturn> = (props) => {
             </h2>
             <CrickIQCard>
                 <h3 className="text-h3 text-text-primary mb-2">1. Select Tournament</h3>
-                <select value={selectedTournamentId} onChange={e => { setSelectedTournamentId(e.target.value); }} className="w-full p-2 bg-white text-black border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue">
+                <select value={selectedTournamentId} onChange={e => { setSelectedTournamentId(e.target.value); }} className="w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue">
                     <option value="" disabled>Select a tournament...</option>
                     {tournamentOptions.map(t => <option key={t.id} value={t.id}>{t.name} ({t.teamIds.length} teams)</option>)}
                 </select>
@@ -273,7 +273,7 @@ const ScheduleGenerator: React.FC<UseCrickIQStateReturn> = (props) => {
                 <div className="space-y-4">
                     <div>
                         <label className="text-table-header text-text-secondary">Tournament Format</label>
-                        <select value={format} onChange={e => handleFormatChange(e.target.value as 'round-robin' | 'knockout' | 'round-robin-knockout')} className="w-full p-2 bg-white text-black border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue">
+                        <select value={format} onChange={e => handleFormatChange(e.target.value as 'round-robin' | 'knockout' | 'round-robin-knockout')} className="w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue">
                             <option value="round-robin">Round Robin (Each team plays each other once)</option>
                             <option value="knockout">Knockout (Elimination)</option>
                             {selectedTournament && selectedTournament.teamIds.length >= 5 && (
@@ -308,11 +308,11 @@ const ScheduleGenerator: React.FC<UseCrickIQStateReturn> = (props) => {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label className="text-table-header text-text-secondary">Start Date</label>
-                            <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-full p-2 bg-white text-black border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" />
+                            <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" />
                         </div>
                         <div>
                             <label className="text-table-header text-text-secondary">Matches per Day</label>
-                            <input type="number" min="1" value={matchesPerDay} onChange={e => setMatchesPerDay(e.target.value === '' ? '' : parseInt(e.target.value))} className="w-full p-2 bg-white text-black border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" />
+                            <input type="number" min="1" value={matchesPerDay} onChange={e => setMatchesPerDay(e.target.value === '' ? '' : parseInt(e.target.value))} className="w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" />
                         </div>
                     </div>
                     <div>

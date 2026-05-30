@@ -106,7 +106,7 @@ const MatchTable: React.FC<MatchTableProps> = ({
                                         <div className="w-12 h-12 flex items-center justify-center rounded-lg text-white text-h2 shadow-md" style={{ backgroundColor: team1.logo }}>{team1.name.substring(0, 3).toUpperCase()}</div>
                                         <h3 className="text-base font-bold text-text-primary truncate w-full">{team1.name}</h3>
                                     </div>
-                                    <span className="text-lg text-text-secondary/80">VS</span>
+                                    <span className="text-lg text-text-secondary">VS</span>
                                     <div className="flex flex-col items-center gap-1">
                                         <div className="w-12 h-12 flex items-center justify-center rounded-lg text-white text-h2 shadow-md" style={{ backgroundColor: team2.logo }}>{team2.name.substring(0, 3).toUpperCase()}</div>
                                         <h3 className="text-base font-bold text-text-primary truncate w-full">{team2.name}</h3>

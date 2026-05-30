@@ -1,4 +1,4 @@
-import React, { Component, ErrorInfo, ReactNode } from 'react';
+import React, { ErrorInfo, ReactNode } from 'react';
 import CrickIQCard from './CrickIQCard';
 
 type Props = {
@@ -36,7 +36,7 @@ class ErrorBoundary extends React.Component<Props, State> {
             });
             if (logs.length > 50) logs.shift();
             localStorage.setItem('crickiq_error_logs', JSON.stringify(logs));
-        } catch (e) {
+        } catch {
             // Ignore format errors or local storage space limits
         }
     }
@@ -56,7 +56,7 @@ class ErrorBoundary extends React.Component<Props, State> {
         if (this.state.hasError) {
             return (
                 <div className="w-full h-full flex flex-col items-center justify-center p-4">
-                    <CrickIQCard className="max-w-md w-full bg-white dark:bg-secondary border-t-4 border-t-red-500 shadow-xl overflow-hidden">
+                    <CrickIQCard className="max-w-md w-full bg-primary border-t-4 border-t-red-500 shadow-xl overflow-hidden">
                         <div className="p-6 text-center space-y-4">
                             <svg className="w-16 h-16 text-red-500 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />

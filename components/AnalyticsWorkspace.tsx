@@ -143,7 +143,7 @@ const AnalyticsWorkspace: React.FC<UseCrickIQStateReturn> = (props) => {
       
 
       <div 
-        className="flex bg-white/10 dark:bg-black/10 rounded-lg p-1 space-x-1 border border-brand-blue/15 overflow-x-auto no-scrollbar"
+        className="flex bg-secondary dark:bg-black/20 rounded-lg p-1 space-x-1 border border-light-border dark:border-brand-blue/15 overflow-x-auto no-scrollbar"
         onTouchStart={(e) => e.stopPropagation()}
         onTouchMove={(e) => e.stopPropagation()}
         onTouchEnd={(e) => e.stopPropagation()}
@@ -154,8 +154,8 @@ const AnalyticsWorkspace: React.FC<UseCrickIQStateReturn> = (props) => {
             onClick={() => setActiveTab(tab.id)}
             className={`flex-shrink-0 px-4 py-1.5 text-body font-semibold rounded-md transition-colors flex items-center gap-2 ${
               activeTab === tab.id
-                ? "bg-white dark:bg-secondary text-brand-blue dark:text-white shadow-sm"
-                : "text-text-secondary hover:text-text-primary hover:bg-white/5"
+                ? "bg-primary text-brand-blue dark:text-white shadow-sm"
+                : "text-text-secondary hover:text-text-primary hover:bg-black/5 dark:hover:bg-white/5"
             }`}
           >
             {tab.icon}

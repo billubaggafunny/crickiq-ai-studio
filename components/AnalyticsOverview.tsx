@@ -285,7 +285,7 @@ const AnalyticsOverview: React.FC<AnalyticsOverviewProps> = (props) => {
             <div className="absolute top-0 right-0 opacity-20 transform translate-x-4 -translate-y-4">
               <TrophyIcon className="w-24 h-24" />
             </div>
-            <div className="relative z-10 w-12 h-12 bg-white/20 rounded-full flex items-center justify-center border border-white/30 backdrop-blur-sm shrink-0">
+            <div className="relative z-10 w-12 h-12 bg-primary rounded-full flex items-center justify-center border border-[#DCE3F0] dark:border-brand-blue/15 shadow-md shrink-0">
               <TrophyIcon className="w-6 h-6 text-white" />
             </div>
             <div className="relative z-10">
@@ -348,7 +348,7 @@ const AnalyticsOverview: React.FC<AnalyticsOverviewProps> = (props) => {
             <div className="absolute top-0 right-0 opacity-20 transform translate-x-4 -translate-y-4">
               <span className="text-6xl">🏏</span>
             </div>
-            <div className="relative z-10 w-12 h-12 bg-white/20 rounded-full flex items-center justify-center border border-white/30 backdrop-blur-sm shrink-0">
+            <div className="relative z-10 w-12 h-12 bg-primary rounded-full flex items-center justify-center border border-[#DCE3F0] dark:border-brand-blue/15 shadow-md shrink-0">
               <span className="text-xl leading-none">🏏</span>
             </div>
             <div className="relative z-10 shrink min-w-0">
@@ -400,7 +400,7 @@ const AnalyticsOverview: React.FC<AnalyticsOverviewProps> = (props) => {
            className="animate-fade-in overflow-hidden flex flex-col h-full"
           style={{ animationDelay: "100ms" }}
         >
-          <div className="p-4 px-4 border-b border-brand-blue/15/50 flex justify-between items-center bg-white/30 dark:bg-black/20 backdrop-blur-sm">
+          <div className="p-4 px-4 border-b border-brand-blue/15/50 flex justify-between items-center bg-secondary">
             <div className="flex items-center gap-2">
               <ClockIcon className="w-4 h-4 text-brand-blue" />
               <h3 className="text-sm font-bold uppercase tracking-wider text-text-primary">
@@ -498,7 +498,7 @@ const AnalyticsOverview: React.FC<AnalyticsOverviewProps> = (props) => {
                   return (
                     <div className="flex flex-col h-full gap-6">
                       <div className="flex justify-between items-center gap-4">
-                        <div className="flex-1 flex flex-col items-center bg-white dark:bg-black/30 p-4 rounded-xl border border-brand-blue/15 shadow-sm">
+                        <div className="flex-1 flex flex-col items-center bg-primary p-4 rounded-xl border border-[#DCE3F0] dark:border-brand-blue/15 shadow-md">
                           <span className="text-[11px] text-text-secondary uppercase mb-1">
                             {team1?.name?.substring(0, 3) || "UNK"}
                           </span>
@@ -506,10 +506,10 @@ const AnalyticsOverview: React.FC<AnalyticsOverviewProps> = (props) => {
                             {formatScore(t1Innings)}
                           </span>
                         </div>
-                        <span className="text-[10px] uppercase font-bold text-text-secondary/40 px-1">
+                        <span className="text-[10px] uppercase font-bold text-text-secondary px-1">
                           vs
                         </span>
-                        <div className="flex-1 flex flex-col items-center bg-white dark:bg-black/30 p-4 rounded-xl border border-brand-blue/15 shadow-sm">
+                        <div className="flex-1 flex flex-col items-center bg-primary p-4 rounded-xl border border-[#DCE3F0] dark:border-brand-blue/15 shadow-md">
                           <span className="text-[11px] text-text-secondary uppercase mb-1">
                             {team2?.name?.substring(0, 3) || "UNK"}
                           </span>
@@ -572,7 +572,7 @@ const AnalyticsOverview: React.FC<AnalyticsOverviewProps> = (props) => {
                       (t) => t.id === stats.highestTeamScore?.teamId,
                     )?.name || "Unknown Team"}
                   </span>
-                  <span className="text-[10px] font-bold text-text-secondary/60 uppercase mx-1">
+                  <span className="text-[10px] font-bold text-text-secondary uppercase mx-1">
                     {" "}
                     vs{" "}
                   </span>

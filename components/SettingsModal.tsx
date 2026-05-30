@@ -132,7 +132,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                                         <button
                                             key={option.id}
                                             onClick={() => setTheme(option.id)}
-                                            className={`w-full py-1.5 px-4 rounded-2xl font-semibold transition-colors duration-300 flex items-center justify-center gap-2 text-body ${currentTheme === option.id ? 'bg-brand-blue text-white shadow-sm' : 'hover:bg-white dark:hover:bg-black/20'}`}
+                                            className={`w-full py-1.5 px-4 rounded-2xl font-semibold transition-colors duration-300 flex items-center justify-center gap-2 text-body ${currentTheme === option.id ? 'bg-brand-blue text-white shadow-sm' : 'hover:bg-secondary'}`}
                                         >
                                             {option.label}
                                         </button>
@@ -146,7 +146,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                                         <button
                                             key={option.id}
                                             onClick={() => setFontSize(option.id)}
-                                            className={`w-full py-1.5 px-4 rounded-2xl font-semibold transition-colors duration-300 flex items-center justify-center gap-2 text-body ${currentFontSize === option.id ? 'bg-brand-blue text-white shadow-sm' : 'hover:bg-white dark:hover:bg-black/20'}`}
+                                            className={`w-full py-1.5 px-4 rounded-2xl font-semibold transition-colors duration-300 flex items-center justify-center gap-2 text-body ${currentFontSize === option.id ? 'bg-brand-blue text-white shadow-sm' : 'hover:bg-secondary'}`}
                                         >
                                             {option.label}
                                         </button>
@@ -275,7 +275,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                                                     <p className="text-xs font-bold text-text-primary">Snapshot {idx + 1}</p>
                                                     <p className="text-[10px] text-text-secondary">{new Date(s.timestamp).toLocaleString()}</p>
                                                 </div>
-                                                <span className="text-[10px] px-2 py-1 bg-white dark:bg-black/20 rounded font-bold text-brand-blue">Restore</span>
+                                                <span className="text-[10px] px-2 py-1 bg-primary rounded font-bold text-brand-blue">Restore</span>
                                             </button>
                                         ))}
                                     </div>

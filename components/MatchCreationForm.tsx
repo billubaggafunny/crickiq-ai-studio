@@ -87,20 +87,20 @@ const MatchCreationForm: React.FC<MatchCreationFormProps> = ({
                 <select
                     value={selectedTournamentForForm}
                     onChange={e => { setSelectedTournamentForForm(e.target.value); setTeam1Id(''); setTeam2Id(''); }}
-                    className="w-full p-2 bg-white text-black border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue"
+                    className="w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue"
                 >
                     <option value="" disabled>Select Tournament</option>
                     {tournaments.filter((t: Tournament) => t.id !== 't_quick_matches').map((t: Tournament) => <option key={t.id} value={t.id}>{t.name}</option>)}
                 </select>
             )}
-                <select value={team1Id} onChange={e => setTeam1Id(e.target.value)} className="w-full p-2 bg-white text-black border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue">
+                <select value={team1Id} onChange={e => setTeam1Id(e.target.value)} className="w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue">
                 <option value="" disabled>Select Team 1</option>
                 {team1Options.map((t: Team) => {
                     const isReady = checkTeamReadiness(t);
                     return <option key={t.id} value={t.id}>{t.name}{!isReady ? ' (Not Ready)' : ''}</option>
                 })}
                 </select>
-                <select value={team2Id} onChange={e => setTeam2Id(e.target.value)} className="w-full p-2 bg-white text-black border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue">
+                <select value={team2Id} onChange={e => setTeam2Id(e.target.value)} className="w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue">
                 <option value="" disabled>Select Team 2</option>
                 {team2Options.map((t: Team) => {
                     const isReady = checkTeamReadiness(t);
@@ -124,7 +124,7 @@ const MatchCreationForm: React.FC<MatchCreationFormProps> = ({
                         setIsCalendarOpen(true);
                     }}
                     readOnly
-                    className="w-full p-2 bg-white text-black border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue cursor-pointer"
+                    className="w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue cursor-pointer"
                 />
                 {isCalendarOpen && <Calendar selectedDate={matchDate} onSelectDate={(d: string) => { setMatchDate(d); setIsCalendarOpen(false); }} position={calendarPosition} />}
             </div>
@@ -137,7 +137,7 @@ const MatchCreationForm: React.FC<MatchCreationFormProps> = ({
                     min="1"
                     value={matchOvers}
                     onChange={e => setMatchOvers(e.target.value === '' ? '' : parseInt(e.target.value, 10))}
-                    className="w-full p-2 bg-white text-black border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue disabled:bg-primary/30"
+                    className="w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue disabled:bg-primary/30"
                     disabled={!isOversEditable}
                     />
             </div>
@@ -149,7 +149,7 @@ const MatchCreationForm: React.FC<MatchCreationFormProps> = ({
                     min="1"
                     value={matchMaxOvers}
                     onChange={e => setMatchMaxOvers(e.target.value === '' ? '' : parseInt(e.target.value, 10))}
-                    className="w-full p-2 bg-white text-black border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue"
+                    className="w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue"
                     />
             </div>
 

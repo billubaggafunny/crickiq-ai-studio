@@ -47,18 +47,18 @@ export const EditMatchModal: React.FC<EditMatchModalProps> = ({
             <CrickIQCard  className="w-full max-w-md">
                 <h3 className="text-h3 text-text-primary mb-4">Edit Match</h3>
                 <div className="space-y-4">
-                     <select value={editFormData.team1Id} onChange={e => setEditFormData(f => ({...f, team1Id: e.target.value}))} className="w-full p-2 bg-white text-black border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue">
+                     <select value={editFormData.team1Id} onChange={e => setEditFormData(f => ({...f, team1Id: e.target.value}))} className="w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue">
                         <option value="" disabled>Select Team 1</option>
                         {editTeam1Options.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
                      </select>
-                     <select value={editFormData.team2Id} onChange={e => setEditFormData(f => ({...f, team2Id: e.target.value}))} className="w-full p-2 bg-white text-black border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue">
+                     <select value={editFormData.team2Id} onChange={e => setEditFormData(f => ({...f, team2Id: e.target.value}))} className="w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue">
                         <option value="" disabled>Select Team 2</option>
                         {editTeam2Options.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
                      </select>
-                    <input type="date" value={editFormData.date} onChange={e => setEditFormData(f => ({...f, date: e.target.value}))} className="w-full p-2 bg-white text-black border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" />
+                    <input type="date" value={editFormData.date} onChange={e => setEditFormData(f => ({...f, date: e.target.value}))} className="w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" />
                     <TimeScroller value={editFormData.time} onChange={newTime => setEditFormData(f => ({...f, time: newTime}))} />
-                    <input type="number" value={editFormData.oversPerInnings} onChange={e => setEditFormData(f => ({...f, oversPerInnings: e.target.value === '' ? '' : parseInt(e.target.value, 10)}))} placeholder="Overs" className="w-full p-2 mb-2 bg-white text-black border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" />
-                    <input type="number" value={editFormData.maxOversPerBowler} onChange={e => setEditFormData(f => ({...f, maxOversPerBowler: e.target.value === '' ? '' : parseInt(e.target.value, 10)}))} placeholder="Max Overs/Bowler" className="w-full p-2 bg-white text-black border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" />
+                    <input type="number" value={editFormData.oversPerInnings} onChange={e => setEditFormData(f => ({...f, oversPerInnings: e.target.value === '' ? '' : parseInt(e.target.value, 10)}))} placeholder="Overs" className="w-full p-2 mb-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" />
+                    <input type="number" value={editFormData.maxOversPerBowler} onChange={e => setEditFormData(f => ({...f, maxOversPerBowler: e.target.value === '' ? '' : parseInt(e.target.value, 10)}))} placeholder="Max Overs/Bowler" className="w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" />
                     {editError && <p className="text-highlight text-body text-center">{editError}</p>}
                 </div>
                 <div className="flex justify-end gap-4 mt-6">

@@ -136,7 +136,7 @@ const QuickMatchResults: React.FC<QuickMatchResultsProps> = ({ matchId, onClose,
                 {/* Vertical Team Bar - DESKTOP ONLY */}
                 <div className="hidden md:flex w-14 lg:w-16 bg-primary flex-col items-center justify-around py-8 shrink-0">
                     <h2 className="text-xl lg:text-2xl tracking-widest uppercase text-text-secondary" style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>{secondInningsBattingTeam?.name}</h2>
-                    <span className="text-lg lg:text-xl text-text-secondary/50">v</span>
+                    <span className="text-lg lg:text-xl text-text-secondary">v</span>
                     <h2 className="text-xl lg:text-2xl tracking-widest uppercase text-text-secondary" style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>{firstInningsBattingTeam.name}</h2>
                 </div>
                 

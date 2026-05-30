@@ -240,7 +240,7 @@ export const TeamEditorModal: React.FC<TeamEditorModalProps> = (props) => {
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-70 backdrop-blur-sm flex justify-center items-center z-50 md:p-4">
-            <div className="bg-gray-100 dark:bg-gray-800 w-full h-full md:max-w-4xl md:max-h-[90vh] flex flex-col md:rounded-2xl shadow-xl">
+            <div className="bg-secondary w-full h-full md:max-w-4xl md:max-h-[90vh] flex flex-col md:rounded-2xl shadow-xl">
                 <div className="relative p-4 md:p-6 text-center border-b border-gray-300 dark:border-gray-700">
                     <div className="flex items-center justify-center gap-4">
                          <div className="relative w-12 h-12 flex-shrink-0">
@@ -258,7 +258,7 @@ export const TeamEditorModal: React.FC<TeamEditorModalProps> = (props) => {
                                 title="Change team color"
                             />
                         </div>
-                        <input value={editedTeam.name} onChange={e => handleTeamInfoChange('name', e.target.value)} className={`w-full max-w-xs text-h2 font-bold text-center text-text-primary bg-white dark:bg-white/10 p-1.5 rounded-lg focus:outline-none border-2 transition-colors ${!editedTeam.name.trim() ? 'border-highlight focus:border-highlight' : 'border-brand-blue/15 focus:border-brand-blue'}`} placeholder="Team Name" />
+                        <input value={editedTeam.name} onChange={e => handleTeamInfoChange('name', e.target.value)} className={`w-full max-w-xs text-h2 font-bold text-center text-text-primary bg-primary/50 p-1.5 rounded-lg focus:outline-none border-2 transition-colors ${!editedTeam.name.trim() ? 'border-highlight focus:border-highlight' : 'border-brand-blue/15 focus:border-brand-blue'}`} placeholder="Team Name" />
                     </div>
                     <button onClick={onClose} className="absolute text-h1 leading-none transform -translate-y-1/2 top-1/2 right-4 md:right-6 text-text-secondary hover:text-text-primary">&times;</button>
                 </div>
@@ -275,7 +275,7 @@ export const TeamEditorModal: React.FC<TeamEditorModalProps> = (props) => {
                         </div>
                     )}
                      <Table >
-                            <Thead className="sticky top-0 bg-gray-100 dark:bg-gray-800 z-10">
+                            <Thead className="sticky top-0 bg-secondary z-10">
                                 <Tr className="border-b border-gray-300 dark:border-gray-700 bg-gray-200 dark:bg-gray-900/75">
                                     <Th className="w-16 text-center tracking-wider">#</Th>
                                     <Th className="w-full tracking-wider">Name</Th>
@@ -293,7 +293,7 @@ export const TeamEditorModal: React.FC<TeamEditorModalProps> = (props) => {
                                                 type="number"
                                                 value={player.number}
                                                 onChange={e => handlePlayerChange(player.id, 'number', e.target.value === '' ? '' : parseInt(e.target.value, 10))}
-                                                className={`w-full text-center bg-white p-1 rounded-md focus:outline-none focus:ring-2 ${rowErrors[player.id] ? 'ring-highlight' : 'ring-brand-blue'}`}
+                                                className={`w-full text-center bg-primary p-1 rounded-md focus:outline-none focus:ring-2 ${rowErrors[player.id] ? 'ring-highlight' : 'ring-brand-blue'}`}
                                                 min="1"
                                             />
                                         </Td>
@@ -302,14 +302,14 @@ export const TeamEditorModal: React.FC<TeamEditorModalProps> = (props) => {
                                                 type="text"
                                                 value={player.name}
                                                 onChange={e => handlePlayerChange(player.id, 'name', e.target.value)}
-                                                className={`w-full bg-white p-1 rounded-md focus:outline-none focus:ring-2 ${rowErrors[player.id] ? 'ring-highlight' : 'ring-brand-blue'}`}
+                                                className={`w-full bg-primary p-1 rounded-md focus:outline-none focus:ring-2 ${rowErrors[player.id] ? 'ring-highlight' : 'ring-brand-blue'}`}
                                             />
                                         </Td>
                                         <Td className="p-1">
                                             <select
                                                 value={player.role}
                                                 onChange={e => handlePlayerChange(player.id, 'role', e.target.value)}
-                                                className="w-full bg-white p-1 rounded-md focus:outline-none focus:ring-2 ring-brand-blue appearance-none text-center"
+                                                className="w-full bg-primary p-1 rounded-md focus:outline-none focus:ring-2 ring-brand-blue appearance-none text-center"
                                             >
                                                 {PLAYER_ROLES.map(role => <option key={role} value={role}>{getRoleEmoji(role)} {getShortRoleName(role)}</option>)}
                                             </select>
@@ -359,7 +359,7 @@ export const TeamEditorModal: React.FC<TeamEditorModalProps> = (props) => {
                                         placeholder="#"
                                         value={newPlayerNumber}
                                         onChange={e => setNewPlayerNumber(e.target.value === '' ? '' : parseInt(e.target.value, 10))}
-                                        className={`w-full text-center bg-white dark:bg-gray-700 p-2 rounded-lg focus:outline-none border-2 ${playerFormErrors.number ? 'border-highlight focus:border-highlight' : 'border-brand-blue/15 focus:border-brand-blue'}`}
+                                        className={`w-full text-center bg-primary p-2 rounded-lg focus:outline-none border-2 ${playerFormErrors.number ? 'border-highlight focus:border-highlight' : 'border-brand-blue/15 focus:border-brand-blue'}`}
                                     />
                                     {playerFormErrors.number && <p className="text-xs text-highlight mt-1">{playerFormErrors.number}</p>}
                                 </div>
@@ -369,7 +369,7 @@ export const TeamEditorModal: React.FC<TeamEditorModalProps> = (props) => {
                                         placeholder="Player Name"
                                         value={newPlayerName}
                                         onChange={e => setNewPlayerName(e.target.value)}
-                                        className={`w-full bg-white dark:bg-gray-700 p-2 rounded-lg focus:outline-none border-2 ${playerFormErrors.name ? 'border-highlight focus:border-highlight' : 'border-brand-blue/15 focus:border-brand-blue'}`}
+                                        className={`w-full bg-primary p-2 rounded-lg focus:outline-none border-2 ${playerFormErrors.name ? 'border-highlight focus:border-highlight' : 'border-brand-blue/15 focus:border-brand-blue'}`}
                                     />
                                     {playerFormErrors.name && <p className="text-xs text-highlight mt-1">{playerFormErrors.name}</p>}
                                 </div>
@@ -377,7 +377,7 @@ export const TeamEditorModal: React.FC<TeamEditorModalProps> = (props) => {
                                     <select
                                         value={newPlayerRole}
                                         onChange={e => setNewPlayerRole(e.target.value as PlayerRole)}
-                                        className={`w-full bg-white dark:bg-gray-700 p-2 rounded-lg focus:outline-none border-2 ${playerFormErrors.role ? 'border-highlight focus:border-highlight' : 'border-brand-blue/15 focus:border-brand-blue'}`}
+                                        className={`w-full bg-primary p-2 rounded-lg focus:outline-none border-2 ${playerFormErrors.role ? 'border-highlight focus:border-highlight' : 'border-brand-blue/15 focus:border-brand-blue'}`}
                                     >
                                         <option value="">Role</option>
                                         {PLAYER_ROLES.map(role => <option key={role} value={role}>{getRoleEmoji(role)} {getShortRoleName(role)}</option>)}

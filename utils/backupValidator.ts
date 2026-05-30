@@ -19,6 +19,7 @@ export const validateBackup = (json: unknown): { isValid: boolean; error?: strin
         return { isValid: false, error: 'Invalid file format. Must be a JSON object.' };
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const jsonObj = json as any;
     
     // 1. Basic Structure Check

@@ -18,7 +18,7 @@ const CrickIQCard: React.FC<CrickIQCardProps> = ({ children, className = '', noP
     return (
         <div 
             {...rest} 
-            className={`bg-[#FFFFFF] border border-brand-blue/10 rounded-3xl shadow-sm ${paddingClass} ${className}`}
+            className={`bg-primary border border-light-border dark:border-brand-blue/15 rounded-3xl shadow-md ${paddingClass} ${className}`}
         >
             {children}
         </div>

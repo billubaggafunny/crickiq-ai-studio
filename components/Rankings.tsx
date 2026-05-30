@@ -226,13 +226,13 @@ const RecentPlayerForm = ({
                         ({rm.balls})
                       </span>
                     </span>
-                    <span className="text-[9px] uppercase text-text-secondary/70 mt-0.5">
+                    <span className="text-[9px] uppercase text-text-secondary mt-0.5">
                       Runs
                     </span>
                   </div>
                 ) : (
                   <div className="flex flex-col items-end w-14 justify-center">
-                    <span className="text-caption text-text-secondary/30">-</span>
+                    <span className="text-caption text-text-secondary">-</span>
                   </div>
                 )}
                 {rm.didBowl ? (
@@ -240,13 +240,13 @@ const RecentPlayerForm = ({
                     <span className="text-sm font-bold text-brand-blue leading-none">
                       {rm.wickets}/{rm.runsConceded}
                     </span>
-                    <span className="text-[9px] uppercase text-text-secondary/70 mt-0.5">
+                    <span className="text-[9px] uppercase text-text-secondary mt-0.5">
                       Wickets
                     </span>
                   </div>
                 ) : (
                   <div className="flex flex-col items-end w-14 justify-center">
-                    <span className="text-caption text-text-secondary/30">-</span>
+                    <span className="text-caption text-text-secondary">-</span>
                   </div>
                 )}
               </div>
@@ -318,7 +318,7 @@ const OverlayModal = ({
       onClick={onClose}
     >
       <div
-        className="bg-white dark:bg-secondary border border-brand-blue/15 rounded-2xl w-full max-w-sm overflow-hidden animate-fade-in shadow-2xl relative"
+        className="bg-primary border border-brand-blue/15 rounded-2xl w-full max-w-sm overflow-hidden animate-fade-in shadow-2xl relative"
         onClick={(e) => e.stopPropagation()}
       >
         <button
@@ -611,7 +611,7 @@ const Rankings: React.FC<RankingsProps> = ({ teams, matches }) => {
           className={`whitespace-nowrap px-4 py-1.5 rounded-2xl text-caption font-bold transition-all duration-200 border ${
             activeTab === "batters"
               ? "bg-brand-blue text-white border-brand-blue shadow-md shadow-accent/20"
-              : "bg-white/10 dark:bg-black/20 text-text-secondary border-brand-blue/15 hover:bg-black/5 dark:hover:bg-white/5"
+              : "bg-transparent dark:bg-black/20 text-text-secondary border-light-border dark:border-brand-blue/15 hover:bg-black/5 dark:hover:bg-white/5"
           }`}
         >
           Top Batters
@@ -621,7 +621,7 @@ const Rankings: React.FC<RankingsProps> = ({ teams, matches }) => {
           className={`whitespace-nowrap px-4 py-1.5 rounded-2xl text-caption font-bold transition-all duration-200 border ${
             activeTab === "bowlers"
               ? "bg-brand-blue text-white border-brand-blue shadow-md shadow-accent/20"
-              : "bg-white/10 dark:bg-black/20 text-text-secondary border-brand-blue/15 hover:bg-black/5 dark:hover:bg-white/5"
+              : "bg-transparent dark:bg-black/20 text-text-secondary border-light-border dark:border-brand-blue/15 hover:bg-black/5 dark:hover:bg-white/5"
           }`}
         >
           Top Bowlers
@@ -631,7 +631,7 @@ const Rankings: React.FC<RankingsProps> = ({ teams, matches }) => {
           className={`whitespace-nowrap px-4 py-1.5 rounded-2xl text-caption font-bold transition-all duration-200 border ${
             activeTab === "teams"
               ? "bg-brand-blue text-white border-brand-blue shadow-md shadow-accent/20"
-              : "bg-white/10 dark:bg-black/20 text-text-secondary border-brand-blue/15 hover:bg-black/5 dark:hover:bg-white/5"
+              : "bg-transparent dark:bg-black/20 text-text-secondary border-light-border dark:border-brand-blue/15 hover:bg-black/5 dark:hover:bg-white/5"
           }`}
         >
           Top Teams
@@ -641,14 +641,14 @@ const Rankings: React.FC<RankingsProps> = ({ teams, matches }) => {
           className={`whitespace-nowrap px-4 py-1.5 rounded-2xl text-caption font-bold transition-all duration-200 border ${
             activeTab === "mvp"
               ? "bg-brand-blue text-white border-brand-blue shadow-md shadow-accent/20"
-              : "bg-white/10 dark:bg-black/20 text-text-secondary border-brand-blue/15 hover:bg-black/5 dark:hover:bg-white/5"
+              : "bg-transparent dark:bg-black/20 text-text-secondary border-light-border dark:border-brand-blue/15 hover:bg-black/5 dark:hover:bg-white/5"
           }`}
         >
           Recent Form (MVP)
         </button>
       </div>
 
-      <p className="px-1 text-body text-text-secondary/80">
+      <p className="px-1 text-body text-text-secondary">
         {activeTab === "batters" && "Highest run scorers across matches"}
         {activeTab === "bowlers" && "Leading wicket-taking performers"}
         {activeTab === "teams" && "Best performing teams by points"}

@@ -94,14 +94,14 @@ const TimeScroller: React.FC<TimeScrollerProps> = ({ value, onChange }) => {
     };
 
     return (
-        <div className="flex items-center justify-between gap-2 bg-white dark:bg-gray-800 border border-brand-blue/15 rounded-lg p-2 h-14">
+        <div className="flex items-center justify-between gap-2 bg-primary border border-brand-blue/15 rounded-lg p-2 h-14">
             <input
                 type="text"
                 inputMode="numeric"
                 value={hour}
                 onChange={handleHourChange}
                 onBlur={handleHourBlur}
-                className="w-16 text-center text-h3 font-semibold bg-gray-100 dark:bg-black/20 rounded-md py-1 text-text-primary focus:outline-none focus:ring-2 focus:ring-brand-blue"
+                className="w-16 text-center text-h3 font-semibold bg-secondary rounded-md py-1 text-text-primary focus:outline-none focus:ring-2 focus:ring-brand-blue"
                 aria-label="Hour"
                 maxLength={2}
             />
@@ -112,16 +112,16 @@ const TimeScroller: React.FC<TimeScrollerProps> = ({ value, onChange }) => {
                 value={minute}
                 onChange={handleMinuteChange}
                 onBlur={handleMinuteBlur}
-                className="w-16 text-center text-h3 font-semibold bg-gray-100 dark:bg-black/20 rounded-md py-1 text-text-primary focus:outline-none focus:ring-2 focus:ring-brand-blue"
+                className="w-16 text-center text-h3 font-semibold bg-secondary rounded-md py-1 text-text-primary focus:outline-none focus:ring-2 focus:ring-brand-blue"
                 aria-label="Minute"
                 maxLength={2}
             />
             <div className="flex-grow"></div>
-            <div className="flex bg-gray-100 dark:bg-black/20 rounded-md p-0.5">
+            <div className="flex bg-secondary rounded-md p-0.5">
                 <button
                     onClick={() => handlePeriodChange('AM')}
                     className={`w-12 h-8 rounded text-button transition-colors duration-200 ${
-                        period === 'AM' ? 'bg-brand-blue text-white shadow' : 'text-text-secondary hover:bg-white dark:hover:bg-black/50'
+                        period === 'AM' ? 'bg-brand-blue text-white shadow' : 'text-text-secondary hover:bg-secondary'
                     }`}
                     aria-pressed={period === 'AM'}
                 >
@@ -130,7 +130,7 @@ const TimeScroller: React.FC<TimeScrollerProps> = ({ value, onChange }) => {
                 <button
                     onClick={() => handlePeriodChange('PM')}
                     className={`w-12 h-8 rounded text-button transition-colors duration-200 ${
-                        period === 'PM' ? 'bg-brand-blue text-white shadow' : 'text-text-secondary hover:bg-white dark:hover:bg-black/50'
+                        period === 'PM' ? 'bg-brand-blue text-white shadow' : 'text-text-secondary hover:bg-secondary'
                     }`}
                     aria-pressed={period === 'PM'}
                 >

@@ -29,6 +29,7 @@ export const usePersistence = () => {
             
             // Isolate persistence by only loading entities owned by current context.
             // Legacy entities (undefined owner) remain safely visible based on rules.
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const filterValidOwner = (item: any) => {
                  if (item && item.ownerId !== undefined) {
                       if (typeof item.ownerId !== 'string' || (item.ownerId as string).trim() === '') {
@@ -160,7 +161,8 @@ export const usePersistence = () => {
         const validatedData = validateHydrationState(newData);
         const migratedData = migrateState(validatedData);
         
-        const filterValidOwner = (item: any) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const filterValidOwner = (item: any) => {
              if (item && item.ownerId !== undefined) {
                   if (typeof item.ownerId !== 'string' || (item.ownerId as string).trim() === '') {
                        console.warn('[AuthValidation] Invalid ownerId rejected in restore.');

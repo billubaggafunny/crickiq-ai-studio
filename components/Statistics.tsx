@@ -226,13 +226,13 @@ const Statistics: React.FC<StatisticsProps> = ({
             <div className="flex bg-primary/50 p-1 rounded-2xl flex-shrink-0">
               <button
                 onClick={() => setStatsSource("tournaments")}
-                className={`w-full sm:w-auto py-1.5 px-4 rounded-2xl font-semibold transition-colors duration-300 text-body ${statsSource === "tournaments" ? "bg-brand-blue text-white shadow-sm" : "hover:bg-white dark:hover:bg-black/20"}`}
+                className={`w-full sm:w-auto py-1.5 px-4 rounded-2xl font-semibold transition-colors duration-300 text-body ${statsSource === "tournaments" ? "bg-brand-blue text-white shadow-sm" : "hover:bg-secondary"}`}
               >
                 Tournaments
               </button>
               <button
                 onClick={() => setStatsSource("quick")}
-                className={`w-full sm:w-auto py-1.5 px-4 rounded-2xl font-semibold transition-colors duration-300 text-body ${statsSource === "quick" ? "bg-brand-blue text-white shadow-sm" : "hover:bg-white dark:hover:bg-black/20"}`}
+                className={`w-full sm:w-auto py-1.5 px-4 rounded-2xl font-semibold transition-colors duration-300 text-body ${statsSource === "quick" ? "bg-brand-blue text-white shadow-sm" : "hover:bg-secondary"}`}
               >
                 Quick Matches
               </button>
@@ -241,7 +241,7 @@ const Statistics: React.FC<StatisticsProps> = ({
               <select
                 value={selectedTournamentId}
                 onChange={(e) => setSelectedTournamentId(e.target.value)}
-                className="w-full p-2 bg-white text-black border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue text-body font-semibold"
+                className="w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue text-body font-semibold"
               >
                 <option value="all">All Tournaments</option>
                 {tournamentOptions.map((t) => (
@@ -279,7 +279,7 @@ const Statistics: React.FC<StatisticsProps> = ({
                 className={`w-full text-left group transition-all duration-300 relative overflow-hidden  ${topScorer && topScorer.runsScored > 0 ? "cursor-pointer hover:shadow-xl hover:-translate-y-0.5" : ""}`}
               >
                 <div
-                  className="absolute top-2 right-2 p-1.5 rounded-2xl text-text-secondary/50 group-hover:text-brand-blue group-hover:bg-primary/50 transition-colors"
+                  className="absolute top-2 right-2 p-1.5 rounded-2xl text-text-secondary group-hover:text-brand-blue group-hover:bg-primary/50 transition-colors"
                   title="View Scoring Areas"
                 >
                   <ChartPieIcon />
@@ -325,7 +325,7 @@ const Statistics: React.FC<StatisticsProps> = ({
                 className={`w-full text-left group transition-all duration-300 relative overflow-hidden  ${topBowler && topBowler.wicketsTaken > 0 ? "cursor-pointer hover:shadow-xl hover:-translate-y-0.5" : ""}`}
               >
                 <div
-                  className="absolute top-2 right-2 p-1.5 rounded-2xl text-text-secondary/50 group-hover:text-brand-blue group-hover:bg-primary/50 transition-colors"
+                  className="absolute top-2 right-2 p-1.5 rounded-2xl text-text-secondary group-hover:text-brand-blue group-hover:bg-primary/50 transition-colors"
                   title="View Dismissal Analysis"
                 >
                   <ChartPieIcon />

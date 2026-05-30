@@ -63,15 +63,15 @@ const WorkspacePagePlaceholder: React.FC<{ onNavigate: (page: string, title: str
             <CrickIQCard>
                 <h4 className="font-bold text-text-primary text-body uppercase tracking-wider mb-4 px-1">Quick Match History</h4>
                 <div className="space-y-2">
-                    <button onClick={() => onNavigate('quick_recent', 'Recent Matches')} className="w-full bg-primary/50 dark:bg-black/20 hover:bg-white dark:hover:bg-black/40 p-4 rounded-xl flex justify-between items-center transition-colors">
+                    <button onClick={() => onNavigate('quick_recent', 'Recent Matches')} className="w-full bg-primary/50 dark:bg-black/20 hover:bg-secondary p-4 rounded-xl flex justify-between items-center transition-colors">
                         <span className="font-semibold text-text-primary">Recent Matches</span>
                         <span className="text-text-secondary">›</span>
                     </button>
-                    <button onClick={() => onNavigate('quick_completed', 'Completed Matches')} className="w-full bg-primary/50 dark:bg-black/20 hover:bg-white dark:hover:bg-black/40 p-4 rounded-xl flex justify-between items-center transition-colors">
+                    <button onClick={() => onNavigate('quick_completed', 'Completed Matches')} className="w-full bg-primary/50 dark:bg-black/20 hover:bg-secondary p-4 rounded-xl flex justify-between items-center transition-colors">
                         <span className="font-semibold text-text-primary">Completed Matches</span>
                         <span className="text-text-secondary">›</span>
                     </button>
-                    <button onClick={() => onNavigate('quick_drafts', 'Saved Draft Matches')} className="w-full bg-primary/50 dark:bg-black/20 hover:bg-white dark:hover:bg-black/40 p-4 rounded-xl flex justify-between items-center transition-colors">
+                    <button onClick={() => onNavigate('quick_drafts', 'Saved Draft Matches')} className="w-full bg-primary/50 dark:bg-black/20 hover:bg-secondary p-4 rounded-xl flex justify-between items-center transition-colors">
                         <span className="font-semibold text-text-primary">Saved Draft Matches</span>
                         <span className="text-text-secondary">›</span>
                     </button>
@@ -81,15 +81,15 @@ const WorkspacePagePlaceholder: React.FC<{ onNavigate: (page: string, title: str
             <CrickIQCard>
                 <h4 className="font-bold text-text-primary text-body uppercase tracking-wider mb-4 px-1">Tournament History</h4>
                 <div className="space-y-2">
-                    <button onClick={() => onNavigate('tourn_active', 'Active Tournaments')} className="w-full bg-primary/50 dark:bg-black/20 hover:bg-white dark:hover:bg-black/40 p-4 rounded-xl flex justify-between items-center transition-colors">
+                    <button onClick={() => onNavigate('tourn_active', 'Active Tournaments')} className="w-full bg-primary/50 dark:bg-black/20 hover:bg-secondary p-4 rounded-xl flex justify-between items-center transition-colors">
                         <span className="font-semibold text-text-primary">Active Tournaments</span>
                         <span className="text-text-secondary">›</span>
                     </button>
-                    <button onClick={() => onNavigate('tourn_completed', 'Completed Tournaments')} className="w-full bg-primary/50 dark:bg-black/20 hover:bg-white dark:hover:bg-black/40 p-4 rounded-xl flex justify-between items-center transition-colors">
+                    <button onClick={() => onNavigate('tourn_completed', 'Completed Tournaments')} className="w-full bg-primary/50 dark:bg-black/20 hover:bg-secondary p-4 rounded-xl flex justify-between items-center transition-colors">
                         <span className="font-semibold text-text-primary">Completed Tournaments</span>
                         <span className="text-text-secondary">›</span>
                     </button>
-                    <button onClick={() => onNavigate('tourn_drafts', 'Draft Tournaments')} className="w-full bg-primary/50 dark:bg-black/20 hover:bg-white dark:hover:bg-black/40 p-4 rounded-xl flex justify-between items-center transition-colors">
+                    <button onClick={() => onNavigate('tourn_drafts', 'Draft Tournaments')} className="w-full bg-primary/50 dark:bg-black/20 hover:bg-secondary p-4 rounded-xl flex justify-between items-center transition-colors">
                         <span className="font-semibold text-text-primary">Draft Tournaments</span>
                         <span className="text-text-secondary">›</span>
                     </button>
@@ -99,7 +99,7 @@ const WorkspacePagePlaceholder: React.FC<{ onNavigate: (page: string, title: str
             <CrickIQCard>
                 <h4 className="font-bold text-text-primary text-body uppercase tracking-wider mb-4 px-1">Quick Actions</h4>
                 <div className="space-y-2">
-                    <button onClick={() => alert("Navigate to active match (placeholder)")} className="w-full bg-primary/50 dark:bg-black/20 hover:bg-white dark:hover:bg-black/40 p-4 rounded-xl flex items-center gap-4 transition-colors">
+                    <button onClick={() => alert("Navigate to active match (placeholder)")} className="w-full bg-primary/50 dark:bg-black/20 hover:bg-secondary p-4 rounded-xl flex items-center gap-4 transition-colors">
                         <div className="p-2 bg-success/20 dark:bg-green-900/30 text-success rounded-lg">
                             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
@@ -108,7 +108,7 @@ const WorkspacePagePlaceholder: React.FC<{ onNavigate: (page: string, title: str
                         </div>
                         <span className="font-bold text-text-primary">Continue Active Match</span>
                     </button>
-                    <button onClick={() => alert("Navigate to active tournament (placeholder)")} className="w-full bg-primary/50 dark:bg-black/20 hover:bg-white dark:hover:bg-black/40 p-4 rounded-xl flex items-center gap-4 transition-colors">
+                    <button onClick={() => alert("Navigate to active tournament (placeholder)")} className="w-full bg-primary/50 dark:bg-black/20 hover:bg-secondary p-4 rounded-xl flex items-center gap-4 transition-colors">
                         <div className="p-2 bg-brand-blue/20 dark:bg-blue-900/30 text-brand-blue rounded-lg">
                             <TrophyIcon className="w-5 h-5" />
                         </div>
@@ -120,7 +120,7 @@ const WorkspacePagePlaceholder: React.FC<{ onNavigate: (page: string, title: str
             <CrickIQCard>
                 <h4 className="font-bold text-text-primary text-body uppercase tracking-wider mb-4 px-1">Data Management</h4>
                 <div className="space-y-2">
-                    <button onClick={() => onNavigate('storage', 'Manage Storage')} className="w-full bg-primary/50 dark:bg-black/20 hover:bg-white dark:hover:bg-black/40 p-4 rounded-xl flex justify-between items-center transition-colors">
+                    <button onClick={() => onNavigate('storage', 'Manage Storage')} className="w-full bg-primary/50 dark:bg-black/20 hover:bg-secondary p-4 rounded-xl flex justify-between items-center transition-colors">
                         <div className="flex items-center gap-4">
                             <div className="p-2 bg-danger/20 dark:bg-red-900/30 text-danger rounded-lg">
                                 <HardDriveIcon className="w-5 h-5" />
@@ -232,7 +232,7 @@ const UpgradePagePlaceholder: React.FC = () => {
                     </div>
                 </div>
                 <div className="pt-4 flex gap-2">
-                    <button className="flex-1 bg-primary border border-brand-blue/15 hover:bg-white dark:hover:bg-black/30 text-text-primary text-button py-2 rounded-lg transition-colors">Change Method</button>
+                    <button className="flex-1 bg-primary border border-brand-blue/15 hover:bg-secondary text-text-primary text-button py-2 rounded-lg transition-colors">Change Method</button>
                     <button className="flex-1 bg-danger/20 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-danger text-button py-2 rounded-lg transition-colors">Delete Method</button>
                 </div>
             </CrickIQCard>
@@ -443,7 +443,7 @@ const HelpCenterPagePlaceholder: React.FC<{ onNavigate: (page: string, title: st
     return (
         <div className="space-y-4 pb-8 max-w-lg mx-auto w-full">
             <CrickIQCard  className="overflow-hidden">
-                <button onClick={() => onNavigate('tutorials', 'Tutorials')} className="w-full text-left bg-primary/50 dark:bg-black/20 hover:bg-white dark:hover:bg-black/40 p-4 border-b border-brand-blue/15 flex items-center justify-between transition-colors">
+                <button onClick={() => onNavigate('tutorials', 'Tutorials')} className="w-full text-left bg-primary/50 dark:bg-black/20 hover:bg-secondary p-4 border-b border-brand-blue/15 flex items-center justify-between transition-colors">
                     <div className="flex items-center gap-4">
                         <div className="p-2 bg-brand-blue/20 dark:bg-blue-900/30 text-brand-blue rounded-lg">
                             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -459,7 +459,7 @@ const HelpCenterPagePlaceholder: React.FC<{ onNavigate: (page: string, title: st
                     <span className="text-text-secondary text-h2">›</span>
                 </button>
 
-                <button onClick={() => onNavigate('faq', 'FAQ')} className="w-full text-left bg-primary/50 dark:bg-black/20 hover:bg-white dark:hover:bg-black/40 p-4 border-b border-brand-blue/15 flex items-center justify-between transition-colors">
+                <button onClick={() => onNavigate('faq', 'FAQ')} className="w-full text-left bg-primary/50 dark:bg-black/20 hover:bg-secondary p-4 border-b border-brand-blue/15 flex items-center justify-between transition-colors">
                     <div className="flex items-center gap-4">
                         <div className="p-2 bg-brand-lavender/20 dark:bg-brand-lavender/30 text-brand-lavender rounded-lg">
                             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -474,7 +474,7 @@ const HelpCenterPagePlaceholder: React.FC<{ onNavigate: (page: string, title: st
                     <span className="text-text-secondary text-h2">›</span>
                 </button>
 
-                <button onClick={() => onNavigate('contact', 'Contact Support')} className="w-full text-left bg-primary/50 dark:bg-black/20 hover:bg-white dark:hover:bg-black/40 p-4 border-b border-brand-blue/15 flex items-center justify-between transition-colors">
+                <button onClick={() => onNavigate('contact', 'Contact Support')} className="w-full text-left bg-primary/50 dark:bg-black/20 hover:bg-secondary p-4 border-b border-brand-blue/15 flex items-center justify-between transition-colors">
                     <div className="flex items-center gap-4">
                         <div className="p-2 bg-success/20 dark:bg-green-900/30 text-success rounded-lg">
                             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -489,7 +489,7 @@ const HelpCenterPagePlaceholder: React.FC<{ onNavigate: (page: string, title: st
                     <span className="text-text-secondary text-h2">›</span>
                 </button>
 
-                <button onClick={() => onNavigate('about', 'About CrickIQ')} className="w-full text-left bg-primary/50 dark:bg-black/20 hover:bg-white dark:hover:bg-black/40 p-4 flex items-center justify-between transition-colors">
+                <button onClick={() => onNavigate('about', 'About CrickIQ')} className="w-full text-left bg-primary/50 dark:bg-black/20 hover:bg-secondary p-4 flex items-center justify-between transition-colors">
                     <div className="flex items-center gap-4">
                         <div className="p-2 bg-warning/20 dark:bg-warning/20 text-warning rounded-lg">
                             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -642,9 +642,9 @@ const SettingsPagePlaceholder: React.FC<{ onNavigate: (page: string, title: stri
             <CrickIQCard>
                 <h4 className="font-bold text-text-primary text-body uppercase tracking-wider mb-4 px-1">Appearance</h4>
                 <div className="space-y-2">
-                    <button onClick={() => onNavigate('appearance', 'Appearance')} className="w-full bg-primary/50 dark:bg-black/20 hover:bg-white dark:hover:bg-black/40 p-4 rounded-xl flex justify-between items-center transition-colors">
+                    <button onClick={() => onNavigate('appearance', 'Appearance')} className="w-full bg-primary/50 dark:bg-black/20 hover:bg-secondary p-4 rounded-xl flex justify-between items-center transition-colors">
                         <div className="flex items-center gap-4">
-                            <div className="p-1.5 bg-gray-100 dark:bg-gray-800 rounded-lg text-text-primary">
+                            <div className="p-1.5 bg-secondary rounded-lg text-text-primary">
                                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                                 </svg>
@@ -659,9 +659,9 @@ const SettingsPagePlaceholder: React.FC<{ onNavigate: (page: string, title: stri
             <CrickIQCard>
                 <h4 className="font-bold text-text-primary text-body uppercase tracking-wider mb-4 px-1">Notifications</h4>
                 <div className="space-y-2">
-                    <button onClick={() => onNavigate('notifications', 'Notifications')} className="w-full bg-primary/50 dark:bg-black/20 hover:bg-white dark:hover:bg-black/40 p-4 rounded-xl flex justify-between items-center transition-colors">
+                    <button onClick={() => onNavigate('notifications', 'Notifications')} className="w-full bg-primary/50 dark:bg-black/20 hover:bg-secondary p-4 rounded-xl flex justify-between items-center transition-colors">
                         <div className="flex items-center gap-4">
-                            <div className="p-1.5 bg-gray-100 dark:bg-gray-800 rounded-lg text-text-primary">
+                            <div className="p-1.5 bg-secondary rounded-lg text-text-primary">
                                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                                 </svg>
@@ -676,9 +676,9 @@ const SettingsPagePlaceholder: React.FC<{ onNavigate: (page: string, title: stri
             <CrickIQCard>
                 <h4 className="font-bold text-text-primary text-body uppercase tracking-wider mb-4 px-1">App Preferences</h4>
                 <div className="space-y-2">
-                    <button onClick={() => onNavigate('preferences', 'App Preferences')} className="w-full bg-primary/50 dark:bg-black/20 hover:bg-white dark:hover:bg-black/40 p-4 rounded-xl flex justify-between items-center transition-colors">
+                    <button onClick={() => onNavigate('preferences', 'App Preferences')} className="w-full bg-primary/50 dark:bg-black/20 hover:bg-secondary p-4 rounded-xl flex justify-between items-center transition-colors">
                         <div className="flex items-center gap-4">
-                            <div className="p-1.5 bg-gray-100 dark:bg-gray-800 rounded-lg text-text-primary">
+                            <div className="p-1.5 bg-secondary rounded-lg text-text-primary">
                                 <SettingsIcon className="w-5 h-5" />
                             </div>
                             <span className="font-semibold text-text-primary">App Mode Setup</span>
@@ -816,7 +816,7 @@ const PrivacyPagePlaceholder: React.FC<{ onNavigate: (page: string, title: strin
     return (
         <div className="space-y-4 pb-8 max-w-lg mx-auto w-full">
             <CrickIQCard  className="overflow-hidden">
-                <button onClick={() => onNavigate('privacy_policy', 'Privacy Policy')} className="w-full text-left bg-primary/50 dark:bg-black/20 hover:bg-white dark:hover:bg-black/40 p-4 border-b border-brand-blue/15 flex items-center justify-between transition-colors">
+                <button onClick={() => onNavigate('privacy_policy', 'Privacy Policy')} className="w-full text-left bg-primary/50 dark:bg-black/20 hover:bg-secondary p-4 border-b border-brand-blue/15 flex items-center justify-between transition-colors">
                     <div className="flex items-center gap-4">
                         <div className="p-2 bg-brand-blue/20 dark:bg-blue-900/30 text-brand-blue rounded-lg">
                             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -831,7 +831,7 @@ const PrivacyPagePlaceholder: React.FC<{ onNavigate: (page: string, title: strin
                     <span className="text-text-secondary text-h2">›</span>
                 </button>
 
-                <button onClick={() => onNavigate('terms', 'Terms & Conditions')} className="w-full text-left bg-primary/50 dark:bg-black/20 hover:bg-white dark:hover:bg-black/40 p-4 border-b border-brand-blue/15 flex items-center justify-between transition-colors">
+                <button onClick={() => onNavigate('terms', 'Terms & Conditions')} className="w-full text-left bg-primary/50 dark:bg-black/20 hover:bg-secondary p-4 border-b border-brand-blue/15 flex items-center justify-between transition-colors">
                     <div className="flex items-center gap-4">
                         <div className="p-2 bg-brand-lavender/20 dark:bg-brand-lavender/30 text-brand-lavender rounded-lg">
                             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -846,7 +846,7 @@ const PrivacyPagePlaceholder: React.FC<{ onNavigate: (page: string, title: strin
                     <span className="text-text-secondary text-h2">›</span>
                 </button>
 
-                <button onClick={() => onNavigate('refund', 'Subscription Refund Policy')} className="w-full text-left bg-primary/50 dark:bg-black/20 hover:bg-white dark:hover:bg-black/40 p-4 border-b border-brand-blue/15 flex items-center justify-between transition-colors">
+                <button onClick={() => onNavigate('refund', 'Subscription Refund Policy')} className="w-full text-left bg-primary/50 dark:bg-black/20 hover:bg-secondary p-4 border-b border-brand-blue/15 flex items-center justify-between transition-colors">
                     <div className="flex items-center gap-4">
                         <div className="p-2 bg-success/20 dark:bg-green-900/30 text-success rounded-lg">
                             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -861,7 +861,7 @@ const PrivacyPagePlaceholder: React.FC<{ onNavigate: (page: string, title: strin
                     <span className="text-text-secondary text-h2">›</span>
                 </button>
 
-                <button onClick={() => onNavigate('data_usage', 'Data Usage Policy')} className="w-full text-left bg-primary/50 dark:bg-black/20 hover:bg-white dark:hover:bg-black/40 p-4 flex items-center justify-between transition-colors">
+                <button onClick={() => onNavigate('data_usage', 'Data Usage Policy')} className="w-full text-left bg-primary/50 dark:bg-black/20 hover:bg-secondary p-4 flex items-center justify-between transition-colors">
                     <div className="flex items-center gap-4">
                         <div className="p-2 bg-warning/20 dark:bg-warning/20 text-warning rounded-lg">
                             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1166,7 +1166,7 @@ const Drawer: React.FC<DrawerProps> = ({ isOpen, onClose }) => {
                             <button className="w-full py-4 rounded-xl font-bold bg-danger/100 hover:bg-red-600 text-white transition-colors shadow-lg">
                                 Yes, Logout (Placeholder)
                             </button>
-                            <button onClick={handleManualClose} className="w-full py-4 rounded-xl font-bold bg-white border border-brand-blue/15 text-text-primary hover:bg-white/10 transition-colors">
+                            <button onClick={handleManualClose} className="w-full py-4 rounded-xl font-bold bg-primary border border-brand-blue/15 text-text-primary hover:bg-secondary transition-colors">
                                 Cancel
                             </button>
                         </div>
@@ -1229,7 +1229,7 @@ const Drawer: React.FC<DrawerProps> = ({ isOpen, onClose }) => {
                 
                 {/* Drawer panel */}
                 <div 
-                    className={`absolute top-0 left-0 bottom-0 flex flex-col w-72 max-w-[85vw] bg-white dark:bg-gray-900 shadow-2xl transition-transform duration-300 ease-in-out transform ${(isOpen && !activePage) ? 'translate-x-0' : '-translate-x-full'} safe-pad-t safe-pad-b safe-pad-l z-10`}
+                    className={`absolute top-0 left-0 bottom-0 flex flex-col w-72 max-w-[85vw] bg-primary shadow-2xl transition-transform duration-300 ease-in-out transform ${(isOpen && !activePage) ? 'translate-x-0' : '-translate-x-full'} safe-pad-t safe-pad-b safe-pad-l z-10`}
                     role="dialog"
                     aria-modal="true"
                 >
@@ -1267,7 +1267,7 @@ const Drawer: React.FC<DrawerProps> = ({ isOpen, onClose }) => {
                                             <div className={`p-1.5 rounded-lg transition-colors
                                                 ${item.highlight ? 'bg-yellow-400/20 text-warning dark:text-white' :
                                                   item.danger ? 'bg-danger/20 dark:bg-red-900/30 text-danger' :
-                                                  'bg-white dark:bg-gray-800 shadow-sm border border-brand-blue/15 text-text-secondary group-hover:text-brand-blue'}
+                                                  'bg-primary shadow-md border border-light-border dark:border-brand-blue/15 text-text-secondary group-hover:text-brand-blue'}
                                             `}>
                                                 {item.icon}
                                             </div>

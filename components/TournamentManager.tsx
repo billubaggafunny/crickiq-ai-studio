@@ -420,9 +420,9 @@ const TournamentManager: React.FC<TournamentManagerProps> = (props) => {
                                     ) : (
                                         <div className="space-y-4">
                                             <div className="relative">
-                                                <input type="text" value={quickTeam1} onChange={handleTeam1Change} onFocus={handleTeam1Change} onBlur={() => setTimeout(() => setActiveSuggestionBox(null), 200)} placeholder="Team 1 Name" className="w-full p-2 bg-white text-black border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" autoComplete="off" />
+                                                <input type="text" value={quickTeam1} onChange={handleTeam1Change} onFocus={handleTeam1Change} onBlur={() => setTimeout(() => setActiveSuggestionBox(null), 200)} placeholder="Team 1 Name" className="w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" autoComplete="off" />
                                                 {activeSuggestionBox === 'team1' && suggestions.length > 0 && (
-                                                    <div className="absolute z-20 w-full bg-white dark:bg-gray-700 rounded-lg shadow-lg mt-1 border border-brand-blue/15 max-h-40 overflow-y-auto no-scrollbar">
+                                                    <div className="absolute z-20 w-full bg-primary rounded-lg shadow-lg mt-1 border border-brand-blue/15 max-h-40 overflow-y-auto no-scrollbar">
                                                         {suggestions.map(team => (
                                                             <button key={team.id} onClick={() => handleSelectSuggestion1(team)} className="block w-full text-left px-4 py-2 hover:bg-primary dark:hover:bg-gray-600">{team.name}</button>
                                                         ))}
@@ -430,9 +430,9 @@ const TournamentManager: React.FC<TournamentManagerProps> = (props) => {
                                                 )}
                                             </div>
                                              <div className="relative">
-                                                <input type="text" value={quickTeam2} onChange={handleTeam2Change} onFocus={handleTeam2Change} onBlur={() => setTimeout(() => setActiveSuggestionBox(null), 200)} placeholder="Team 2 Name" className="w-full p-2 bg-white text-black border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" autoComplete="off" />
+                                                <input type="text" value={quickTeam2} onChange={handleTeam2Change} onFocus={handleTeam2Change} onBlur={() => setTimeout(() => setActiveSuggestionBox(null), 200)} placeholder="Team 2 Name" className="w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" autoComplete="off" />
                                                 {activeSuggestionBox === 'team2' && suggestions.length > 0 && (
-                                                    <div className="absolute z-20 w-full bg-white dark:bg-gray-700 rounded-lg shadow-lg mt-1 border border-brand-blue/15 max-h-40 overflow-y-auto no-scrollbar">
+                                                    <div className="absolute z-20 w-full bg-primary rounded-lg shadow-lg mt-1 border border-brand-blue/15 max-h-40 overflow-y-auto no-scrollbar">
                                                         {suggestions.map(team => (
                                                             <button key={team.id} onClick={() => handleSelectSuggestion2(team)} className="block w-full text-left px-4 py-2 hover:bg-primary dark:hover:bg-gray-600">{team.name}</button>
                                                         ))}
@@ -440,9 +440,9 @@ const TournamentManager: React.FC<TournamentManagerProps> = (props) => {
                                                 )}
                                             </div>
                                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                                                <input type="number" value={quickOvers} onChange={e => setQuickOvers(e.target.value === '' ? '' : parseInt(e.target.value, 10))} placeholder="Overs" className="w-full p-2 bg-white text-black border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" />
-                                                <input type="number" value={quickMaxOvers} onChange={e => setQuickMaxOvers(e.target.value === '' ? '' : parseInt(e.target.value, 10))} placeholder="Max Overs/Bowler" className="w-full p-2 bg-white text-black border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" />
-                                                <input type="number" value={quickPlayers} onChange={handleQuickPlayersChange} placeholder="Players" className="w-full p-2 bg-white text-black border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue disabled:bg-primary/30 disabled:cursor-not-allowed" disabled={isPlayersInputDisabled} title={isPlayersInputDisabled ? 'Player count is determined by the selected historical team.' : ''} />
+                                                <input type="number" value={quickOvers} onChange={e => setQuickOvers(e.target.value === '' ? '' : parseInt(e.target.value, 10))} placeholder="Overs" className="w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" />
+                                                <input type="number" value={quickMaxOvers} onChange={e => setQuickMaxOvers(e.target.value === '' ? '' : parseInt(e.target.value, 10))} placeholder="Max Overs/Bowler" className="w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" />
+                                                <input type="number" value={quickPlayers} onChange={handleQuickPlayersChange} placeholder="Players" className="w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue disabled:bg-primary/30 disabled:cursor-not-allowed" disabled={isPlayersInputDisabled} title={isPlayersInputDisabled ? 'Player count is determined by the selected historical team.' : ''} />
                                             </div>
                                             <Button
                                                 onClick={handleAddQuickMatch}

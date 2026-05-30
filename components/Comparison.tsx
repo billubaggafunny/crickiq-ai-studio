@@ -238,11 +238,11 @@ const Comparison: React.FC<UseCrickIQStateReturn> = ({ teams, matches, getTourna
                     <CrickIQCard>
                         <h3 className="text-h3 text-text-primary mb-4">Select Teams to Compare</h3>
                         <div className="grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-4 items-end">
-                            <select value={team1Id} onChange={e => { setTeam1Id(e.target.value); setTeamResult(null); }} className="w-full p-2 bg-white text-black border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue">
+                            <select value={team1Id} onChange={e => { setTeam1Id(e.target.value); setTeamResult(null); }} className="w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue">
                                 <option value="" disabled>Select Team 1</option>
                                 {team1Options.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
                             </select>
-                            <select value={team2Id} onChange={e => { setTeam2Id(e.target.value); setTeamResult(null); }} className="w-full p-2 bg-white text-black border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue">
+                            <select value={team2Id} onChange={e => { setTeam2Id(e.target.value); setTeamResult(null); }} className="w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue">
                                 <option value="" disabled>Select Team 2</option>
                                 {team2Options.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
                             </select>
@@ -283,21 +283,21 @@ const Comparison: React.FC<UseCrickIQStateReturn> = ({ teams, matches, getTourna
                         <h3 className="text-h3 text-text-primary mb-4">Select Players to Compare</h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
                             <div className="space-y-2">
-                                <select value={p1TeamId} onChange={e => { setP1TeamId(e.target.value); setPlayer1Id(''); setPlayerResult(null); }} className="w-full p-2 bg-white text-black border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue">
+                                <select value={p1TeamId} onChange={e => { setP1TeamId(e.target.value); setPlayer1Id(''); setPlayerResult(null); }} className="w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue">
                                     <option value="">Select Team 1</option>
                                     {p1TeamOptions.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
                                 </select>
-                                <select value={player1Id} onChange={e => { setPlayer1Id(e.target.value); setPlayerResult(null); }} disabled={!p1TeamId} className="w-full p-2 bg-white text-black border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400">
+                                <select value={player1Id} onChange={e => { setPlayer1Id(e.target.value); setPlayerResult(null); }} disabled={!p1TeamId} className="w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400">
                                     <option value="">Select Player 1</option>
                                     {p1Players.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
                                 </select>
                             </div>
                              <div className="space-y-2">
-                                <select value={p2TeamId} onChange={e => { setP2TeamId(e.target.value); setPlayer2Id(''); setPlayerResult(null); }} className="w-full p-2 bg-white text-black border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue">
+                                <select value={p2TeamId} onChange={e => { setP2TeamId(e.target.value); setPlayer2Id(''); setPlayerResult(null); }} className="w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue">
                                     <option value="">Select Team 2</option>
                                     {p2TeamOptions.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
                                 </select>
-                                <select value={player2Id} onChange={e => { setPlayer2Id(e.target.value); setPlayerResult(null); }} disabled={!p2TeamId} className="w-full p-2 bg-white text-black border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400">
+                                <select value={player2Id} onChange={e => { setPlayer2Id(e.target.value); setPlayerResult(null); }} disabled={!p2TeamId} className="w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400">
                                     <option value="">Select Player 2</option>
                                     {p2Players.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
                                 </select>

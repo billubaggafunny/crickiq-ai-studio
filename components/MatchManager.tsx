@@ -234,8 +234,10 @@ const MatchManager: React.FC<MatchManagerProps> = (props) => {
     useEffect(() => {
         const val = validateMaxOversPerBowler(matchMaxOvers, matchOvers);
         if (!val.valid) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setScheduleError(val.message || null);
         } else {
+             
             setScheduleError(prev => prev && prev.includes('Maximum Overs') ? null : prev);
         }
     }, [matchOvers, matchMaxOvers]);
@@ -243,8 +245,10 @@ const MatchManager: React.FC<MatchManagerProps> = (props) => {
     useEffect(() => {
         const val = validateMaxOversPerBowler(editFormData.maxOversPerBowler === '' ? undefined : editFormData.maxOversPerBowler, editFormData.oversPerInnings);
         if (!val.valid) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setEditError(val.message || null);
         } else {
+             
             setEditError(prev => prev && prev.includes('Maximum Overs') ? null : prev);
         }
     }, [editFormData.oversPerInnings, editFormData.maxOversPerBowler]);
@@ -407,7 +411,8 @@ const MatchManager: React.FC<MatchManagerProps> = (props) => {
     };
 
     const handleAddMatch = () => {
-        setScheduleError(null);
+         
+            setScheduleError(null);
 
         if (teamReadinessError) {
             setConfirmation({
@@ -429,6 +434,7 @@ const MatchManager: React.FC<MatchManagerProps> = (props) => {
         
         if (!scheduleValidation.valid) {
             const error = scheduleValidation.message || "Please complete all fields correctly.";
+             
             setScheduleError(error);
             showNotification(error, 'error');
             return;
@@ -451,7 +457,7 @@ const MatchManager: React.FC<MatchManagerProps> = (props) => {
                         <h3 className="text-base font-bold text-text-primary truncate w-full">{team1?.name}</h3>
                     </div>
 
-                    <span className="text-2xl text-text-secondary/80">VS</span>
+                    <span className="text-2xl text-text-secondary">VS</span>
                     
                     <div className="flex flex-col items-center gap-2 w-28">
                         <div className="w-14 h-14 flex items-center justify-center rounded-lg text-white text-h2 shadow-md" style={{ backgroundColor: team2?.logo }}>
@@ -825,16 +831,16 @@ const MatchManager: React.FC<MatchManagerProps> = (props) => {
     
                 {view === 'schedule' && (
                     <div className="space-y-6 relative z-50">
-                        <div className="flex bg-white/10 dark:bg-black/10 rounded-lg p-1 space-x-1 border border-brand-blue/15">
+                        <div className="flex bg-secondary dark:bg-black/20 rounded-lg p-1 space-x-1 border border-[#DCE3F0] dark:border-brand-blue/15">
                             <button
                                 onClick={() => setFixtureView('manual')}
-                                className={`flex-1 py-2 px-4 text-body font-semibold rounded-md transition-colors ${fixtureView === 'manual' ? 'bg-white dark:bg-secondary text-brand-blue dark:text-white shadow-sm' : 'text-text-secondary hover:text-text-primary hover:bg-white/5'}`}
+                                className={`flex-1 py-2 px-4 text-body font-semibold rounded-md transition-colors ${fixtureView === 'manual' ? 'bg-primary text-brand-blue dark:text-white shadow-sm' : 'text-text-secondary hover:text-text-primary hover:bg-black/5 dark:hover:bg-white/5'}`}
                             >
                                 Manual
                             </button>
                             <button
                                 onClick={() => setFixtureView('automation')}
-                                className={`flex-1 py-2 px-4 text-body font-semibold rounded-md transition-colors ${fixtureView === 'automation' ? 'bg-white dark:bg-secondary text-brand-blue dark:text-white shadow-sm' : 'text-text-secondary hover:text-text-primary hover:bg-white/5'}`}
+                                className={`flex-1 py-2 px-4 text-body font-semibold rounded-md transition-colors ${fixtureView === 'automation' ? 'bg-primary text-brand-blue dark:text-white shadow-sm' : 'text-text-secondary hover:text-text-primary hover:bg-black/5 dark:hover:bg-white/5'}`}
                             >
                                 Automation
                             </button>
@@ -1017,7 +1023,7 @@ const MatchManager: React.FC<MatchManagerProps> = (props) => {
                                 Add New Team
                              </h3>
                              <div className="grid grid-cols-5 gap-4">
-                                <input type="text" value={newTeamName} onChange={e => setNewTeamName(e.target.value)} placeholder="Team Name" className="col-span-3 p-2 bg-white text-black border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" />
+                                <input type="text" value={newTeamName} onChange={e => setNewTeamName(e.target.value)} placeholder="Team Name" className="col-span-3 p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" />
                                 <Button onClick={handleAddTeam} variant="primary" disabled={!newTeamName.trim()} className="w-full col-span-2">
                                     <PlusIcon />
                                     Add

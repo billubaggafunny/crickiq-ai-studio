@@ -329,7 +329,7 @@ const TournamentStats: React.FC<UseCrickIQStateReturn> = ({
                   </div>
                 ) : (
                   <div className="flex justify-between items-center text-caption bg-black/5 dark:bg-white/5 text-text-secondary px-2 py-1.5 rounded border border-brand-blue/15">
-                    <span className="font-bold flex items-center gap-1.5 text-text-secondary/50">
+                    <span className="font-bold flex items-center gap-1.5 text-text-secondary">
                       <span className="text-sm">🏏</span> No batters yet
                     </span>
                   </div>
@@ -352,7 +352,7 @@ const TournamentStats: React.FC<UseCrickIQStateReturn> = ({
                   </div>
                 ) : (
                   <div className="flex justify-between items-center text-caption bg-black/5 dark:bg-white/5 text-text-secondary px-2 py-1.5 rounded border border-brand-blue/15">
-                    <span className="font-bold flex items-center gap-1.5 text-text-secondary/50">
+                    <span className="font-bold flex items-center gap-1.5 text-text-secondary">
                       <span className="text-sm">🎯</span> No bowlers yet
                     </span>
                   </div>

@@ -224,21 +224,21 @@ const TournamentList: React.FC<TournamentListProps> = ({ tournaments, teams, mat
                             <TrophyIcon className="w-5 h-5" /> Create Tournament
                         </h3>
                         <div className="space-y-4">
-                            <input type="text" value={newTournamentName} onChange={e => setNewTournamentName(e.target.value)} placeholder="Tournament Name" className="w-full p-2 bg-white text-black border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" />
-                            <input type="text" value={newTournamentLocation} onChange={e => setNewTournamentLocation(e.target.value)} placeholder="Location" className="w-full p-2 bg-white text-black border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" />
+                            <input type="text" value={newTournamentName} onChange={e => setNewTournamentName(e.target.value)} placeholder="Tournament Name" className="w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" />
+                            <input type="text" value={newTournamentLocation} onChange={e => setNewTournamentLocation(e.target.value)} placeholder="Location" className="w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" />
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label htmlFor="start-date" className="text-caption text-text-secondary px-2">Start Date</label>
-                                    <input id="start-date" type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-full p-2 bg-white text-black border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" />
+                                    <input id="start-date" type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" />
                                 </div>
                                 <div>
                                     <label htmlFor="end-date" className="text-caption text-text-secondary px-2">End Date</label>
-                                    <input id="end-date" type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="w-full p-2 bg-white text-black border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" />
+                                    <input id="end-date" type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" />
                                 </div>
                             </div>
                              <div className="grid grid-cols-2 gap-4">
-                                <input type="number" value={defaultOvers} onChange={e => setDefaultOvers(e.target.value === '' ? '' : parseInt(e.target.value, 10))} placeholder="Default Overs" className="w-full p-2 bg-white text-black border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" />
-                                <input type="number" value={numberOfPlayers} onChange={handleNumberOfPlayersChange} placeholder="Players/Team" className="w-full p-2 bg-white text-black border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" />
+                                <input type="number" value={defaultOvers} onChange={e => setDefaultOvers(e.target.value === '' ? '' : parseInt(e.target.value, 10))} placeholder="Default Overs" className="w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" />
+                                <input type="number" value={numberOfPlayers} onChange={handleNumberOfPlayersChange} placeholder="Players/Team" className="w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" />
                             </div>
                             <Button
                                 onClick={handleAddTournament}
@@ -366,21 +366,21 @@ const TournamentList: React.FC<TournamentListProps> = ({ tournaments, teams, mat
                     <CrickIQCard  className="w-full max-w-lg">
                         <h3 className="text-h3 text-text-primary mb-4">Edit Tournament</h3>
                         <div className="space-y-4">
-                            <input type="text" value={editFormData.name} onChange={e => setEditFormData(f => ({...f, name: e.target.value}))} placeholder="Tournament Name" className="w-full p-2 bg-white text-black border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" />
-                            <input type="text" value={editFormData.location} onChange={e => setEditFormData(f => ({...f, location: e.target.value}))} placeholder="Location" className="w-full p-2 bg-white text-black border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" />
+                            <input type="text" value={editFormData.name} onChange={e => setEditFormData(f => ({...f, name: e.target.value}))} placeholder="Tournament Name" className="w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" />
+                            <input type="text" value={editFormData.location} onChange={e => setEditFormData(f => ({...f, location: e.target.value}))} placeholder="Location" className="w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" />
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label htmlFor="start-date-edit" className="text-caption text-text-secondary px-2">Start Date</label>
-                                    <input id="start-date-edit" type="date" value={editFormData.startDate} onChange={e => setEditFormData(f => ({...f, startDate: e.target.value}))} className="w-full p-2 bg-white text-black border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" />
+                                    <input id="start-date-edit" type="date" value={editFormData.startDate} onChange={e => setEditFormData(f => ({...f, startDate: e.target.value}))} className="w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" />
                                 </div>
                                 <div>
                                     <label htmlFor="end-date-edit" className="text-caption text-text-secondary px-2">End Date</label>
-                                    <input id="end-date-edit" type="date" value={editFormData.endDate} onChange={e => setEditFormData(f => ({...f, endDate: e.target.value}))} className="w-full p-2 bg-white text-black border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" />
+                                    <input id="end-date-edit" type="date" value={editFormData.endDate} onChange={e => setEditFormData(f => ({...f, endDate: e.target.value}))} className="w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" />
                                 </div>
                             </div>
                             <div className="grid grid-cols-2 gap-4">
-                                <input type="number" value={editFormData.defaultOvers} onChange={e => setEditFormData(f => ({...f, defaultOvers: e.target.value === '' ? '' : parseInt(e.target.value, 10)}))} placeholder="Default Overs" className="w-full p-2 bg-white text-black border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" />
-                                <input type="number" value={editFormData.numberOfPlayers} onChange={e => setEditFormData(f => ({...f, numberOfPlayers: e.target.value === '' ? '' : parseInt(e.target.value, 10)}))} placeholder="Players/Team" className="w-full p-2 bg-white text-black border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" />
+                                <input type="number" value={editFormData.defaultOvers} onChange={e => setEditFormData(f => ({...f, defaultOvers: e.target.value === '' ? '' : parseInt(e.target.value, 10)}))} placeholder="Default Overs" className="w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" />
+                                <input type="number" value={editFormData.numberOfPlayers} onChange={e => setEditFormData(f => ({...f, numberOfPlayers: e.target.value === '' ? '' : parseInt(e.target.value, 10)}))} placeholder="Players/Team" className="w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" />
                             </div>
                             {editError && <p className="text-highlight text-body text-center">{editError}</p>}
                         </div>
