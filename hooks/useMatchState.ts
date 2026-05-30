@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import type React from 'react';
 import type { Tournament, Team, Match, Toss, Innings, Ball } from '../types';
 import { PlayerRole, BattingStatus } from '../types';
 import { generateEntityId, createTimestamp, createSyncMetadata } from '../utils/idGenerator';
@@ -15,7 +16,7 @@ export const useMatchState = (
     createSnapshot: () => void
 ) => {
 
-    const addMatch = useCallback((tournamentId: string, team1Id: string, team2Id: string, date: string, time: string, oversPerInnings: number, ownerId?: string) => {
+    const addMatch = useCallback((tournamentId: string, team1Id: string, team2Id: string, date: string, time: string, oversPerInnings: number, maxOversPerBowler?: number, ownerId?: string) => {
         if (!team1Id || !team2Id || team1Id === team2Id) {
             console.warn("[RuntimeValidation] Cannot add match: Invalid team relation.");
             return;
@@ -43,6 +44,7 @@ export const useMatchState = (
             time, 
             status: 'scheduled', 
             oversPerInnings,
+            maxOversPerBowler,
             createdAt: timestamp,
             updatedAt: timestamp,
             ...createSyncMetadata()
@@ -65,7 +67,7 @@ export const useMatchState = (
         setMatches(prev => [...prev, ...newMatches]);
     }, [setMatches]);
     
-    const updateMatch = useCallback((matchId: string, updatedDetails: Pick<Match, 'team1Id' | 'team2Id' | 'date' | 'time' | 'oversPerInnings'>) => {
+    const updateMatch = useCallback((matchId: string, updatedDetails: Pick<Match, 'team1Id' | 'team2Id' | 'date' | 'time' | 'oversPerInnings' | 'maxOversPerBowler'>) => {
         if (updatedDetails.team1Id === updatedDetails.team2Id) {
             console.warn("[RuntimeValidation] Cannot update match: Teams cannot be the same.");
             return;
@@ -90,7 +92,7 @@ export const useMatchState = (
         setMatches(prev => prev.filter(m => m.id !== matchId));
     }, [setMatches]);
 
-    const addQuickMatch = useCallback((team1Data: string | Team, team2Data: string | Team, oversPerInnings: number, numberOfPlayers: number, ownerId?: string) => {
+    const addQuickMatch = useCallback((team1Data: string | Team, team2Data: string | Team, oversPerInnings: number, numberOfPlayers: number, maxOversPerBowler?: number, ownerId?: string) => {
         const QUICK_MATCH_TOURNAMENT_ID = 't_quick_matches';
         const QUICK_MATCH_TOURNAMENT_NAME = 'Quick Matches';
 
@@ -185,6 +187,7 @@ export const useMatchState = (
             status: 'scheduled',
             oversPerInnings,
             isQuickMatch: true,
+            maxOversPerBowler,
             createdAt: timestamp,
             updatedAt: timestamp,
             ...createSyncMetadata()
@@ -217,6 +220,7 @@ export const useMatchState = (
             date: now.toISOString().split('T')[0],
             time: time,
             oversPerInnings: originalMatch.oversPerInnings,
+            maxOversPerBowler: originalMatch.maxOversPerBowler,
             status: 'scheduled',
             isQuickMatch: true,
             createdAt: timestamp,
@@ -268,7 +272,7 @@ export const useMatchState = (
                     manualOverrides: [],
                 };
 
-                return { ...m, status: 'live', innings1, updatedAt: createTimestamp() };
+                return { ...m, status: 'live' as const, innings1, updatedAt: createTimestamp() };
             }
             return m;
         }));
@@ -290,7 +294,7 @@ export const useMatchState = (
             winnerId = determineWinner(matchToEnd.innings1, matchToEnd.innings2);
         }
         
-        let updatedMatches = matches.map(m => m.id === matchId ? { ...m, status: 'completed', winnerId: winnerId, updatedAt: createTimestamp() } : m);
+        let updatedMatches = matches.map(m => m.id === matchId ? { ...m, status: 'completed' as const, winnerId: winnerId, updatedAt: createTimestamp() } : m);
         const finishedMatch = updatedMatches.find(m => m.id === matchId)!;
 
         const tournament = tournaments.find(t => t.id === finishedMatch.tournamentId);
@@ -305,7 +309,8 @@ export const useMatchState = (
         let nextStage: Tournament['stage'] | undefined = undefined;
 
         const getNextKnockoutDate = (lastMatchDateStr: string | undefined): string => {
-            const date = new Date((lastMatchDateStr || tournament.endDate || new Date()).replace(/-/g, '/'));
+            const baseDateStr = lastMatchDateStr || tournament.endDate || new Date().toISOString().split('T')[0];
+            const date = new Date(baseDateStr.replace(/-/g, '/'));
             date.setDate(date.getDate() + 2);
             return date.toISOString().split('T')[0];
         };
@@ -333,8 +338,8 @@ export const useMatchState = (
                         if (tableA.length >= 2 && tableB.length >= 2) {
                             const [a1, a2] = tableA;
                             const [b1, b2] = tableB;
-                            newKnockoutMatches.push({ id: `m_semi1_${tournament.id}`, tournamentId: tournament.id, team1Id: a1.teamId, team2Id: b2.teamId, date: getNextKnockoutDate(lastMatchDate), oversPerInnings: tournament.defaultOvers || 20, status: 'scheduled', knockoutType: 'semifinal' });
-                            newKnockoutMatches.push({ id: `m_semi2_${tournament.id}`, tournamentId: tournament.id, team1Id: b1.teamId, team2Id: a2.teamId, date: getNextKnockoutDate(lastMatchDate), oversPerInnings: tournament.defaultOvers || 20, status: 'scheduled', knockoutType: 'semifinal' });
+                            newKnockoutMatches.push({ id: `m_semi1_${tournament.id}`, tournamentId: tournament.id, team1Id: a1.teamId, team2Id: b2.teamId, date: getNextKnockoutDate(lastMatchDate), oversPerInnings: tournament.defaultOvers || 20, status: 'scheduled' as const, knockoutType: 'semifinal' });
+                            newKnockoutMatches.push({ id: `m_semi2_${tournament.id}`, tournamentId: tournament.id, team1Id: b1.teamId, team2Id: a2.teamId, date: getNextKnockoutDate(lastMatchDate), oversPerInnings: tournament.defaultOvers || 20, status: 'scheduled' as const, knockoutType: 'semifinal' });
                             nextStage = 'semifinals';
                         }
                     } else { 
@@ -342,8 +347,8 @@ export const useMatchState = (
                         const pointsTable = calculatePointsTable(tournamentTeams, groupMatches);
                         if (pointsTable.length >= 4) {
                             const [p1, p2, p3, p4] = pointsTable;
-                            newKnockoutMatches.push({ id: `m_semi1_${tournament.id}`, tournamentId: tournament.id, team1Id: p1.teamId, team2Id: p4.teamId, date: getNextKnockoutDate(lastMatchDate), oversPerInnings: tournament.defaultOvers || 20, status: 'scheduled', knockoutType: 'semifinal' });
-                            newKnockoutMatches.push({ id: `m_semi2_${tournament.id}`, tournamentId: tournament.id, team1Id: p2.teamId, team2Id: p3.teamId, date: getNextKnockoutDate(lastMatchDate), oversPerInnings: tournament.defaultOvers || 20, status: 'scheduled', knockoutType: 'semifinal' });
+                            newKnockoutMatches.push({ id: `m_semi1_${tournament.id}`, tournamentId: tournament.id, team1Id: p1.teamId, team2Id: p4.teamId, date: getNextKnockoutDate(lastMatchDate), oversPerInnings: tournament.defaultOvers || 20, status: 'scheduled' as const, knockoutType: 'semifinal' });
+                            newKnockoutMatches.push({ id: `m_semi2_${tournament.id}`, tournamentId: tournament.id, team1Id: p2.teamId, team2Id: p3.teamId, date: getNextKnockoutDate(lastMatchDate), oversPerInnings: tournament.defaultOvers || 20, status: 'scheduled' as const, knockoutType: 'semifinal' });
                             nextStage = 'semifinals';
                         }
                     }
@@ -360,7 +365,7 @@ export const useMatchState = (
                     const pointsTable = calculatePointsTable(tournamentTeams, groupStageMatches);
                     if (pointsTable.length >= 2) {
                         const [p1, p2] = pointsTable;
-                        newKnockoutMatches.push({ id: `m_final_${tournament.id}`, tournamentId: tournament.id, team1Id: p1.teamId, team2Id: p2.teamId, date: getNextKnockoutDate(lastMatchDate), oversPerInnings: tournament.defaultOvers || 20, status: 'scheduled', knockoutType: 'final' });
+                        newKnockoutMatches.push({ id: `m_final_${tournament.id}`, tournamentId: tournament.id, team1Id: p1.teamId, team2Id: p2.teamId, date: getNextKnockoutDate(lastMatchDate), oversPerInnings: tournament.defaultOvers || 20, status: 'scheduled' as const, knockoutType: 'final' });
                         nextStage = 'final';
                     }
                 }
@@ -373,7 +378,7 @@ export const useMatchState = (
                 const winners = semifinals.map(m => m.winnerId).filter((id): id is string => !!id && id !== 'draw');
                 if (winners.length === 2) {
                     const lastSemiDate = semifinals.reduce((latest, match) => (match.date > latest ? match.date : latest), '1970-01-01');
-                    newKnockoutMatches.push({ id: `m_final_${tournament.id}`, tournamentId: tournament.id, team1Id: winners[0], team2Id: winners[1], date: getNextKnockoutDate(lastSemiDate), oversPerInnings: tournament.defaultOvers || 20, status: 'scheduled', knockoutType: 'final' });
+                    newKnockoutMatches.push({ id: `m_final_${tournament.id}`, tournamentId: tournament.id, team1Id: winners[0], team2Id: winners[1], date: getNextKnockoutDate(lastSemiDate), oversPerInnings: tournament.defaultOvers || 20, status: 'scheduled' as const, knockoutType: 'final' });
                     nextStage = 'final';
                 }
             }
@@ -394,11 +399,11 @@ export const useMatchState = (
                     const nextMatchDate = getNextKnockoutDate(lastRoundMatchDate);
 
                     if (winners.length === 2) { 
-                        newKnockoutMatches.push({ id: `m_final_${tournament.id}`, tournamentId: tournament.id, team1Id: winners[0], team2Id: winners[1], date: nextMatchDate, oversPerInnings: tournament.defaultOvers || 20, status: 'scheduled', knockoutType: 'final' });
+                        newKnockoutMatches.push({ id: `m_final_${tournament.id}`, tournamentId: tournament.id, team1Id: winners[0], team2Id: winners[1], date: nextMatchDate, oversPerInnings: tournament.defaultOvers || 20, status: 'scheduled' as const, knockoutType: 'final' });
                         nextStage = 'final';
                     } else if (winners.length === 4) { 
-                        newKnockoutMatches.push({ id: `m_semi1_${tournament.id}`, tournamentId: tournament.id, team1Id: winners[0], team2Id: winners[1], date: nextMatchDate, oversPerInnings: tournament.defaultOvers || 20, status: 'scheduled', knockoutType: 'semifinal' });
-                        newKnockoutMatches.push({ id: `m_semi2_${tournament.id}`, tournamentId: tournament.id, team1Id: winners[2], team2Id: winners[3], date: nextMatchDate, oversPerInnings: tournament.defaultOvers || 20, status: 'scheduled', knockoutType: 'semifinal' });
+                        newKnockoutMatches.push({ id: `m_semi1_${tournament.id}`, tournamentId: tournament.id, team1Id: winners[0], team2Id: winners[1], date: nextMatchDate, oversPerInnings: tournament.defaultOvers || 20, status: 'scheduled' as const, knockoutType: 'semifinal' });
+                        newKnockoutMatches.push({ id: `m_semi2_${tournament.id}`, tournamentId: tournament.id, team1Id: winners[2], team2Id: winners[3], date: nextMatchDate, oversPerInnings: tournament.defaultOvers || 20, status: 'scheduled' as const, knockoutType: 'semifinal' });
                         nextStage = 'semifinals';
                     }
                 }
@@ -529,6 +534,27 @@ export const useMatchState = (
             updatedInnings.currentBatsmen = newOverride.batsmen;
             updatedInnings.currentBowler = newOverride.bowler;
             
+            if (bowlerId && m.maxOversPerBowler) {
+                const bowlerStats = updatedInnings.bowlerScores[bowlerId];
+                if (bowlerStats && Math.floor(bowlerStats.overs) >= m.maxOversPerBowler) {
+                    if (!updatedInnings.exceptions) updatedInnings.exceptions = [];
+                    // Check if we already logged this exception for this bowler to prevent spam
+                    const alreadyHasException = updatedInnings.exceptions.some(e => 
+                        (typeof e === 'object' && e.type === 'BOWLER_LIMIT_EXCEPTION' && e.bowlerId === bowlerId) ||
+                        (typeof e === 'string' && e.includes(`Bowler ${bowlerId}`))
+                    );
+                    
+                    if (!alreadyHasException) {
+                        updatedInnings.exceptions.push({
+                            type: 'BOWLER_LIMIT_EXCEPTION',
+                            bowlerId,
+                            limit: m.maxOversPerBowler,
+                            timestamp: Date.now()
+                        });
+                    }
+                }
+            }
+
             if ((!currentInnings.initialBatsmen || !currentInnings.initialBatsmen[0]) && onStrikeId) {
                 updatedInnings.initialBatsmen = [onStrikeId, nonStrikerId] as [string, string | null];
             }

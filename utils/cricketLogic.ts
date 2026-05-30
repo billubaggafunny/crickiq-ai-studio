@@ -1,4 +1,4 @@
-import type { Innings, Ball, Match, Team, PlayerCareerStats, Performance, PointsTableData } from '../types';
+import type { Innings, Ball, Match, Team, PlayerCareerStats, Performance, PointsTableData, BatsmanScore } from '../types';
 import { BattingStatus, WicketType } from '../types';
 
 export const calculateStrikeRate = (runs: number, balls: number): string => {

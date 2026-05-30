@@ -119,7 +119,7 @@ export const indexedDbAdapter: StorageAdapter = {
     clear: async (): Promise<void> => {
         // Clear should ONLY clear current owner's data, not everything!
         try {
-            await db.transaction('rw', db.matches, db.teams, db.tournaments, db.snapshots, db.metadata, async () => {
+            await db.transaction('rw', [db.matches, db.teams, db.tournaments, db.snapshots, db.metadata], async () => {
                 const matches = await db.matches.toArray();
                 const toDelMatches = matches.filter(m => isEntityOwnedByCurrent(m.ownerId)).map(m => m.id);
                 if (toDelMatches.length) await db.matches.bulkDelete(toDelMatches);

@@ -19,20 +19,22 @@ export const validateBackup = (json: unknown): { isValid: boolean; error?: strin
         return { isValid: false, error: 'Invalid file format. Must be a JSON object.' };
     }
 
+    const jsonObj = json as any;
+    
     // 1. Basic Structure Check
-    if (typeof json.version !== 'number') {
+    if (typeof jsonObj.version !== 'number') {
         return { isValid: false, error: 'Missing or invalid backup version.' };
     }
 
-    if (!json.exportedAt || typeof json.exportedAt !== 'string' || isNaN(Date.parse(json.exportedAt))) {
+    if (!jsonObj.exportedAt || typeof jsonObj.exportedAt !== 'string' || isNaN(Date.parse(jsonObj.exportedAt))) {
         return { isValid: false, error: 'Missing or invalid export timestamp.' };
     }
 
-    if (!json.data || typeof json.data !== 'object') {
+    if (!jsonObj.data || typeof jsonObj.data !== 'object') {
         return { isValid: false, error: 'Missing backup data content.' };
     }
 
-    const { tournaments, teams, matches } = json.data;
+    const { tournaments, teams, matches } = jsonObj.data;
 
     // 2. Data Integrity Checks (Arrays must exist)
     if (!Array.isArray(tournaments)) {

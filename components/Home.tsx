@@ -11,7 +11,7 @@ interface HomeProps {
 const Home: React.FC<HomeProps> = ({ onLogin, onGuest }) => {
     return (
         <div className="min-h-screen flex flex-col font-sans">
-            <Header title="Sign In" />
+            <Header />
             <div className="flex-1 flex flex-col justify-center items-center p-4 text-center">
                 <CrickIQCard className="max-w-md w-full">
                     <p className="text-base md:text-lg text-text-secondary mb-6 font-bold">Your Ultimate Cricket Scorer & Analyst</p>

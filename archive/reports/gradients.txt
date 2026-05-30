@@ -1,0 +1,87 @@
+components/MatchManager.tsx:        variant === 'secondary' ? 'bg-gradient-to-br from-white to-gray-200 text-gray-800 dark:from-gray-700 dark:to-gray-800 dark:text-text-primary hover:brightness-105 border border-border-color'
+components/MatchManager.tsx:        : 'bg-gradient-to-r from-accent to-theme-orange text-white'; // primary is default
+components/MatchManager.tsx:                <div className="-mx-4 p-4 bg-gradient-to-r from-premium-purple to-premium-blue shadow-lg sticky top-0 z-20 backdrop-blur-sm safe-pad-t space-y-3">
+components/MatchManager.tsx:                                        <button onClick={() => onViewMatchResult(match.id)} className="w-full px-4 py-3 text-base rounded-full font-bold bg-gradient-to-r from-teal-400 to-blue-500 text-white shadow-md transform hover:-translate-y-0.5 transition-transform">
+components/MatchManager.tsx:                                        <button onClick={() => onContinueMatch(match)} className="w-full px-4 py-3 text-base rounded-full font-bold bg-gradient-to-r from-green-500 to-green-600 text-white shadow-md transform hover:-translate-y-0.5 transition-transform">Continue Live Match</button>
+components/MatchManager.tsx:                                            <button disabled={isMatchLive || !arePlayerCountsEqual} onClick={() => onStartMatch(match)} className="w-full px-8 py-3 rounded-full font-bold text-lg bg-gradient-to-br from-green-400 via-cyan-400 to-blue-500 text-white shadow-lg disabled:opacity-50 transform hover:-translate-y-0.5 transition-transform" title={!arePlayerCountsEqual ? playerMismatchTitle : (isMatchLive ? 'Another match is live' : 'Start Match')}>{isMatchLive ? 'Match Live' : (arePlayerCountsEqual ? 'Start Match' : 'Unequal Players')}</button>
+components/MatchManager.tsx:                                        <button disabled={isMatchLive || !arePlayerCountsEqual} onClick={() => setTossMatch(match)} className="w-full px-4 py-3 text-base rounded-full font-bold bg-gradient-to-r from-premium-blue to-theme-blue text-white shadow-md disabled:opacity-50 transform hover:-translate-y-0.5 transition-transform" title={!arePlayerCountsEqual ? playerMismatchTitle : (isMatchLive ? 'Another match is live' : 'Set Toss')}>{isMatchLive ? 'Match Live' : (arePlayerCountsEqual ? 'Set Toss' : 'Unequal Players')}</button>
+components/TeamEditorModal.tsx:        variant === 'secondary' ? 'bg-gradient-to-br from-white to-gray-200 text-gray-800 dark:from-gray-700 dark:to-gray-800 dark:text-text-primary hover:brightness-105 border border-border-color'
+components/TeamEditorModal.tsx:        : 'bg-gradient-to-r from-accent to-theme-orange text-white';
+components/Statistics.tsx:                className={`w-full text-left group transition-all duration-300 relative overflow-hidden bg-gradient-to-br from-purple-600/10 to-indigo-800/5 dark:from-purple-600/20 dark:to-indigo-800/10 border border-purple-500/20 ${topScorer && topScorer.runsScored > 0 ? "cursor-pointer hover:shadow-xl hover:-translate-y-0.5" : ""}`}
+components/Statistics.tsx:                className={`w-full text-left group transition-all duration-300 relative overflow-hidden bg-gradient-to-br from-teal-500/10 to-cyan-700/5 dark:from-teal-500/20 dark:to-cyan-700/10 border border-teal-500/20 ${topBowler && topBowler.wicketsTaken > 0 ? "cursor-pointer hover:shadow-xl hover:-translate-y-0.5" : ""}`}
+components/Statistics.tsx:              <Card className="flex flex-col bg-gradient-to-b from-white/50 to-transparent dark:from-black/20 dark:to-transparent border border-border-color shadow-sm">
+components/Statistics.tsx:              <Card className="flex flex-col bg-gradient-to-b from-white/50 to-transparent dark:from-black/20 dark:to-transparent border border-border-color shadow-sm">
+components/Statistics.tsx:            <Card className="p-0 overflow-hidden shadow-md border-purple-500/10 bg-gradient-to-b from-purple-50/30 to-white dark:from-purple-900/10 dark:to-background">
+components/Statistics.tsx:              <div className="p-5 sm:p-7 pb-4 bg-gradient-to-r from-purple-600/5 to-transparent dark:from-purple-600/10 border-b border-border-color/50">
+components/Statistics.tsx:            <Card className="p-0 overflow-hidden shadow-md border-teal-500/10 bg-gradient-to-b from-teal-50/30 to-white dark:from-teal-900/10 dark:to-background">
+components/Statistics.tsx:              <div className="p-5 sm:p-7 pb-4 bg-gradient-to-r from-teal-600/5 to-transparent dark:from-teal-600/10 border-b border-border-color/50">
+components/QuickMatchSetup.tsx:        variant === 'secondary' ? 'bg-gradient-to-br from-white to-gray-200 text-gray-800 dark:from-gray-700 dark:to-gray-800 dark:text-text-primary hover:brightness-105 border border-border-color'
+components/QuickMatchSetup.tsx:        : 'bg-gradient-to-r from-accent to-theme-orange text-white';
+components/QuickMatchSetup.tsx:                ? 'bg-gradient-to-r from-premium-blue to-green-400 text-white'
+components/QuickMatchSetup.tsx:                : 'bg-gradient-to-br from-white to-gray-200 text-gray-800 dark:from-gray-700 dark:to-gray-800 dark:text-text-primary hover:brightness-105 border border-border-color'
+components/QuickMatchSetup.tsx:                                    className="mt-2 w-full sm:w-auto px-8 py-2.5 rounded-full font-bold text-lg bg-gradient-to-r from-theme-blue to-green-400 text-white shadow-lg"
+components/TossModal.tsx:                className="w-full max-w-xs rounded-2xl shadow-2xl p-5 space-y-5 bg-gradient-to-br from-secondary to-primary dark:from-gray-800 dark:to-gray-900 border border-border-color"
+components/TournamentManager.tsx:        variant === 'secondary' ? 'bg-gradient-to-br from-white to-gray-200 text-gray-800 dark:from-gray-700 dark:to-gray-800 dark:text-text-primary hover:brightness-105 border border-border-color'
+components/TournamentManager.tsx:        : 'bg-gradient-to-r from-accent to-theme-orange text-white';
+components/Comparison.tsx:    const baseClasses = 'px-4 py-2 rounded-full font-bold text-sm transition-all duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-md bg-gradient-to-r from-accent to-theme-orange text-white';
+components/Comparison.tsx:                                <p className="text-center text-text-secondary py-4">No past head-to-head matches found between these teams.</p>
+components/Comparison.tsx:                                            <p className="text-center text-sm text-text-secondary mb-4">Based on a weighted score in head-to-head matches.</p>
+components/Comparison.tsx:                                    : "No head-to-head matches found."}
+components/TournamentStats.tsx:            className="gap-4 border- border-border-color bg-gradient-to-br from-white/5 to-transparent hover:border-accent/40 transition-colors"
+components/Rankings.tsx:            <div className="absolute inset-0 bg-white/5 bg-gradient-to-b from-white/10 to-transparent"></div>
+components/Rankings.tsx:      <Card className="p-0 overflow-hidden bg-gradient-to-b from-white/5 to-transparent border border-border-color shadow-sm">
+components/Rankings.tsx:        headerThemeClass="bg-gradient-to-br from-purple-600 to-indigo-800"
+components/Rankings.tsx:        headerThemeClass="bg-gradient-to-br from-purple-600 to-indigo-800"
+components/ScheduleGenerator.tsx:        variant === 'secondary' ? 'bg-gradient-to-br from-white to-gray-200 text-gray-800 dark:from-gray-700 dark:to-gray-800 dark:text-text-primary hover:brightness-105 border border-border-color'
+components/ScheduleGenerator.tsx:        : 'bg-gradient-to-r from-accent to-theme-orange text-white';
+components/Home.tsx:                        className="w-full bg-gradient-to-r from-theme-purple to-theme-orange text-white font-bold py-2.5 px-4 rounded-full shadow-lg hover:opacity-90 transition-all duration-300 transform hover:scale-105"
+components/QuickMatchHistory.tsx:    'from-rose-400 via-fuchsia-500 to-indigo-500',
+components/QuickMatchHistory.tsx:    'from-emerald-400 to-cyan-400',
+components/QuickMatchHistory.tsx:    'from-amber-400 to-orange-500',
+components/QuickMatchHistory.tsx:    'from-sky-400 to-blue-500',
+components/QuickMatchHistory.tsx:    'from-violet-500 to-purple-500',
+components/QuickMatchHistory.tsx:    'from-lime-400 to-green-500',
+components/QuickMatchHistory.tsx:                            className={`flex flex-col p-0 overflow-hidden hover:shadow-xl transition-all duration-300 group bg-gradient-to-br text-white ${gradientClass}`}
+components/AnalyticsOverview.tsx:        <Card className="flex flex-col items-center justify-center text-center py-4 bg-gradient-to-br from-purple-600/10 to-indigo-800/5 dark:from-purple-600/20 dark:to-indigo-800/10 border border-purple-500/20">
+components/AnalyticsOverview.tsx:        <Card className="flex flex-col items-center justify-center text-center py-4 bg-gradient-to-br from-teal-500/10 to-cyan-700/5 dark:from-teal-500/20 dark:to-cyan-700/10 border border-teal-500/20">
+components/AnalyticsOverview.tsx:        <Card className="flex flex-col items-center justify-center text-center py-4 bg-gradient-to-br from-amber-500/10 to-orange-600/5 dark:from-amber-500/20 dark:to-orange-600/10 border border-amber-500/20">
+components/AnalyticsOverview.tsx:        <Card className="flex flex-col items-center justify-center text-center py-4 bg-gradient-to-br from-emerald-500/10 to-green-700/5 dark:from-emerald-500/20 dark:to-green-700/10 border border-emerald-500/20">
+components/AnalyticsOverview.tsx:        <Card className="animate-fade-in flex flex-col p-0 overflow-hidden bg-gradient-to-br from-amber-500/10 to-orange-600/5 dark:from-amber-500/20 dark:to-orange-600/10 border border-amber-500/20">
+components/AnalyticsOverview.tsx:          <div className="bg-gradient-to-r from-amber-500 to-orange-600 p-4 relative overflow-hidden text-white flex items-center gap-4">
+components/AnalyticsOverview.tsx:          className="animate-fade-in flex flex-col p-0 overflow-hidden bg-gradient-to-br from-purple-600/10 to-indigo-800/5 dark:from-purple-600/20 dark:to-indigo-800/10 border border-purple-500/20"
+components/AnalyticsOverview.tsx:          <div className="bg-gradient-to-r from-purple-600 to-indigo-800 p-4 relative overflow-hidden text-white flex items-center gap-4">
+components/AnalyticsOverview.tsx:          className="animate-fade-in p-0 overflow-hidden bg-gradient-to-br from-indigo-500/5 to-purple-600/5 dark:from-indigo-500/10 dark:to-purple-600/10 border border-indigo-500/20 flex flex-col h-full"
+components/AnalyticsOverview.tsx:          <Card className="flex justify-between items-center py-4 px-5 bg-gradient-to-br from-indigo-500/5 to-purple-500/5 dark:from-indigo-500/10 dark:to-purple-500/10 border border-indigo-500/20 shadow-sm relative overflow-hidden">
+components/AnalyticsOverview.tsx:          <Card className="flex justify-between items-center py-4 px-5 bg-gradient-to-br from-indigo-500/5 to-purple-500/5 dark:from-indigo-500/10 dark:to-purple-500/10 border border-indigo-500/20 shadow-sm relative overflow-hidden">
+components/AnalyticsOverview.tsx:          <Card className="flex justify-between items-center py-4 px-5 bg-gradient-to-br from-indigo-500/5 to-purple-500/5 dark:from-indigo-500/10 dark:to-purple-500/10 border border-indigo-500/20 shadow-sm relative overflow-hidden">
+components/TournamentList.tsx:        variant === 'secondary' ? 'bg-gradient-to-br from-white to-gray-200 text-gray-800 dark:from-gray-700 dark:to-gray-800 dark:text-text-primary hover:brightness-105 border border-border-color'
+components/TournamentList.tsx:        : 'bg-gradient-to-r from-accent to-theme-orange text-white';
+components/TournamentList.tsx:    'from-blue-500 via-cyan-500 to-teal-500',
+components/TournamentList.tsx:    'from-purple-600 via-indigo-600 to-violet-600',
+components/TournamentList.tsx:    'from-green-500 via-emerald-500 to-lime-600',
+components/TournamentList.tsx:    'from-orange-500 via-amber-500 to-yellow-500',
+components/TournamentList.tsx:    'from-red-500 via-rose-500 to-pink-500',
+components/TournamentList.tsx:    'from-sky-500 via-blue-500 to-indigo-500',
+components/TournamentList.tsx:                                <div className={`p-4 bg-gradient-to-r ${gradientClass} text-white relative`}>
+components/TournamentList.tsx:                                        <div className="p-3 text-center bg-gradient-to-r from-amber-400 to-yellow-500 text-black shadow-inner">
+components/WagonWheelModal.tsx:        // If content is scrolled, don't initiate drag-to-close
+components/LiveScoring.tsx:            <div className="-mx-4 p-4 bg-gradient-to-r from-purple-400 to-purple-600 shadow-lg flex items-center gap-4 sticky top-0 z-20 backdrop-blur-sm safe-pad-t">
+components/LiveScoring.tsx:                                                className="bg-gradient-to-r from-accent to-theme-orange text-white font-bold hover:opacity-90 disabled:bg-gray-500 disabled:cursor-not-allowed shadow-lg rounded-full flex items-center justify-center text-center p-2 text-2xl w-[7.35rem] h-[7.35rem] active:bg-red-600 active:from-red-600 active:to-red-700 active:scale-95 transform transition-all duration-150"
+components/MatchScorecard.tsx:            <header className="p-4 bg-gradient-to-r from-purple-500 to-blue-500 shadow-lg flex items-center justify-between shrink-0">
+components/MatchScorecard.tsx:                    <div className="p-4 rounded-2xl text-center shadow-lg relative overflow-hidden bg-gradient-to-br from-amber-200 via-yellow-300 to-amber-200 text-amber-900 dark:from-premium-purple dark:via-accent dark:to-theme-orange dark:text-white">
+components/MatchScorecard.tsx:                        className="px-4 py-2 rounded-full font-bold text-sm flex items-center justify-center gap-2 bg-gradient-to-br from-white to-gray-200 text-gray-800 dark:from-gray-700 dark:to-gray-800 dark:text-text-primary hover:brightness-105 border border-border-color"
+components/MatchScorecard.tsx:                        className="px-4 py-2 rounded-full font-bold text-sm flex items-center justify-center gap-2 bg-gradient-to-r from-accent to-theme-orange text-white"
+components/MatchScorecard.tsx:                        className="px-4 py-2 rounded-full font-bold text-sm flex items-center justify-center gap-2 bg-gradient-to-r from-accent to-theme-orange text-white"
+components/Drawer.tsx:                <div className="bg-gradient-to-r from-yellow-400 to-yellow-600 p-4 text-center">
+components/Drawer.tsx:                <div className="p-5 space-y-3 bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-900/20 dark:to-yellow-800/10">
+components/Drawer.tsx:                <div className="glass-card p-5 shadow-sm space-y-4 bg-gradient-to-br from-purple-900/5 to-purple-800/10">
+components/Drawer.tsx:                    <div className="w-24 h-24 bg-gradient-to-br from-green-400 to-green-600 rounded-3xl shadow-lg flex items-center justify-center mb-2">
+components/Drawer.tsx:                <div className="w-24 h-24 bg-gradient-to-br from-purple-400 to-purple-600 rounded-full flex items-center justify-center mb-2 shadow-lg text-white text-4xl font-extrabold pb-1">
+components/Drawer.tsx:                    <header className="p-4 bg-gradient-to-r from-purple-400 to-purple-600 shadow-md flex items-center gap-3">
+components/Drawer.tsx:                        <header className="p-4 bg-gradient-to-r from-purple-400 to-purple-600 shadow-md flex items-center gap-3">
+components/Drawer.tsx:                    <div className="p-4 border-b border-white/10 flex justify-between items-center bg-gradient-to-r from-purple-500 to-purple-700 shadow-md">
+components/Drawer.tsx:                                                ${item.highlight ? 'bg-gradient-to-r from-yellow-400/10 to-yellow-500/10 hover:from-yellow-400/20 hover:to-yellow-500/20 text-yellow-600 dark:text-yellow-400' : 
+components/ConfirmationModal.tsx:        : 'bg-gradient-to-r from-accent to-theme-orange text-white';
+components/ConfirmationModal.tsx:                className="w-full max-w-md p-6 rounded-2xl shadow-xl border border-white/20 bg-gradient-to-b from-purple-200 to-white dark:from-purple-900/60 dark:to-gray-900/60"
+components/SettingsModal.tsx:                                        Auto-saved before major changes.
+App.tsx:                        <header className="md:hidden p-4 bg-gradient-to-r from-purple-400 to-purple-600 shadow-lg flex items-center justify-between sticky top-0 z-20 backdrop-blur-sm safe-pad-t">

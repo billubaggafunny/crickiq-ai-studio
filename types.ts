@@ -5,6 +5,15 @@ import type { SyncStatus } from './utils/idGenerator';
 export type Theme = 'light' | 'dark' | 'system';
 export type FontSize = 'small' | 'medium' | 'standard';
 
+export interface BowlerLimitException {
+    type: "BOWLER_LIMIT_EXCEPTION";
+    bowlerId: string;
+    limit: number;
+    timestamp: number;
+}
+
+export type MatchException = BowlerLimitException;
+
 export enum PlayerRole {
     BATSMAN = 'Batsman',
     BOWLER = 'Bowler',
@@ -151,6 +160,7 @@ export interface Innings {
     initialBatsmen?: [Player['id'], Player['id'] | null];
     initialBowler?: Player['id'] | null;
     isFreeHit?: boolean;
+    exceptions?: (string | MatchException)[];
     manualOverrides?: {
         ballIndex: number;
         batsmen: [string, string | null];
@@ -171,6 +181,7 @@ export interface Match {
     date: string;
     time?: string;
     oversPerInnings: number;
+    maxOversPerBowler?: number;
     status: 'scheduled' | 'live' | 'completed';
     toss?: Toss;
     innings1?: Innings;

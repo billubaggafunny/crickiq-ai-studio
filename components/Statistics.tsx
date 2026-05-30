@@ -475,7 +475,7 @@ const Statistics: React.FC<StatisticsProps> = ({
               <Table >
                   <Thead>
                     <Tr className="border-b border-brand-blue/15/50 bg-black/5 dark:bg-white/5">
-                      <Th className="sm:px-6 font-bold tracking-wider" className="w-full">Player</Th>
+                      <Th className="w-full sm:px-6 font-bold tracking-wider">Player</Th>
                       <Th className="text-right font-bold tracking-wider">
                         Runs
                       </Th>
@@ -595,7 +595,7 @@ const Statistics: React.FC<StatisticsProps> = ({
               <Table >
                   <Thead>
                     <Tr className="border-b border-brand-blue/15/50 bg-black/5 dark:bg-white/5">
-                      <Th className="sm:px-6 font-bold tracking-wider" className="w-full">Player</Th>
+                      <Th className="w-full sm:px-6 font-bold tracking-wider">Player</Th>
                       <Th className="text-right font-bold tracking-wider">
                         Wickets
                       </Th>

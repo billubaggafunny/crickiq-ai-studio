@@ -36,7 +36,7 @@ const ScheduleGenerator: React.FC<UseCrickIQStateReturn> = (props) => {
     const tournamentOptions = useMemo(() => tournaments.filter(t => t.id !== 't_quick_matches' && t.teamIds.length > 1), [tournaments]);
     const selectedTournament = useMemo(() => tournaments.find(t => t.id === selectedTournamentId), [tournaments, selectedTournamentId]);
 
-    const prevTournamentIdRef = useRef<string>();
+    const prevTournamentIdRef = useRef<string | undefined>(undefined);
     useEffect(() => {
         if (selectedTournamentId !== prevTournamentIdRef.current) {
             prevTournamentIdRef.current = selectedTournamentId;
@@ -340,7 +340,7 @@ const ScheduleGenerator: React.FC<UseCrickIQStateReturn> = (props) => {
                     <h3 className="text-h3 text-text-primary mb-4">3. Fixtures Preview</h3>
                     <div className="space-y-4 max-h-96 overflow-y-auto no-scrollbar pr-2">
                         {renderedSchedule && 'error' in renderedSchedule ? (
-                            <p className="text-highlight text-body text-center p-2 bg-highlight/10 rounded-md">{renderedSchedule.error}</p>
+                            <p className="text-highlight text-body text-center p-2 bg-highlight/10 rounded-md">{renderedSchedule.error as string}</p>
                         ) : renderedSchedule ? (
                             Object.entries(renderedSchedule).map(([date, matches]) => (
                                 <div key={date}>

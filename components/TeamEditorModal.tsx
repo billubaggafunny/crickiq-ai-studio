@@ -2,6 +2,7 @@ import { Table, Thead, Tbody, Tr, Th, Td } from './CrickIQTable';
 import React, { useState, useMemo } from 'react';
 import type { Team, Player } from '../types';
 import { PlayerRole } from '../types';
+import { validatePlayer } from '../utils/validation';
 import { PLAYER_ROLES, PlusIcon, TrashIcon, getRoleEmoji, getShortRoleName } from '../constants';
 import type { UseCrickIQStateReturn } from '../hooks/useCrickIQState';
 import ConfirmationModal from './ConfirmationModal';
@@ -109,23 +110,10 @@ export const TeamEditorModal: React.FC<TeamEditorModalProps> = (props) => {
         if (isTeamFull) return;
         
         setIsSubmittingPlayer(true);
-        const newErrors = { number: null, name: null, role: null };
-        const num = Number(newPlayerNumber);
-        const trimmedName = newPlayerName.trim();
-
-        if (!trimmedName) newErrors.name = "Name required.";
-        else if (trimmedName.length > 30) newErrors.name = "Name too long.";
-        else if (editedTeam.players.some(p => p.name.trim().toLowerCase() === trimmedName.toLowerCase())) newErrors.name = "Name taken.";
+        const validation = validatePlayer(newPlayerName, newPlayerNumber, newPlayerRole, editedTeam.players);
+        setPlayerFormErrors(validation.errors);
         
-        if (newPlayerNumber === '') newErrors.number = "Number required.";
-        else if (!Number.isInteger(num) || num <= 0) newErrors.number = "Positive # required.";
-        else if (editedTeam.players.some(p => p.number === num)) newErrors.number = "# taken.";
-        
-        if (!newPlayerRole) newErrors.role = "Role required.";
-
-        setPlayerFormErrors(newErrors);
-
-        if (Object.values(newErrors).some(Boolean)) {
+        if (!validation.valid) {
             showNotification('Please fix errors to add player', 'error');
             setTimeout(() => setIsSubmittingPlayer(false), 200);
             return;
@@ -133,8 +121,8 @@ export const TeamEditorModal: React.FC<TeamEditorModalProps> = (props) => {
 
         const newPlayer: Player = {
             id: `p_${Date.now()}`,
-            number: num,
-            name: trimmedName,
+            number: Number(newPlayerNumber),
+            name: newPlayerName.trim(),
             role: newPlayerRole as PlayerRole,
         };
         setEditedTeam(prev => ({ ...prev, players: [...prev.players, newPlayer] }));

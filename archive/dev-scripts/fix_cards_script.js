@@ -28,6 +28,12 @@ walkDir('./components', function(filePath) {
     content = content.replace(cardDefRegex4, '');
     content = content.replace(/const Card: React\.FC<\s*\{\s*children: React\.ReactNode;\s*className\?: string;\s*\}\s*&\s*React\.HTMLAttributes<HTMLDivElement>\s*> = \(\{ children, className, \.\.\.rest \}\) => \(\s*<div \{\.\.\.rest\} className=\{`glass-card[^`]*`\}>\{children\}<\/div>\s*\);\n/g, '');
 
+    // Sometimes the card uses string concatenation or rest spreading that breaks the simple regexes. So we just remove block that matches:
+    // const Card: React.FC<{ children: React.ReactNode; className?: string } & React.HTMLAttributes<HTMLDivElement>> = ({ children, className, ...rest }) => (
+    //     <div {...rest} className={`glass-card px-6 py-4 ${className}`}>{children}</div>
+    // );
+    content = content.replace(/const Card:\s*React\.FC<[^>]+>\s*=\s*\([^\)]+\)\s*=>\s*\([^;]+;\n/g, '');
+
     // Add import for CrickIQCard if not present and if Card (now CrickIQCard) was used
     if (original.match(/<Card\b/) && content !== original) {
         if (!content.includes("import CrickIQCard")) {

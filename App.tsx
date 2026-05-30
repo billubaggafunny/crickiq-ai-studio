@@ -14,6 +14,7 @@ import MatchScorecard from './components/MatchScorecard';
 import ConfirmationModal from './components/ConfirmationModal';
 import TransitionLockOverlay from './components/TransitionLockOverlay';
 import Drawer from './components/Drawer';
+import ErrorBoundary from './components/ErrorBoundary';
 import Header from './components/Header';
 import AnalyticsWorkspace from './components/AnalyticsWorkspace';
 
@@ -342,8 +343,8 @@ const AppUI: React.FC = () => {
         }
     }
 
-    const handleAddQuickMatch = (team1Data: string | Team, team2Data: string | Team, overs: number, numberOfPlayers: number) => {
-        const { matchId } = tournamentState.addQuickMatch(team1Data, team2Data, overs, numberOfPlayers);
+    const handleAddQuickMatch = (team1Data: string | Team, team2Data: string | Team, overs: number, numberOfPlayers: number, maxOversPerBowler?: number) => {
+        const { matchId } = tournamentState.addQuickMatch(team1Data, team2Data, overs, numberOfPlayers, maxOversPerBowler);
         setIsQuickMatchMode(true);
         setQuickMatchSetupId(matchId);
         setActiveTab('tournament');
@@ -483,15 +484,17 @@ const AppUI: React.FC = () => {
 
     if (scorecardMatchToView && tournamentForScorecard) {
         return (
-            <div className="theme-blue">
-                <MatchScorecard
-                    match={scorecardMatchToView}
-                    tournament={tournamentForScorecard}
-                    onClose={handleCloseScorecard}
-                    teams={tournamentState.teams}
-                    setManOfTheMatch={tournamentState.setManOfTheMatch}
-                    onUndo={isJustFinished ? tournamentState.undoLastBall : undefined}
-                />
+            <div className="theme-blue h-screen w-full">
+                <ErrorBoundary componentName="Match Scorecard" onReset={handleCloseScorecard}>
+                    <MatchScorecard
+                        match={scorecardMatchToView}
+                        tournament={tournamentForScorecard}
+                        onClose={handleCloseScorecard}
+                        teams={tournamentState.teams}
+                        setManOfTheMatch={tournamentState.setManOfTheMatch}
+                        onUndo={isJustFinished ? tournamentState.undoLastBall : undefined}
+                    />
+                </ErrorBoundary>
             </div>
         );
     }
@@ -521,7 +524,9 @@ const AppUI: React.FC = () => {
     const renderContent = () => {
         switch (activeTab) {
             case 'matches':
-                return <MatchManager 
+                return (
+                    <ErrorBoundary componentName="Tournaments & Matches" onReset={() => { setActiveTab('tournament'); setSelectedTournamentId(null); }}>
+                        <MatchManager 
                             key={selectedTournamentId || 'all'}
                             {...tournamentState} 
                             onStartMatch={handleStartMatch} 
@@ -531,19 +536,31 @@ const AppUI: React.FC = () => {
                             onBack={handleBackToTournaments}
                             onViewTournament={handleViewTournament}
                             onViewMatchResult={handleViewScorecard}
-                        />;
+                        />
+                    </ErrorBoundary>
+                );
             case 'analytics':
-                return <AnalyticsWorkspace {...tournamentState} />;
+                return (
+                    <ErrorBoundary componentName="Analytics" onReset={() => setActiveTab('tournament')}>
+                        <AnalyticsWorkspace {...tournamentState} />
+                    </ErrorBoundary>
+                );
             case 'live': {
                 const currentMatch = tournamentState.matches.find(m => m.id === selectedMatch?.id);
                 if (currentMatch && (currentMatch.status === 'live' || currentMatch.status === 'completed')) {
-                    return <LiveScoring match={currentMatch} onEndMatch={handleEndMatch} onStartDrinksBreak={handleStartDrinksBreak} onBack={handleBackFromLive} {...tournamentState} />;
+                    return (
+                        <ErrorBoundary componentName="Live Scoring" onReset={() => setActiveTab('tournament')}>
+                            <LiveScoring match={currentMatch} onEndMatch={handleEndMatch} onStartDrinksBreak={handleStartDrinksBreak} onBack={handleBackFromLive} {...tournamentState} />
+                        </ErrorBoundary>
+                    );
                 }
                 return <div className="p-4">Loading match...</div>;
             }
             default: // falls through
             case 'tournament':
-                return <TournamentManager
+                return (
+                    <ErrorBoundary componentName="Home / Setup">
+                        <TournamentManager
                             {...tournamentState}
                             isMatchLive={isMatchActuallyLive}
                             liveQuickMatch={liveQuickMatch}
@@ -558,7 +575,9 @@ const AppUI: React.FC = () => {
                              onTournamentCreated={handleTournamentCreated}
                              onRematch={handleRematch}
                              startRematchWithToss={startRematchWithToss}
-                        />;
+                        />
+                    </ErrorBoundary>
+                );
         }
     };
     

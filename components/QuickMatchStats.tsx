@@ -175,7 +175,7 @@ const QuickMatchStats: React.FC<UseCrickIQStateReturn> = ({ matches, teams }) =>
                 <Table >
                         <Thead>
                            <Tr className="border-b border-brand-blue/15">
-                                <Th className="w-full" className="w-full">Player</Th>
+                                <Th className="w-full">Player</Th>
                                 <Th className="text-right">Runs</Th>
                                 <Th className="text-right">HS</Th>
                                 <Th className="text-right">Avg</Th>
@@ -212,7 +212,7 @@ const QuickMatchStats: React.FC<UseCrickIQStateReturn> = ({ matches, teams }) =>
                 <Table >
                         <Thead>
                             <Tr className="border-b border-brand-blue/15">
-                                <Th className="w-full" className="w-full">Player</Th>
+                                <Th className="w-full">Player</Th>
                                 <Th className="text-right">Wickets</Th>
                                 <Th className="text-right">Econ</Th>
                                 <Th className="text-right">Avg</Th>

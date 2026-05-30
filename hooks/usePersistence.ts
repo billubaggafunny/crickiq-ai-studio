@@ -5,6 +5,7 @@ import { migrateEntityMetadata } from '../utils/idGenerator';
 import { initialTournaments, initialTeams, initialMatches } from '../utils/initialData';
 import { AppState, serializeState } from '../utils/stateSerializer';
 import { validateHydrationState } from '../utils/hydrationValidator';
+import { migrateState } from '../utils/migrations';
 import { enforceSessionOwner } from '../utils/authValidator';
 import { indexedDbAdapter } from '../storage/indexedDbAdapter';
 import { db } from '../storage/indexedDb';
@@ -28,7 +29,7 @@ export const usePersistence = () => {
             
             // Isolate persistence by only loading entities owned by current context.
             // Legacy entities (undefined owner) remain safely visible based on rules.
-            const filterValidOwner = (item: Record<string, unknown>) => {
+            const filterValidOwner = (item: any) => {
                  if (item && item.ownerId !== undefined) {
                       if (typeof item.ownerId !== 'string' || (item.ownerId as string).trim() === '') {
                            console.warn('[AuthValidation] Invalid ownerId rejected.');
@@ -53,7 +54,8 @@ export const usePersistence = () => {
             };
             
             const safeState = validateHydrationState(rawHydratedState);
-            return safeState;
+            const fullyMigratedState = migrateState(safeState);
+            return fullyMigratedState;
         } catch (e) {
             console.error('[PersistenceValidation] Fatal hydration error, pausing persistence to protect data.', e);
             authLifecycleManager.pausePersistenceObservers();
@@ -88,7 +90,7 @@ export const usePersistence = () => {
                 // Lightweight fallback: only active matches to prevent QuotaExceededError and Android WebView freezes
                 const lightweightState: AppState = {
                     ...state,
-                    matches: state.matches.filter(m => m.status === 'in-progress'),
+                    matches: state.matches.filter(m => m.status === 'live'),
                 };
                 const envelope = serializeState(lightweightState);
                 localStorage.setItem(STORAGE_KEY, envelope);
@@ -130,7 +132,7 @@ export const usePersistence = () => {
                 // Lightweight fallback to avoid QuotaExceededError
                 const lightweightState: AppState = {
                     ...state,
-                    matches: state.matches.filter(m => m.status === 'in-progress'),
+                    matches: state.matches.filter(m => m.status === 'live'),
                 };
                 const currentState = { ...lightweightState, timestamp: new Date().toISOString(), ownerId };
                 const existingStr = localStorage.getItem(SNAPSHOT_KEY);
@@ -156,8 +158,9 @@ export const usePersistence = () => {
 
     const restoreBackup = useCallback(async (newData: AppState) => {
         const validatedData = validateHydrationState(newData);
+        const migratedData = migrateState(validatedData);
         
-        const filterValidOwner = (item: Record<string, unknown>) => {
+        const filterValidOwner = (item: any) => {
              if (item && item.ownerId !== undefined) {
                   if (typeof item.ownerId !== 'string' || (item.ownerId as string).trim() === '') {
                        console.warn('[AuthValidation] Invalid ownerId rejected in restore.');
@@ -172,9 +175,9 @@ export const usePersistence = () => {
         };
 
         const safeImport: AppState = {
-             tournaments: validatedData.tournaments.filter(t => filterValidOwner(t as unknown as Record<string, unknown>)),
-             teams: validatedData.teams.filter(t => filterValidOwner(t as unknown as Record<string, unknown>)),
-             matches: validatedData.matches.filter(m => filterValidOwner(m as unknown as Record<string, unknown>))
+             tournaments: migratedData.tournaments.filter(t => filterValidOwner(t)),
+             teams: migratedData.teams.filter(t => filterValidOwner(t)),
+             matches: migratedData.matches.filter(m => filterValidOwner(m))
         };
         
         const clonedData = structuredClone(safeImport);
@@ -184,7 +187,7 @@ export const usePersistence = () => {
     const emergencySaveActiveMatch = useCallback((state: AppState) => {
         if (authLifecycleManager.isPersistencePaused()) return;
         try {
-            const activeMatches = state.matches.filter(m => m.status === 'in-progress').map(m => enforceSessionOwner(m));
+            const activeMatches = state.matches.filter(m => m.status === 'live').map(m => enforceSessionOwner(m));
             if (activeMatches.length > 0) {
                 // By-pass the adapter and directly hit IDB for maximum speed
                 // Fire and forget, we do not await it

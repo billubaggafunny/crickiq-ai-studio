@@ -2,7 +2,7 @@ import React from 'react';
 import { SettingsIcon, LogoutIcon } from '../constants';
 
 export interface HeaderProps {
-    title: string;
+    title?: string;
     showMenu?: boolean;
     onMenuClick?: () => void;
     showSettings?: boolean;
@@ -70,11 +70,13 @@ const Header: React.FC<HeaderProps> = ({
             </div>
 
             {/* Middle: Screen Title */}
-            <div className="flex-1 flex justify-center px-2 truncate min-w-0">
-                <h1 className="text-h1 text-white truncate text-center leading-none">
-                    {title}
-                </h1>
-            </div>
+            {title ? (
+                <div className="flex-1 flex justify-center px-2 truncate min-w-0">
+                    <h1 className="text-h1 text-white truncate text-center leading-none">
+                        {title}
+                    </h1>
+                </div>
+            ) : <div className="flex-1 px-2"></div>}
 
             {/* Right: Actions */}
             <div className="flex items-center justify-end min-w-[100px] gap-1 shrink-0">

@@ -50,7 +50,7 @@ const AnalyticsOverview: React.FC<AnalyticsOverviewProps> = (props) => {
     const recentMatch =
       completedMatches.length > 0
         ? [...completedMatches].sort(
-            (a, b) => (b?.startTime || 0) - (a?.startTime || 0),
+            (a, b) => new Date(b?.date || 0).getTime() - new Date(a?.date || 0).getTime(),
           )[0]
         : null;
 

@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import type React from 'react';
 import type { Tournament, Match, ScheduleRound } from '../types';
 import { generateEntityId, createTimestamp, createSyncMetadata } from '../utils/idGenerator';
 

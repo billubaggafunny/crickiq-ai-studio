@@ -5,7 +5,7 @@ import {
   calculatePlayerCareerStats,
   calculatePointsTable,
 } from "../utils/cricketLogic";
-import type { Match, PlayerCareerStats, PointsTableData } from "../types";
+import type { Match, PlayerCareerStats, PointsTableData, Team } from "../types";
 
 // Helpers for visual enhancement
 // Trend system was removed as per analytics identity clarification
@@ -429,7 +429,7 @@ const Rankings: React.FC<RankingsProps> = ({ teams, matches }) => {
   );
 
   // 2. Calculate Top Players Data
-  const playerStats = useMemo(() => {
+  const playerStats = useMemo<Array<PlayerCareerStats & { name: string, teamName: string, teamId: string, logo?: string, id: string }>>(() => {
     if (completedMatches.length === 0) return [];
 
     const allPlayers = safeTeams.flatMap((t) =>
@@ -452,17 +452,17 @@ const Rankings: React.FC<RankingsProps> = ({ teams, matches }) => {
       .filter((p) => p.matches > 0);
   }, [completedMatches, safeTeams]);
 
-  const topBatsmen = useMemo(
+  const topBatsmen = useMemo<Array<PlayerCareerStats & { name: string, teamName: string, teamId: string, logo?: string, id: string }>>(
     () => [...playerStats].sort((a, b) => b.runsScored - a.runsScored),
     [playerStats],
   );
-  const topBowlers = useMemo(
+  const topBowlers = useMemo<Array<PlayerCareerStats & { name: string, teamName: string, teamId: string, logo?: string, id: string }>>(
     () => [...playerStats].sort((a, b) => b.wicketsTaken - a.wicketsTaken),
     [playerStats],
   );
 
   // 3. Calculate Top Teams Data
-  const teamStats = useMemo(() => {
+  const teamStats = useMemo<PointsTableData[]>(() => {
     if (completedMatches.length === 0) return [];
 
     // Calculate point table across all tournament matches
@@ -483,7 +483,7 @@ const Rankings: React.FC<RankingsProps> = ({ teams, matches }) => {
   }, [completedMatches, safeTeams]);
 
   // 4. Calculate Recent Form Data
-  const playerForm = useMemo(() => {
+  const playerForm = useMemo<Array<PlayerCareerStats & { name: string, teamName: string, teamId: string, logo?: string, id: string }>>(() => {
     if (completedMatches.length === 0) return [];
 
     // Just take the top performers by runs + wickets across the board to represent "Hot Form"
@@ -964,10 +964,7 @@ const Rankings: React.FC<RankingsProps> = ({ teams, matches }) => {
                     Net Run Rate
                   </p>
                   <p className="text-2xl text-brand-blue mt-1.5">
-                    {typeof selectedTeam.nrr === "number" &&
-                    Number.isFinite(selectedTeam.nrr)
-                      ? selectedTeam.nrr.toFixed(2)
-                      : "0.00"}
+                    {selectedTeam.nrr ? Number(selectedTeam.nrr).toFixed(2) : "0.00"}
                   </p>
                 </div>
               </div>

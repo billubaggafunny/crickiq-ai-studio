@@ -22,6 +22,7 @@ interface QuickMatchSetupProps extends UseCrickIQStateReturn {
     match: Match;
     onStartMatch: (match: Match) => void;
     startWithToss?: boolean;
+    onCancel?: () => void;
 }
 
 const TeamPanel: React.FC<{ team: Team, isReady: boolean, onManage: () => void }> = ({ team, isReady, onManage }) => (

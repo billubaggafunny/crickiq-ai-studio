@@ -9,6 +9,7 @@ import { useNotification } from '../hooks/useNotification';
 import QuickMatchHistory from './QuickMatchHistory';
 import Comparison from './Comparison';
 import { Plus, Minus } from 'lucide-react';
+import { validateQuickMatch } from '../utils/validation';
 
 
 const Button: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'primary' | 'secondary' | 'blue' }> = ({ children, className = '', variant = 'primary', ...props }) => {
@@ -57,7 +58,7 @@ interface TournamentManagerProps extends UseCrickIQStateReturn {
     isMatchLive: boolean;
     liveQuickMatch: Match | undefined;
     liveTournamentMatch: Match | undefined;
-    onAddQuickMatch: (team1Data: string | Team, team2Data: string | Team, overs: number, numberOfPlayers: number) => void;
+    onAddQuickMatch: (team1Data: string | Team, team2Data: string | Team, overs: number, numberOfPlayers: number, maxOversPerBowler?: number) => void;
     onContinueMatch: (match: Match) => void;
     onAbandonMatch: (matchId: string) => void;
     quickMatchSetupId: string | null;
@@ -89,6 +90,7 @@ const TournamentManager: React.FC<TournamentManagerProps> = (props) => {
     const [quickTeam1, setQuickTeam1] = useState('');
     const [quickTeam2, setQuickTeam2] = useState('');
     const [quickOvers, setQuickOvers] = useState<number | ''>(5);
+    const [quickMaxOvers, setQuickMaxOvers] = useState<number | ''>(2);
     const [quickPlayers, setQuickPlayers] = useState<number | ''>(8);
     const [confirmation, setConfirmation] = useState<{ title: string; message: string; onConfirm: () => void; } | null>(null);
     const { showNotification } = useNotification();
@@ -216,43 +218,33 @@ const TournamentManager: React.FC<TournamentManagerProps> = (props) => {
     const handleAddQuickMatch = () => {
         if (isSubmittingQuickMatch) return;
 
+        const validation = validateQuickMatch(
+            quickTeam1,
+            quickTeam2,
+            quickOvers,
+            quickPlayers,
+            quickMaxOvers
+        );
+        
+        if (!validation.valid) {
+            showNotification(validation.message || 'Invalid input.', 'error');
+            return;
+        }
+        
         const overs = Number(quickOvers);
         const players = Number(quickPlayers);
-        
-        if (!quickTeam1.trim() || !quickTeam2.trim()) {
-            showNotification('Team names are required.', 'error');
-            return;
-        }
-
-        if (quickTeam1.trim().length > 30 || quickTeam2.trim().length > 30) {
-            showNotification('Team names cannot exceed 30 characters.', 'error');
-            return;
-        }
-
-        if (!Number.isInteger(overs) || overs <= 0 || overs > 100) {
-            showNotification('Overs must be a valid number between 1 and 100.', 'error');
-            return;
-        }
-
-        if (!Number.isInteger(players) || players < 2 || players > 11) {
-            showNotification('Players per team must be between 2 and 11.', 'error');
-            return;
-        }
-
-        if (quickTeam1.trim().toLowerCase() === quickTeam2.trim().toLowerCase()) {
-            showNotification('Team names cannot be the same.', 'error');
-            return;
-        }
 
         setIsSubmittingQuickMatch(true);
 
         const team1Data = selectedTeam1 && selectedTeam1.name === quickTeam1.trim() ? selectedTeam1 : quickTeam1.trim();
         const team2Data = selectedTeam2 && selectedTeam2.name === quickTeam2.trim() ? selectedTeam2 : quickTeam2.trim();
 
-        onAddQuickMatch(team1Data, team2Data, overs, players);
+        const maxOvers = quickMaxOvers ? Number(quickMaxOvers) : undefined;
+        onAddQuickMatch(team1Data, team2Data, overs, players, maxOvers);
         setQuickTeam1('');
         setQuickTeam2('');
         setQuickOvers(5);
+        setQuickMaxOvers(2);
         setQuickPlayers(8);
         setSelectedTeam1(null);
         setSelectedTeam2(null);
@@ -447,8 +439,9 @@ const TournamentManager: React.FC<TournamentManagerProps> = (props) => {
                                                     </div>
                                                 )}
                                             </div>
-                                            <div className="grid grid-cols-2 gap-4">
+                                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                                 <input type="number" value={quickOvers} onChange={e => setQuickOvers(e.target.value === '' ? '' : parseInt(e.target.value, 10))} placeholder="Overs" className="w-full p-2 bg-white text-black border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" />
+                                                <input type="number" value={quickMaxOvers} onChange={e => setQuickMaxOvers(e.target.value === '' ? '' : parseInt(e.target.value, 10))} placeholder="Max Overs/Bowler" className="w-full p-2 bg-white text-black border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" />
                                                 <input type="number" value={quickPlayers} onChange={handleQuickPlayersChange} placeholder="Players" className="w-full p-2 bg-white text-black border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue disabled:bg-primary/30 disabled:cursor-not-allowed" disabled={isPlayersInputDisabled} title={isPlayersInputDisabled ? 'Player count is determined by the selected historical team.' : ''} />
                                             </div>
                                             <Button

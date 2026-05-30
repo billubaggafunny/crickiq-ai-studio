@@ -4,10 +4,12 @@ import ReactDOMServer from 'react-dom/server';
 import type { UseCrickIQStateReturn } from '../hooks/useCrickIQState';
 import type { Match, TossDecision, Team, Tournament, Player } from '../types';
 import { PlayerRole } from '../types';
-import { PlusIcon, TrophyIcon, ClockIcon, TrashIcon, EditIcon, ShareIcon, UserGroupIcon, BallIcon, CalendarIcon, CheckIcon } from '../constants';
+import { PlusIcon, TrophyIcon, ClockIcon, TrashIcon, EditIcon, UserGroupIcon, BallIcon, CalendarIcon, CheckIcon } from '../constants';
 import ConfirmationModal from './ConfirmationModal';
-import TimeScroller from './TimeScroller';
-import Calendar from './Calendar';
+import MatchCreationForm from './MatchCreationForm';
+import MatchTable from './MatchTable';
+import MatchFilters from './MatchFilters';
+import { EditMatchModal } from './MatchModals';
 import MatchShareCard from './MatchShareCard';
 import { useNotification } from '../hooks/useNotification';
 import { TeamEditorModal } from './TeamEditorModal';
@@ -16,6 +18,7 @@ import Statistics from './Statistics';
 import LineupPreview from './LineupPreview';
 import ScheduleGenerator from './ScheduleGenerator';
 import { calculatePlayerCareerStats } from '../utils/cricketLogic';
+import { validateTournamentMatch, validateMaxOversPerBowler } from '../utils/validation';
 import TossModal from './TossModal';
 import PointsTable from './PointsTable';
 
@@ -158,6 +161,7 @@ const MatchManager: React.FC<MatchManagerProps> = (props) => {
     const [matchDate, setMatchDate] = useState('');
     const [matchTime, setMatchTime] = useState('10:00');
     const [matchOvers, setMatchOvers] = useState<number | ''>(20);
+    const [matchMaxOvers, setMatchMaxOvers] = useState<number | ''>(4);
     const [isOversEditable, setIsOversEditable] = useState(false);
     const [scheduleError, setScheduleError] = useState<string | null>(null);
     
@@ -172,6 +176,7 @@ const MatchManager: React.FC<MatchManagerProps> = (props) => {
         date: '',
         time: '',
         oversPerInnings: '' as number | '',
+        maxOversPerBowler: '' as number | '',
     });
     const [editError, setEditError] = useState<string | null>(null);
 
@@ -211,10 +216,6 @@ const MatchManager: React.FC<MatchManagerProps> = (props) => {
         return getPlayerStatsMap(previewingTeam);
     }, [previewingTeam, getPlayerStatsMap]);
 
-    const handleTeamReady = (teamId: string) => {
-        setReadyTeams(prev => new Set(prev).add(teamId));
-    };
-
     const scheduledMatches = useMemo(() => {
         return tournamentMatches.filter(m => (m.status === 'scheduled' || m.status === 'live') && !m.knockoutType);
     }, [tournamentMatches]);
@@ -230,6 +231,24 @@ const MatchManager: React.FC<MatchManagerProps> = (props) => {
     const completedMatches = useMemo(() => {
         return tournamentMatches.filter(m => m.status === 'completed');
     }, [tournamentMatches]);
+    useEffect(() => {
+        const val = validateMaxOversPerBowler(matchMaxOvers, matchOvers);
+        if (!val.valid) {
+            setScheduleError(val.message || null);
+        } else {
+            setScheduleError(prev => prev && prev.includes('Maximum Overs') ? null : prev);
+        }
+    }, [matchOvers, matchMaxOvers]);
+
+    useEffect(() => {
+        const val = validateMaxOversPerBowler(editFormData.maxOversPerBowler === '' ? undefined : editFormData.maxOversPerBowler, editFormData.oversPerInnings);
+        if (!val.valid) {
+            setEditError(val.message || null);
+        } else {
+            setEditError(prev => prev && prev.includes('Maximum Overs') ? null : prev);
+        }
+    }, [editFormData.oversPerInnings, editFormData.maxOversPerBowler]);
+
 
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
@@ -252,6 +271,7 @@ const MatchManager: React.FC<MatchManagerProps> = (props) => {
                     date: editingMatch.date,
                     time: editingMatch.time || '10:00',
                     oversPerInnings: editingMatch.oversPerInnings,
+                    maxOversPerBowler: editingMatch.maxOversPerBowler || '',
                 });
                 setEditError(null);
             }, 0);
@@ -338,23 +358,24 @@ const MatchManager: React.FC<MatchManagerProps> = (props) => {
         return teamsForEditingMatch.filter(t => t.id !== editFormData.team1Id);
     }, [teamsForEditingMatch, editFormData.team1Id]);
     
-    const isScheduleFormValid = useMemo(() => {
+    const scheduleValidation = useMemo(() => {
         const tournamentId = selectedTournamentId || selectedTournamentForForm;
-        const overs = Number(matchOvers);
+        return validateTournamentMatch(tournamentId, team1Id, team2Id, matchDate, matchTime, matchOvers, matchMaxOvers);
+    }, [selectedTournamentId, selectedTournamentForForm, team1Id, team2Id, matchDate, matchTime, matchOvers, matchMaxOvers]);
+    const isScheduleFormValid = scheduleValidation.valid;
 
-        if (!matchDate) return false;
-
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const selected = new Date(matchDate.replace(/-/g, '/'));
-
-        return tournamentId && team1Id && team2Id && matchTime && Number.isInteger(overs) && overs > 0 && overs <= 100 && team1Id !== team2Id && selected.getTime() >= today.getTime();
-    }, [selectedTournamentId, selectedTournamentForForm, team1Id, team2Id, matchDate, matchTime, matchOvers]);
-
-    const isEditFormValid = useMemo(() => {
-        const overs = Number(editFormData.oversPerInnings);
-        return editFormData.team1Id && editFormData.team2Id && editFormData.date && editFormData.time && Number.isInteger(overs) && overs > 0 && overs <= 100 && editFormData.team1Id !== editFormData.team2Id;
+    const editValidation = useMemo(() => {
+        return validateTournamentMatch(
+            'valid-tournament', 
+            editFormData.team1Id, 
+            editFormData.team2Id, 
+            editFormData.date, 
+            editFormData.time, 
+            editFormData.oversPerInnings, 
+            editFormData.maxOversPerBowler
+        );
     }, [editFormData]);
+    const isEditFormValid = editValidation.valid;
 
     const teamReadinessError = useMemo(() => {
         if (!team1Id && !team2Id) return null;
@@ -405,34 +426,15 @@ const MatchManager: React.FC<MatchManagerProps> = (props) => {
         }
         
         const tournamentId = selectedTournamentId || selectedTournamentForForm;
-
-        if (team1Id === team2Id) {
-            const error = "A team cannot play against itself.";
-            setScheduleError(error);
-            showNotification(error, 'error');
-            return;
-        }
-
-        if (matchDate) {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            const selectedDateObj = new Date(matchDate.replace(/-/g, '/'));
-            if (selectedDateObj < today) {
-                const error = "Cannot add a fixture for a past date.";
-                setScheduleError(error);
-                showNotification(error, 'error');
-                return;
-            }
-        }
         
-        if (!isScheduleFormValid) {
-            const error = "Please complete all fields to add a fixture.";
+        if (!scheduleValidation.valid) {
+            const error = scheduleValidation.message || "Please complete all fields correctly.";
             setScheduleError(error);
             showNotification(error, 'error');
             return;
         }
         
-        const overs = Number(matchOvers);
+
         const tournamentName = getTournamentById(tournamentId)?.name;
         const team1 = getTeamById(team1Id);
         const team2 = getTeamById(team2Id);
@@ -474,7 +476,7 @@ const MatchManager: React.FC<MatchManagerProps> = (props) => {
                     </div>
                     <div className="flex items-center gap-4 text-body">
                         <BallIcon className="w-5 h-5 text-text-secondary" />
-                        <span className="font-semibold text-text-primary">{overs} Overs per Innings</span>
+                        <span className="font-semibold text-text-primary">{matchOvers} Overs per Innings</span>
                     </div>
                 </div>
             </div>
@@ -485,7 +487,7 @@ const MatchManager: React.FC<MatchManagerProps> = (props) => {
             title: 'Confirm Fixture',
             message: confirmationMessage,
             onConfirm: () => {
-                addMatch(tournamentId, team1Id, team2Id, matchDate, matchTime, overs);
+                addMatch(tournamentId, team1Id, team2Id, matchDate, matchTime, matchOvers as number, matchMaxOvers === '' ? undefined : matchMaxOvers);
                 setTeam1Id('');
                 setTeam2Id('');
                 setMatchDate('');
@@ -512,35 +514,18 @@ const MatchManager: React.FC<MatchManagerProps> = (props) => {
 
     const handleUpdateMatch = () => {
         setEditError(null);
-        if (!editingMatch || !isEditFormValid) {
-            setEditError("Please fill all fields correctly.");
+        if (!editingMatch || !editValidation.valid) {
+            setEditError(editValidation.message || "Please fill all fields correctly.");
             return;
         }
         
-        const overs = Number(editFormData.oversPerInnings);
-        if (!Number.isInteger(overs) || overs <= 0 || overs > 100) {
-            setEditError("Overs must be a valid number between 1 and 100.");
-            return;
-        }
 
-        if (editFormData.team1Id === editFormData.team2Id) {
-            setEditError("A team cannot play against itself.");
-            return;
-        }
-
-        if (editFormData.date) {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            const selectedDateObj = new Date(editFormData.date.replace(/-/g, '/'));
-            if (selectedDateObj < today) {
-                setEditError("Cannot schedule a match for a past date.");
-                return;
-            }
-        }
-
+        const maxOvers = editFormData.maxOversPerBowler ? Number(editFormData.maxOversPerBowler) : undefined;
+        
         updateMatch(editingMatch.id, {
             ...editFormData,
-            oversPerInnings: overs
+            oversPerInnings: overs,
+            maxOversPerBowler: maxOvers
         });
         showNotification("Match updated successfully!", 'success');
         setEditingMatch(null);
@@ -759,7 +744,7 @@ const MatchManager: React.FC<MatchManagerProps> = (props) => {
         const SWIPE_THRESHOLD = 75;
 
         if (Math.abs(diffX) > SWIPE_THRESHOLD) {
-            const tabIds = TABS.map(t => t.id);
+            const tabIds = TABS.map(t => t.id) as View[];
             const currentIndex = tabIds.indexOf(view);
 
             if (diffX > 0) { // Swiped left
@@ -780,110 +765,20 @@ const MatchManager: React.FC<MatchManagerProps> = (props) => {
     const tossMatchTeam1 = tossMatch ? getTeamById(tossMatch.team1Id) : null;
     const tossMatchTeam2 = tossMatch ? getTeamById(tossMatch.team2Id) : null;
 
-    const renderMatchList = (list: Match[], title: string, emptyMessage: string) => (
-        <div className="space-y-6">
-            <h3 className="text-h3 text-text-primary flex items-center gap-2">
-                <CalendarIcon className="w-5 h-5" />
-                {title}
-            </h3>
-            {list.length === 0 ? (
-                <CrickIQCard  className="text-center">
-                    <p className="text-text-secondary">{emptyMessage}</p>
-                </CrickIQCard>
-            ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {list.map(match => {
-                        const team1 = getTeamById(match.team1Id);
-                        const team2 = getTeamById(match.team2Id);
-                        const tournament = getTournamentById(match.tournamentId);
-                        if (!team1 || !team2) return null;
+    const matchTableProps = {
+        today,
+        getTeamById,
+        getTournamentById,
+        isMatchLive,
+        handleShareMatch,
+        setEditingMatch,
+        handleDeleteMatch,
+        onViewMatchResult,
+        onContinueMatch,
+        onStartMatch,
+        setTossMatch
+    };
 
-                        const arePlayerCountsEqual = team1.players.length === team2.players.length;
-                        const playerMismatchTitle = `Teams must have same number of players (${team1.players.length} vs ${team2.players.length})`;
-                        const matchDateObj = new Date(match.date.replace(/-/g, '/'));
-                        const isFutureMatch = matchDateObj.getTime() > today.getTime();
-
-                        return (
-                            <CrickIQCard key={match.id} className="flex flex-col space-y-2">
-                                <div className="flex justify-between items-start">
-                                    <div className="h-5 flex items-center gap-2">
-                                        {match.status === 'live' && (
-                                            <span className="text-[10px] font-bold text-danger bg-danger/20 dark:bg-red-900/30 px-2 py-0.5 rounded-2xl flex items-center gap-1 animate-pulse">
-                                                <span className="relative flex h-1.5 w-1.5"><span className="animate-ping absolute inline-flex h-full w-full rounded-2xl bg-red-400 opacity-75"></span><span className="relative inline-flex rounded-2xl h-1.5 w-1.5 bg-danger/100"></span></span>
-                                                LIVE
-                                            </span>
-                                        )}
-                                        {match.groupId && (
-                                            <span className="text-[10px] font-bold text-teal-600 bg-teal-100 dark:bg-teal-900/30 px-2 py-0.5 rounded-2xl uppercase">Group {match.groupId.toUpperCase()}</span>
-                                        )}
-                                        {tournament?.format && !match.knockoutType && !match.groupId && (
-                                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-2xl uppercase ${
-                                                tournament.format === 'Round Robin' ? 'text-brand-blue bg-brand-blue/20 dark:bg-blue-900/30' : 
-                                                tournament.format === 'Knockout' ? 'text-brand-lavender bg-brand-lavender/20 dark:bg-brand-lavender/30' : ''
-                                            }`}>{tournament.format}</span>
-                                        )}
-                                        {match.knockoutType === 'final' && (
-                                            <span className="text-[10px] font-bold text-warning bg-warning/20 dark:bg-warning/20 px-2 py-0.5 rounded-2xl uppercase">Final</span>
-                                        )}
-                                        {match.knockoutType === 'semifinal' && (
-                                            <span className="text-[10px] font-bold text-brand-blue bg-brand-blue/20 dark:bg-blue-900/30 px-2 py-0.5 rounded-2xl uppercase">Semifinal</span>
-                                        )}
-                                    </div>
-                                    <div className="flex items-center -mt-1 -mr-1">
-                                        <button onClick={() => handleShareMatch(match)} className="p-1.5 rounded-full text-text-secondary hover:bg-primary transition-colors" title="Share Match"><ShareIcon className="w-4 h-4" /></button>
-                                        {match.status === 'scheduled' && (
-                                            <button onClick={() => setEditingMatch(match)} disabled={isMatchLive} className="p-1.5 rounded-full text-text-secondary hover:bg-primary transition-colors disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 disabled:cursor-not-allowed" title={isMatchLive ? "Cannot edit while a match is live" : "Edit Match"}><EditIcon className="w-4 h-4" /></button>
-                                        )}
-                                        <button onClick={() => handleDeleteMatch(match.id)} disabled={isMatchLive} className="p-1.5 rounded-full text-text-secondary hover:text-highlight hover:bg-highlight/10 transition-colors disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 disabled:cursor-not-allowed" title={isMatchLive ? "Cannot delete while a match is live" : "Delete Match"}><TrashIcon className="w-4 h-4" /></button>
-                                    </div>
-                                </div>
-    
-                                <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 text-center -mt-2">
-                                    <div className="flex flex-col items-center gap-1">
-                                        <div className="w-12 h-12 flex items-center justify-center rounded-lg text-white text-h2 shadow-md" style={{ backgroundColor: team1.logo }}>{team1.name.substring(0, 3).toUpperCase()}</div>
-                                        <h3 className="text-base font-bold text-text-primary truncate w-full">{team1.name}</h3>
-                                    </div>
-                                    <span className="text-lg text-text-secondary/80">VS</span>
-                                    <div className="flex flex-col items-center gap-1">
-                                        <div className="w-12 h-12 flex items-center justify-center rounded-lg text-white text-h2 shadow-md" style={{ backgroundColor: team2.logo }}>{team2.name.substring(0, 3).toUpperCase()}</div>
-                                        <h3 className="text-base font-bold text-text-primary truncate w-full">{team2.name}</h3>
-                                    </div>
-                                </div>
-    
-                                <div className="space-y-2 pt-2 border-t border-brand-blue/15">
-                                    {!arePlayerCountsEqual && ( <div className="text-center text-highlight font-semibold text-[10px] p-1 bg-highlight/10 rounded-md">Unequal players ({team1.players.length} vs {team2.players.length})</div>)}
-                                    <div className="flex justify-around items-center text-[11px] text-text-secondary">
-                                        <div className="flex items-center gap-1.5"><CalendarIcon className="w-3 h-3" /> <span className="font-semibold">{new Date(match.date.replace(/-/g, '/')).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</span></div>
-                                        <div className="flex items-center gap-1.5"><ClockIcon className="w-3 h-3" /> <span className="font-semibold">{formatTime(match.time)}</span></div>
-                                        <div className="flex items-center gap-1.5"><BallIcon className="w-3 h-3" /> <span className="font-semibold">{match.oversPerInnings} Overs</span></div>
-                                    </div>
-                                </div>
-                                
-                                <div className="text-center pt-2">
-                                    {match.status === 'completed' ? (
-                                        <button onClick={() => onViewMatchResult(match.id)} className="w-full px-4 py-4 text-body rounded-2xl font-bold bg-brand-gradient text-white shadow-md transform hover:-translate-y-0.5 transition-transform">
-                                            View Scorecard
-                                        </button>
-                                    ) : match.status === 'live' ? (
-                                        <button onClick={() => onContinueMatch(match)} className="w-full px-4 py-4 text-body rounded-2xl font-bold bg-brand-gradient text-white shadow-md transform hover:-translate-y-0.5 transition-transform">Continue Live Match</button>
-                                    ) : match.toss ? (
-                                        <>
-                                            <p className="text-[10px] text-text-secondary mb-1">{getTeamById(match.toss.winner)?.name} won toss & chose to {match.toss.decision}</p>
-                                            <button disabled={isMatchLive || !arePlayerCountsEqual} onClick={() => onStartMatch(match)} className="w-full px-8 py-4 rounded-2xl font-bold text-h3 bg-brand-gradient text-white shadow-lg disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 transform hover:-translate-y-0.5 transition-transform" title={!arePlayerCountsEqual ? playerMismatchTitle : (isMatchLive ? 'Another match is live' : 'Start Match')}>{isMatchLive ? 'Match Live' : (arePlayerCountsEqual ? 'Start Match' : 'Unequal Players')}</button>
-                                        </>
-                                    ) : isFutureMatch ? (
-                                        <button disabled={true} className="w-full px-4 py-4 text-body rounded-2xl font-bold bg-primary/50 text-text-secondary shadow-md cursor-not-allowed">Upcoming Match</button>
-                                    ) : (
-                                        <button disabled={isMatchLive || !arePlayerCountsEqual} onClick={() => setTossMatch(match)} className="w-full px-4 py-4 text-body rounded-2xl font-bold bg-brand-gradient text-white shadow-md disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 transform hover:-translate-y-0.5 transition-transform" title={!arePlayerCountsEqual ? playerMismatchTitle : (isMatchLive ? 'Another match is live' : 'Set Toss')}>{isMatchLive ? 'Match Live' : (arePlayerCountsEqual ? 'Set Toss' : 'Unequal Players')}</button>
-                                    )}
-                                </div>
-                            </CrickIQCard>
-                        )
-                    })}
-                </div>
-            )}
-        </div>
-    );
     const getStageTag = (match: Match) => {
         if (match.knockoutType === 'final') {
             return <span className="text-[10px] font-bold text-warning bg-warning/20 dark:bg-warning/20 px-2 py-0.5 rounded-2xl uppercase">Final</span>;
@@ -908,19 +803,7 @@ const MatchManager: React.FC<MatchManagerProps> = (props) => {
             {renderHeader()}
             
             
-            { TABS.length > 1 &&
-                <div className="border-b border-brand-blue/15 flex items-center gap-4 overflow-x-auto no-scrollbar">
-                    {TABS.map(tab => (
-                         <button
-                            key={tab.id}
-                            onClick={() => setView(tab.id)}
-                            className={`flex-shrink-0 py-2 px-1 transition-colors duration-300 text-tab ${view === tab.id ? 'border-b-2 border-brand-blue text-brand-blue' : 'border-b-2 border-transparent text-text-secondary hover:text-text-primary'}`}
-                        >
-                            {tab.label}
-                        </button>
-                    ))}
-                </div>
-            }
+            <MatchFilters tabs={TABS} currentView={view} onViewChange={setView} />
             
             <div
                 onTouchStart={handleTouchStart}
@@ -963,77 +846,38 @@ const MatchManager: React.FC<MatchManagerProps> = (props) => {
                             </div>
                         ) : (
                             <div className="animate-fade-in space-y-6">
-                                <CrickIQCard className={isCalendarOpen ? 'z-40' : ''}>
-                             <h3 className="text-h3 text-text-primary mb-4 flex items-center gap-2">
-                                <CalendarIcon className="w-5 h-5" />
-                                Add New Fixture
-                             </h3>
-                             <div className="space-y-4">
-                                {!selectedTournamentId && (
-                                    <select
-                                        value={selectedTournamentForForm}
-                                        onChange={e => { setSelectedTournamentForForm(e.target.value); setTeam1Id(''); setTeam2Id(''); }}
-                                        className="w-full p-2 bg-white text-black border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue"
-                                    >
-                                        <option value="" disabled>Select Tournament</option>
-                                        {tournaments.filter(t => t.id !== 't_quick_matches').map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
-                                    </select>
-                                )}
-                                 <select value={team1Id} onChange={e => setTeam1Id(e.target.value)} className="w-full p-2 bg-white text-black border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue">
-                                    <option value="" disabled>Select Team 1</option>
-                                    {team1Options.map(t => {
-                                        const isReady = checkTeamReadiness(t);
-                                        return <option key={t.id} value={t.id}>{t.name}{!isReady ? ' (Not Ready)' : ''}</option>
-                                    })}
-                                 </select>
-                                  <select value={team2Id} onChange={e => setTeam2Id(e.target.value)} className="w-full p-2 bg-white text-black border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue">
-                                    <option value="" disabled>Select Team 2</option>
-                                    {team2Options.map(t => {
-                                        const isReady = checkTeamReadiness(t);
-                                        return <option key={t.id} value={t.id}>{t.name}{!isReady ? ' (Not Ready)' : ''}</option>
-                                    })}
-                                  </select>
-                                {allTournamentTeams.length > 0 && availableTeams.length === 0 && (
-                                    <p className="text-sm text-text-secondary text-center p-2 bg-primary/50 rounded-lg">
-                                        No teams are ready for scheduling. Visit the 'Teams' tab to finalize lineups.
-                                    </p>
-                                )}
-                                <div ref={calendarContainerRef} className="relative">
-                                     <input 
-                                        type="text"
-                                        placeholder="Select Date"
-                                        value={matchDate ? new Date(matchDate.replace(/-/g, '/')).toDateString() : ''}
-                                        onFocus={(e) => {
-                                            const rect = e.currentTarget.getBoundingClientRect();
-                                            const spaceBelow = window.innerHeight - rect.bottom;
-                                            setCalendarPosition(spaceBelow < 350 ? 'up' : 'down');
-                                            setIsCalendarOpen(true);
-                                        }}
-                                        readOnly
-                                        className="w-full p-2 bg-white text-black border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue cursor-pointer"
-                                    />
-                                    {isCalendarOpen && <Calendar selectedDate={matchDate} onSelectDate={(d) => { setMatchDate(d); setIsCalendarOpen(false); }} position={calendarPosition} />}
-                                </div>
-                                <TimeScroller value={matchTime} onChange={setMatchTime} />
-                                <div className="flex items-center gap-2">
-                                     <label htmlFor="match-overs" className="text-table-header text-text-secondary">Overs:</label>
-                                     <input 
-                                        id="match-overs"
-                                        type="number"
-                                        min="1"
-                                        value={matchOvers}
-                                        onChange={e => setMatchOvers(e.target.value === '' ? '' : parseInt(e.target.value, 10))}
-                                        className="w-full p-2 bg-white text-black border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue disabled:bg-primary/30"
-                                        disabled={!isOversEditable}
-                                     />
-                                </div>
-    
-                                {scheduleError && <p className="text-highlight text-body text-center">{scheduleError}</p>}
-                                 <Button onClick={handleAddMatch} className="w-full" variant="primary" disabled={!isScheduleFormValid}>
-                                    <PlusIcon /> Add Fixture
-                                 </Button>
-                             </div>
-                        </CrickIQCard>
+                                <MatchCreationForm
+                                    isCalendarOpen={isCalendarOpen}
+                                    setIsCalendarOpen={setIsCalendarOpen}
+                                    calendarPosition={calendarPosition}
+                                    setCalendarPosition={setCalendarPosition}
+                                    calendarContainerRef={calendarContainerRef}
+                                    selectedTournamentId={selectedTournamentId}
+                                    selectedTournamentForForm={selectedTournamentForForm}
+                                    setSelectedTournamentForForm={setSelectedTournamentForForm}
+                                    team1Id={team1Id}
+                                    setTeam1Id={setTeam1Id}
+                                    team2Id={team2Id}
+                                    setTeam2Id={setTeam2Id}
+                                    matchDate={matchDate}
+                                    setMatchDate={setMatchDate}
+                                    matchTime={matchTime}
+                                    setMatchTime={setMatchTime}
+                                    matchOvers={matchOvers}
+                                    setMatchOvers={setMatchOvers}
+                                    matchMaxOvers={matchMaxOvers}
+                                    setMatchMaxOvers={setMatchMaxOvers}
+                                    isOversEditable={isOversEditable}
+                                    scheduleError={scheduleError}
+                                    isScheduleFormValid={isScheduleFormValid}
+                                    handleAddMatch={handleAddMatch}
+                                    team1Options={team1Options}
+                                    team2Options={team2Options}
+                                    allTournamentTeams={allTournamentTeams}
+                                    availableTeams={availableTeams}
+                                    tournaments={tournaments}
+                                    checkTeamReadiness={checkTeamReadiness}
+                                />
                             </div>
                         )}
                     </div>
@@ -1043,25 +887,17 @@ const MatchManager: React.FC<MatchManagerProps> = (props) => {
                     <div className="mt-8 space-y-6">
                         {tournament?.groups ? (
                             <>
-                                {renderMatchList(
-                                    scheduledMatches.filter(m => m.groupId === 'a'),
-                                    "Group A Matches",
-                                    "No Group A fixtures."
-                                )}
-                                {renderMatchList(
-                                    scheduledMatches.filter(m => m.groupId === 'b'),
-                                    "Group B Matches",
-                                    "No Group B fixtures."
-                                )}
+                                <MatchTable list={scheduledMatches.filter(m => m.groupId === 'a')} title="Group A Matches" emptyMessage="No Group A fixtures." {...matchTableProps} />
+                                <MatchTable list={scheduledMatches.filter(m => m.groupId === 'b')} title="Group B Matches" emptyMessage="No Group B fixtures." {...matchTableProps} />
                             </>
                         ) : (
-                            renderMatchList(scheduledMatches, "Upcoming Group Matches", "No upcoming fixtures.")
+                            <MatchTable list={scheduledMatches} title="Upcoming Group Matches" emptyMessage="No upcoming fixtures." {...matchTableProps} />
                         )}
                     </div>
                 )}
 
-                {view === 'semifinals' && renderMatchList(semifinalMatches, "Semifinals", "Semifinals will be automatically added here.")}
-                {view === 'final' && renderMatchList(finalMatches, "Final", "The final will be automatically added here.")}
+                {view === 'semifinals' && <MatchTable list={semifinalMatches} title="Semifinals" emptyMessage="Semifinals will be automatically added here." {...matchTableProps} />}
+                {view === 'final' && <MatchTable list={finalMatches} title="Final" emptyMessage="The final will be automatically added here." {...matchTableProps} />}
                 
                 {view === 'history' && (
                     <div className="space-y-4">
@@ -1318,40 +1154,22 @@ const MatchManager: React.FC<MatchManagerProps> = (props) => {
                     onClose={() => setEditingTeam(null)}
                     isMatchLive={isMatchLive}
                     onDone={() => {
-                        const isReady = checkTeamReadiness(teams.find(t => t.id === editingTeam.id)!);
-                        if (isReady) {
-                            handleTeamReady(editingTeam.id);
-                        }
                         setEditingTeam(null);
                     }}
                     {...props}
                 />
             )}
-            {editingMatch && (
-                <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50 p-4">
-                    <CrickIQCard  className="w-full max-w-md">
-                        <h3 className="text-h3 text-text-primary mb-4">Edit Match</h3>
-                        <div className="space-y-4">
-                             <select value={editFormData.team1Id} onChange={e => setEditFormData(f => ({...f, team1Id: e.target.value}))} className="w-full p-2 bg-white text-black border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue">
-                                <option value="" disabled>Select Team 1</option>
-                                {editTeam1Options.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
-                             </select>
-                             <select value={editFormData.team2Id} onChange={e => setEditFormData(f => ({...f, team2Id: e.target.value}))} className="w-full p-2 bg-white text-black border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue">
-                                <option value="" disabled>Select Team 2</option>
-                                {editTeam2Options.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
-                             </select>
-                            <input type="date" value={editFormData.date} onChange={e => setEditFormData(f => ({...f, date: e.target.value}))} className="w-full p-2 bg-white text-black border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" />
-                            <TimeScroller value={editFormData.time} onChange={newTime => setEditFormData(f => ({...f, time: newTime}))} />
-                            <input type="number" value={editFormData.oversPerInnings} onChange={e => setEditFormData(f => ({...f, oversPerInnings: e.target.value === '' ? '' : parseInt(e.target.value, 10)}))} placeholder="Overs" className="w-full p-2 bg-white text-black border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" />
-                            {editError && <p className="text-highlight text-body text-center">{editError}</p>}
-                        </div>
-                        <div className="flex justify-end gap-4 mt-6">
-                            <button onClick={() => setEditingMatch(null)} className="py-1.5 px-4 bg-primary border border-brand-blue/15 rounded-2xl hover:bg-border-color font-semibold text-body">Cancel</button>
-                            <button onClick={handleUpdateMatch} disabled={!isEditFormValid} className="py-1.5 px-4 bg-brand-blue text-white font-bold rounded-2xl hover:bg-opacity-90 text-body disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400">Update</button>
-                        </div>
-                    </CrickIQCard>
-                </div>
-            )}
+            <EditMatchModal
+                editingMatch={editingMatch}
+                editFormData={editFormData}
+                setEditFormData={setEditFormData}
+                editTeam1Options={editTeam1Options}
+                editTeam2Options={editTeam2Options}
+                editError={editError}
+                isEditFormValid={isEditFormValid}
+                setEditingMatch={setEditingMatch}
+                handleUpdateMatch={handleUpdateMatch}
+            />
         </div>
     );
 };

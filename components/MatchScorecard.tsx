@@ -103,6 +103,30 @@ const InningsScorecard: React.FC<{ innings: Innings; teams: Team[]; }> = ({ inni
                     </Table>
 
             <div className="space-y-1">
+            {innings.exceptions && innings.exceptions.length > 0 && (
+            <div className='mb-6 mt-4'>
+                 <h4 className='text-h3 text-slate-700 dark:text-text-primary mb-4'>Exceptions</h4>
+                 <div className='text-caption text-orange-600 bg-orange-50 dark:bg-orange-950/30 p-4 rounded-lg h-full overflow-x-auto no-scrollbar'>
+                    {innings.exceptions.map((exc, idx) => {
+                        let readable = '';
+                        if (typeof exc === 'string') {
+                            const matchId = exc.match(/Bowler (p_[\w]+)/);
+                            readable = exc;
+                            if (matchId && matchId[1]) {
+                                readable = readable.replace(matchId[1], getPlayerName(matchId[1]));
+                            }
+                        } else {
+                            if (exc.type === "BOWLER_LIMIT_EXCEPTION") {
+                                readable = `Exception: Bowler ${getPlayerName(exc.bowlerId)} exceeded limit ${exc.limit} over(s)`;
+                            } else {
+                                readable = `Unknown exception type`;
+                            }
+                        }
+                        return <div key={idx} className='whitespace-nowrap'>{readable}</div>;
+                    })}
+                 </div>
+            </div>
+            )}
                 <h4 className="text-h3 text-slate-700 dark:text-text-primary">Extras</h4>
                 <div className="p-4 bg-primary/50 rounded-lg flex justify-between items-center">
                     <span className="font-bold text-h3 text-text-primary">{extras.total}</span>

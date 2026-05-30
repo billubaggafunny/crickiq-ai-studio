@@ -5,6 +5,7 @@ export interface AppState {
   tournaments: Tournament[];
   teams: Team[];
   matches: Match[];
+  schemaVersion?: number;
 }
 
 export interface StorageEnvelope {

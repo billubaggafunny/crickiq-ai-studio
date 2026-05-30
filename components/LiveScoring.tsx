@@ -14,6 +14,7 @@ interface LiveScoringProps extends UseCrickIQStateReturn {
     match: Match;
     onEndMatch: () => void;
     onStartDrinksBreak: () => void;
+    onBack: () => void;
 }
 
 
@@ -636,7 +637,11 @@ const LiveScoring: React.FC<LiveScoringProps> = ({ match, recordBall, getTeamByI
     }, [currentInnings]);
     
     const availableBatsmen = battingTeam.players.filter(p => currentInnings.batsmanScores[p.id]?.status !== BattingStatus.OUT);
-    const availableBowlers = bowlingTeam.players.filter(p => p.id !== currentInnings.lastBowlerId);
+    const maxOvers = match.maxOversPerBowler;
+const baseEligibleBowlers = bowlingTeam.players.filter(p => p.id !== currentInnings.lastBowlerId);
+const atLimitIds = baseEligibleBowlers.filter(p => { if (!maxOvers) return false; const stats = currentInnings.bowlerScores[p.id]; return stats && Math.floor(stats.overs) >= maxOvers; }).map(p => p.id);
+const isExceptionActive = !!maxOvers && atLimitIds.length === baseEligibleBowlers.length && baseEligibleBowlers.length > 0;
+const availableBowlers = baseEligibleBowlers.map(p => { const isAtLimit = atLimitIds.includes(p.id); const isDisabled = isAtLimit && !isExceptionActive; return { ...p, isDisabled, isAtLimit }; });
 
     const onStrikeOptions = useMemo(() => {
         return availableBatsmen.filter(p => !nonStrikerId || p.id !== nonStrikerId);
@@ -1209,7 +1214,7 @@ const LiveScoring: React.FC<LiveScoringProps> = ({ match, recordBall, getTeamByI
                                     </div>
                                     <div>
                                         <div title={bowlerLockTooltip}>
-                                            <label className="text-sm text-text-secondary">Bowler</label>
+                                            <div className="flex justify-between items-center"><label className="text-sm text-text-secondary">Bowler</label>{maxOvers ? <span className="text-xs text-text-secondary font-medium">Max {maxOvers} {maxOvers === 1 ? 'Over' : 'Overs'}/Bowler</span> : null}</div>
                                             <Select
                                                 disabled={isMatchOver || isBowlerLocked}
                                                 value={currentBowlerId || ''}
@@ -1217,7 +1222,8 @@ const LiveScoring: React.FC<LiveScoringProps> = ({ match, recordBall, getTeamByI
                                                 className={isBowlerLocked ? 'cursor-not-allowed opacity-70' : ''}
                                             >
                                                 <option value="">Select Bowler</option>
-                                                {availableBowlers.map(p => <option key={p.id} value={p.id} title={p.role}>{`${getRoleEmoji(p.role)} ${p.name}`}</option>)}
+                                                {isExceptionActive && <option disabled className="text-orange-500 bg-orange-50 dark:bg-orange-950/30">Additional overs allowed due to insufficient available bowlers.</option>}
+                                                {availableBowlers.map(p => <option key={p.id} disabled={p.isDisabled} value={p.id} title={p.role}>{`${getRoleEmoji(p.role)} ${p.name}`}{p.isDisabled ? " (Max Overs Reached)" : ""}</option>)}
                                             </Select>
                                         </div>
                                         {!!currentBowlerId && (

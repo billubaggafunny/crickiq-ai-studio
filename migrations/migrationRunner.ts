@@ -142,7 +142,7 @@ export const loadAndMigrateDataAsync = async (): Promise<EnvelopedData> => {
  */
 export const loadAndMigrateData = (): EnvelopedData => {
     try {
-        const rawString = localStorageAdapter.load(STORAGE_KEY);
+        const rawString = localStorageAdapter.load(STORAGE_KEY) as string | null;
         if (!rawString) {
              // Fresh start
              return {

@@ -41,7 +41,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
     const [isImporting, setIsImporting] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const snapshotsStr = localStorageAdapter.load('crickiq_snapshots');
+    const snapshotsStr = localStorageAdapter.load('crickiq_snapshots') as string | null;
     const snapshots = snapshotsStr ? JSON.parse(snapshotsStr) : [];
 
     const handleExport = () => {
@@ -265,7 +265,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                                         Auto-saved before major changes.
                                     </p>
                                     <div className="space-y-2">
-                                        {snapshots.map((s: { tournaments: Tournament[]; teams: Team[]; matches: Match[] }, idx: number) => (
+                                        {snapshots.map((s: { timestamp: string, tournaments: Tournament[]; teams: Team[]; matches: Match[] }, idx: number) => (
                                             <button
                                                 key={idx}
                                                 onClick={() => handleRestoreSnapshot({ tournaments: s.tournaments, teams: s.teams, matches: s.matches })}

@@ -8,6 +8,7 @@ import type { Match, Team } from '../types';
 
 interface QuickMatchHistoryProps extends UseCrickIQStateReturn {
     onViewResult: (matchId: string) => void;
+    onRematch?: (matchId: string) => void;
 }
 
 const QuickMatchHistory: React.FC<QuickMatchHistoryProps> = ({ matches, getTeamById, onViewResult }) => {
