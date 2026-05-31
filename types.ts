@@ -189,6 +189,7 @@ export interface Match {
     winnerId?: Team['id'] | 'draw';
     manOfTheMatchId?: Player['id'];
     isQuickMatch?: boolean;
+    isDraft?: boolean;
     wasAbandoned?: boolean;
     knockoutType?: 'semifinal' | 'final';
     groupId?: 'a' | 'b';

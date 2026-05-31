@@ -61,6 +61,7 @@ interface TournamentManagerProps extends UseCrickIQStateReturn {
     onContinueMatch: (match: Match) => void;
     onAbandonMatch: (matchId: string) => void;
     quickMatchSetupId: string | null;
+    setQuickMatchSetupId: (id: string | null) => void;
     onClearQuickMatchSetup: () => void;
     onStartMatch: (match: Match) => void;
     onViewQuickMatchResult: (matchId: string) => void;
@@ -80,6 +81,7 @@ const TournamentManager: React.FC<TournamentManagerProps> = (props) => {
         onContinueMatch,
         onAbandonMatch,
         quickMatchSetupId,
+        setQuickMatchSetupId,
         onClearQuickMatchSetup,
         onStartMatch,
         onViewQuickMatchResult,
@@ -271,7 +273,7 @@ const TournamentManager: React.FC<TournamentManagerProps> = (props) => {
                     onClick={() => setHomeView('quickMatches')}
                     className={`py-2 px-1 font-bold transition-colors duration-300 text-body flex-shrink-0 ${homeView === 'quickMatches' ? 'border-b-2 border-brand-blue text-brand-blue dark:text-white dark:border-brand-blue' : 'border-b-2 border-transparent text-text-secondary dark:text-gray-300 hover:text-text-primary'}`}
                 >
-                    Quick Matches
+                    Create
                 </button>
             </div>
             
@@ -404,7 +406,7 @@ const TournamentManager: React.FC<TournamentManagerProps> = (props) => {
                                 </div>
                             </div>
                         </CrickIQCard>
-                        <QuickMatchHistory {...props} onViewResult={onViewQuickMatchResult} onRematch={onRematch} />
+                        <QuickMatchHistory {...props} setQuickMatchSetupId={setQuickMatchSetupId} onViewResult={onViewQuickMatchResult} onRematch={onRematch} />
                     </div>
                 )}
 

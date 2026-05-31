@@ -92,7 +92,7 @@ export const useMatchState = (
         setMatches(prev => prev.filter(m => m.id !== matchId));
     }, [setMatches]);
 
-    const addQuickMatch = useCallback((team1Data: string | Team, team2Data: string | Team, oversPerInnings: number, numberOfPlayers: number, maxOversPerBowler?: number, ownerId?: string) => {
+    const addQuickMatch = useCallback((team1Data: string | Team, team2Data: string | Team, oversPerInnings: number, numberOfPlayers: number, maxOversPerBowler?: number, ownerId?: string, isDraft: boolean = false) => {
         const QUICK_MATCH_TOURNAMENT_ID = 't_quick_matches';
         const QUICK_MATCH_TOURNAMENT_NAME = 'Quick Matches';
 
@@ -185,6 +185,7 @@ export const useMatchState = (
             date: now.toISOString().split('T')[0],
             time: time,
             status: 'scheduled',
+            isDraft,
             oversPerInnings,
             isQuickMatch: true,
             maxOversPerBowler,
@@ -272,7 +273,7 @@ export const useMatchState = (
                     manualOverrides: [],
                 };
 
-                return { ...m, status: 'live' as const, innings1, updatedAt: createTimestamp() };
+                return { ...m, status: 'live' as const, isDraft: false, innings1, updatedAt: createTimestamp() };
             }
             return m;
         }));

@@ -43,6 +43,10 @@ const MatchTable: React.FC<MatchTableProps> = ({
     onStartMatch,
     setTossMatch
 }) => {
+    const dayAfterTomorrow = new Date(today);
+    dayAfterTomorrow.setDate(today.getDate() + 2);
+    dayAfterTomorrow.setHours(23, 59, 59, 999);
+
     return (
         <div className="space-y-6">
             <h3 className="text-h3 text-text-primary flex items-center gap-2">
@@ -63,13 +67,31 @@ const MatchTable: React.FC<MatchTableProps> = ({
 
                         const arePlayerCountsEqual = team1.players.length === team2.players.length;
                         const playerMismatchTitle = `Teams must have same number of players (${team1.players.length} vs ${team2.players.length})`;
-                        const matchDateObj = new Date(match.date.replace(/-/g, '/'));
-                        const isFutureMatch = matchDateObj.getTime() > today.getTime();
+                        
+                        let statusDisplay = '';
+                        if (match.wasAbandoned) statusDisplay = 'Abandoned';
+                        else if (match.status === 'live') statusDisplay = 'Live';
+                        else if (match.status === 'completed') statusDisplay = 'Finished';
+                        else if (match.isDraft) statusDisplay = 'Upcoming';
+                        else {
+                            const matchDateObj = new Date(match.date.replace(/-/g, '/'));
+                            matchDateObj.setHours(0, 0, 0, 0);
+                            const todayStart = new Date(today);
+                            todayStart.setHours(0, 0, 0, 0);
+
+                            if (matchDateObj < todayStart) statusDisplay = 'Scheduled'; // Past scheduled, treat as scheduled
+                            else if (matchDateObj > dayAfterTomorrow) statusDisplay = 'Coming Soon';
+                            else statusDisplay = 'Scheduled';
+                        }
 
                         return (
                             <CrickIQCard key={match.id} className="flex flex-col space-y-2">
                                 <div className="flex justify-between items-start">
                                     <div className="h-5 flex items-center gap-2">
+                                        <span className="text-[10px] font-bold text-gray-500 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-2xl flex items-center gap-1">
+                                            {statusDisplay}
+                                        </span>
+                                        {/* Keep existing status indicators like LIVE, Group, etc. */}
                                         {match.status === 'live' && (
                                             <span className="text-[10px] font-bold text-danger bg-danger/20 dark:bg-red-900/30 px-2 py-0.5 rounded-2xl flex items-center gap-1 animate-pulse">
                                                 <span className="relative flex h-1.5 w-1.5"><span className="animate-ping absolute inline-flex h-full w-full rounded-2xl bg-red-400 opacity-75"></span><span className="relative inline-flex rounded-2xl h-1.5 w-1.5 bg-danger/100"></span></span>
@@ -129,13 +151,13 @@ const MatchTable: React.FC<MatchTableProps> = ({
                                         </button>
                                     ) : match.status === 'live' ? (
                                         <button onClick={() => onContinueMatch(match)} className="w-full px-4 py-4 text-body rounded-2xl font-bold bg-brand-gradient text-white shadow-md transform hover:-translate-y-0.5 transition-transform">Continue Live Match</button>
+                                    ) : match.isDraft ? (
+                                        <button onClick={() => setEditingMatch(match)} className="w-full px-4 py-4 text-body rounded-2xl font-bold bg-brand-gradient text-white shadow-md transform hover:-translate-y-0.5 transition-transform">Setup Teams</button>
                                     ) : match.toss ? (
                                         <>
                                             <p className="text-[10px] text-text-secondary mb-1">{getTeamById(match.toss.winner)?.name} won toss & chose to {match.toss.decision}</p>
                                             <button disabled={isMatchLive || !arePlayerCountsEqual} onClick={() => onStartMatch(match)} className="w-full px-8 py-4 rounded-2xl font-bold text-h3 bg-brand-gradient text-white shadow-lg disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 transform hover:-translate-y-0.5 transition-transform" title={!arePlayerCountsEqual ? playerMismatchTitle : (isMatchLive ? 'Another match is live' : 'Start Match')}>{isMatchLive ? 'Match Live' : (arePlayerCountsEqual ? 'Start Match' : 'Unequal Players')}</button>
                                         </>
-                                    ) : isFutureMatch ? (
-                                        <button disabled={true} className="w-full px-4 py-4 text-body rounded-2xl font-bold bg-primary/50 text-text-secondary shadow-md cursor-not-allowed">Upcoming Match</button>
                                     ) : (
                                         <button disabled={isMatchLive || !arePlayerCountsEqual} onClick={() => setTossMatch(match)} className="w-full px-4 py-4 text-body rounded-2xl font-bold bg-brand-gradient text-white shadow-md disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 transform hover:-translate-y-0.5 transition-transform" title={!arePlayerCountsEqual ? playerMismatchTitle : (isMatchLive ? 'Another match is live' : 'Set Toss')}>{isMatchLive ? 'Match Live' : (arePlayerCountsEqual ? 'Set Toss' : 'Unequal Players')}</button>
                                     )}

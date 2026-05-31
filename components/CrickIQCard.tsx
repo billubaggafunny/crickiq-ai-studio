@@ -4,9 +4,10 @@ export interface CrickIQCardProps extends React.HTMLAttributes<HTMLDivElement> {
     children: React.ReactNode;
     className?: string;
     noPadding?: boolean;
+    accentColor?: string;
 }
 
-const CrickIQCard: React.FC<CrickIQCardProps> = ({ children, className = '', noPadding = false, ...rest }) => {
+const CrickIQCard: React.FC<CrickIQCardProps> = ({ children, className = '', noPadding = false, accentColor, ...rest }) => {
     // Official Card Specifications:
     // - Radius: 20px (rounded-3xl)
     // - Padding: 24px (p-6)
@@ -18,7 +19,8 @@ const CrickIQCard: React.FC<CrickIQCardProps> = ({ children, className = '', noP
     return (
         <div 
             {...rest} 
-            className={`bg-primary border border-light-border dark:border-brand-blue/15 rounded-3xl shadow-md ${paddingClass} ${className}`}
+            className={`bg-primary border border-light-border dark:border-brand-blue/15 rounded-3xl shadow-md ${paddingClass} ${className} ${accentColor ? 'border-l-[6px]' : ''}`}
+            style={accentColor ? { ...rest.style, borderLeftColor: accentColor } : rest.style}
         >
             {children}
         </div>

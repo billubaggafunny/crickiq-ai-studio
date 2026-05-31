@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { TrophyIcon, CalendarIcon, SparklesIcon, LockClosedIcon, LockOpenIcon, AnalyticsIcon } from './constants';
+import { TrophyIcon, CalendarIcon, SparklesIcon, LockClosedIcon, LockOpenIcon, AnalyticsIcon, BallIcon } from './constants';
 import TournamentManager from './components/TournamentManager';
 import MatchManager from './components/MatchManager';
+import MatchesView from './components/MatchesView';
 import LiveScoring from './components/LiveScoring';
 import { useCrickIQState } from './hooks/useCrickIQState';
 import type { Match, Theme, FontSize, Team } from './types';
@@ -185,6 +186,7 @@ const AppUI: React.FC = () => {
     const navItems = useMemo(() => {
         const items = [
             { id: 'tournament', label: 'Home', icon: <TrophyIcon /> },
+            { id: 'all-matches', label: 'Matches', icon: <BallIcon /> },
             { id: 'matches', label: 'Tournaments', icon: <CalendarIcon /> },
             { id: 'analytics', label: 'Analytics', icon: <AnalyticsIcon /> },
         ];
@@ -344,7 +346,7 @@ const AppUI: React.FC = () => {
     }
 
     const handleAddQuickMatch = (team1Data: string | Team, team2Data: string | Team, overs: number, numberOfPlayers: number, maxOversPerBowler?: number) => {
-        const { matchId } = tournamentState.addQuickMatch(team1Data, team2Data, overs, numberOfPlayers, maxOversPerBowler);
+        const { matchId } = tournamentState.addQuickMatch(team1Data, team2Data, overs, numberOfPlayers, maxOversPerBowler, undefined, true);
         setIsQuickMatchMode(true);
         setQuickMatchSetupId(matchId);
         setActiveTab('tournament');
@@ -523,6 +525,25 @@ const AppUI: React.FC = () => {
     
     const renderContent = () => {
         switch (activeTab) {
+            case 'all-matches':
+                return (
+                    <ErrorBoundary componentName="All Matches" onReset={() => { setActiveTab('tournament'); }}>
+                        <MatchesView 
+                            matches={tournamentState.matches}
+                            today={new Date()}
+                            getTeamById={tournamentState.getTeamById}
+                            getTournamentById={tournamentState.getTournamentById}
+                            isMatchLive={isMatchActuallyLive}
+                            handleShareMatch={() => { }} // Need to pass or implement
+                            handleDeleteMatch={(id) => tournamentState.deleteMatch(id)}
+                            onStartMatch={(match) => tournamentState.onStartMatch(match)}
+                            onContinueMatch={(match) => tournamentState.onContinueMatch(match)}
+                            onViewMatchResult={(matchId) => handleViewScorecard(matchId)}
+                            setTossMatch={() => {}} // Need to pass or implement
+                            setEditingMatch={() => {}} // Need to pass or implement
+                        />
+                    </ErrorBoundary>
+                );
             case 'matches':
                 return (
                     <ErrorBoundary componentName="Tournaments & Matches" onReset={() => { setActiveTab('tournament'); setSelectedTournamentId(null); }}>
@@ -569,6 +590,7 @@ const AppUI: React.FC = () => {
                             onContinueMatch={handleContinueMatch}
                             onAbandonMatch={tournamentState.abandonMatch}
                             quickMatchSetupId={quickMatchSetupId}
+                            setQuickMatchSetupId={setQuickMatchSetupId}
                             onClearQuickMatchSetup={clearQuickMatchSetup}
                             onStartMatch={handleStartMatch}
                              onViewQuickMatchResult={handleViewScorecard}

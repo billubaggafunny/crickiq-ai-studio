@@ -37,75 +37,6 @@ const adjustColor = (color: string, amount: number) => {
     return '#' + color.replace(/^#/, '').replace(/../g, color => ('0' + Math.min(255, Math.max(0, parseInt(color, 16) + amount)).toString(16)).substr(-2));
 }
 
-const hexToPastel = (hexColor: string, isWinner: boolean, isDarkMode: boolean) => {
-    if (!hexColor || !hexColor.startsWith('#') || (hexColor.length !== 4 && hexColor.length !== 7)) {
-        return isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)';
-    }
-
-    let r_hex: string, g_hex: string, b_hex: string;
-
-    if (hexColor.length === 4) { // #RGB
-        r_hex = hexColor[1] + hexColor[1];
-        g_hex = hexColor[2] + hexColor[2];
-        b_hex = hexColor[3] + hexColor[3];
-    } else { // #RRGGBB
-        r_hex = hexColor.slice(1, 3);
-        g_hex = hexColor.slice(3, 5);
-        b_hex = hexColor.slice(5, 7);
-    }
-    
-    let r = parseInt(r_hex, 16);
-    let g = parseInt(g_hex, 16);
-    let b = parseInt(b_hex, 16);
-
-    r /= 255; g /= 255; b /= 255;
-    const max = Math.max(r, g, b), min = Math.min(r, g, b);
-    let h = 0, s, l = (max + min) / 2;
-
-    if (max === min) {
-        s = 0;
-    } else {
-        const d = max - min;
-        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-        switch (max) {
-            case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-            case g: h = (b - r) / d + 2; break;
-            case b: h = (r - g) / d + 4; break;
-        }
-        h /= 6;
-    }
-    
-    if (isDarkMode) {
-        s = isWinner ? s * 0.7 : s * 0.5;
-        l = isWinner ? 0.28 : 0.22;
-    } else {
-        s = isWinner ? s * 0.7 + 0.1 : s * 0.5 + 0.1;
-        l = isWinner ? 0.88 : 0.94;
-    }
-
-    let r2, g2, b2;
-    if (s === 0) {
-        r2 = g2 = b2 = l;
-    } else {
-        const hue2rgb = (p: number, q: number, t: number) => {
-            if (t < 0) t += 1;
-            if (t > 1) t -= 1;
-            if (t < 1/6) return p + (q - p) * 6 * t;
-            if (t < 1/2) return q;
-            if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
-            return p;
-        };
-        const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-        const p = 2 * l - q;
-        r2 = hue2rgb(p, q, h + 1/3);
-        g2 = hue2rgb(p, q, h);
-        b2 = hue2rgb(p, q, h - 1/3);
-    }
-    
-    const toHex = (c: number) => ('00' + Math.round(c * 255).toString(16)).slice(-2);
-    
-    return `#${toHex(r2)}${toHex(g2)}${toHex(b2)}`;
-};
 
 interface MatchManagerProps extends UseCrickIQStateReturn {
     onStartMatch: (match: Match) => void;
@@ -919,14 +850,11 @@ const MatchManager: React.FC<MatchManagerProps> = (props) => {
                                     if (!team1 || !team2) return null;
 
                                     let winnerMessage = "Match Drawn";
-                                    let winnerTeam: Team | null | 'draw' = 'draw';
                                     if (match.wasAbandoned) {
                                         winnerMessage = 'Match Abandoned';
-                                        winnerTeam = null;
                                     } else if (match.winnerId && match.winnerId !== 'draw') {
                                         const winner = getTeamById(match.winnerId);
                                         if (winner) {
-                                            winnerTeam = winner;
                                             if (match.innings2 && winner.id === match.innings2.battingTeamId) {
                                                 const battingTeam = getTeamById(match.innings2.battingTeamId);
                                                 const wicketsLeft = (battingTeam?.players.length || 11) - 1 - (match.innings2.wickets || 0);
@@ -943,23 +871,18 @@ const MatchManager: React.FC<MatchManagerProps> = (props) => {
                                     const team1Score = match.innings1?.battingTeamId === team1.id ? match.innings1 : match.innings2;
                                     const team2Score = match.innings1?.battingTeamId === team2.id ? match.innings1 : match.innings2;
                                     
-                                    const isWinner = (team: Team) => winnerTeam !== 'draw' && winnerTeam?.id === team.id;
-
                                     let manOfTheMatchPlayer: Player | undefined;
                                     if (match.manOfTheMatchId) {
                                         const allPlayers = teams.flatMap(t => t.players);
                                         manOfTheMatchPlayer = allPlayers.find(p => p.id === match.manOfTheMatchId);
                                     }
                                     
-                                    const isDarkMode = document.documentElement.classList.contains('dark');
-                                    const team1Bg = hexToPastel(team1.logo, isWinner(team1), isDarkMode);
-                                    const team2Bg = hexToPastel(team2.logo, isWinner(team2), isDarkMode);
-
 
                                     return (
                                         <CrickIQCard 
                                             key={match.id} 
-                                             className="flex flex-col space-y-4 cursor-pointer hover: hover:-translate-y-1 transition-transform duration-300"
+                                            accentColor={team1.logo}
+                                            className="flex flex-col space-y-4 cursor-pointer hover:-translate-y-1 transition-transform duration-300"
                                             onClick={() => onViewMatchResult(match.id)}
                                         >
                                             <div className="pb-2 border-b border-brand-blue/15">
@@ -975,7 +898,7 @@ const MatchManager: React.FC<MatchManagerProps> = (props) => {
                                                 )}
                                             </div>
                                             <div className="space-y-1">
-                                                <div style={{ backgroundColor: team1Bg }} className={`flex justify-between items-center py-1.5 px-2 rounded-lg transition-colors`}>
+                                                <div className={`flex justify-between items-center py-1.5 px-2 transition-colors`}>
                                                     <div className="flex items-center gap-2 font-bold text-text-primary">
                                                         <div className="w-6 h-6 flex items-center justify-center rounded-md text-button text-white text-caption" style={{ backgroundColor: team1.logo }}>
                                                             {team1.name.substring(0, 2).toUpperCase()}
@@ -984,7 +907,7 @@ const MatchManager: React.FC<MatchManagerProps> = (props) => {
                                                     </div>
                                                     <span className="font-mono font-bold text-text-primary">{team1Score ? `${team1Score.score}/${team1Score.wickets} (${team1Score.overs})` : 'DNB'}</span>
                                                 </div>
-                                                <div style={{ backgroundColor: team2Bg }} className={`flex justify-between items-center py-1.5 px-2 rounded-lg transition-colors`}>
+                                                <div className={`flex justify-between items-center py-1.5 px-2 transition-colors`}>
                                                     <div className="flex items-center gap-2 font-bold text-text-primary">
                                                         <div className="w-6 h-6 flex items-center justify-center rounded-md text-button text-white text-caption" style={{ backgroundColor: team2.logo }}>
                                                             {team2.name.substring(0, 2).toUpperCase()}
@@ -995,7 +918,7 @@ const MatchManager: React.FC<MatchManagerProps> = (props) => {
                                                 </div>
                                             </div>
                                             
-                                            <div className="text-center text-body font-semibold py-1.5 px-2 rounded-lg bg-primary/50">
+                                            <div className="text-center text-body font-semibold py-1.5 px-2">
                                                 {winnerMessage}
                                             </div>
                                             
