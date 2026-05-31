@@ -7,7 +7,6 @@ import ConfirmationModal from './ConfirmationModal';
 import QuickMatchSetup from './QuickMatchSetup';
 import { useNotification } from '../hooks/useNotification';
 import QuickMatchHistory from './QuickMatchHistory';
-import Comparison from './Comparison';
 import { Plus, Minus } from 'lucide-react';
 import { validateQuickMatch } from '../utils/validation';
 
@@ -94,7 +93,7 @@ const TournamentManager: React.FC<TournamentManagerProps> = (props) => {
     const [quickPlayers, setQuickPlayers] = useState<number | ''>(8);
     const [confirmation, setConfirmation] = useState<{ title: string; message: string; onConfirm: () => void; } | null>(null);
     const { showNotification } = useNotification();
-    const [homeView, setHomeView] = useState<'quickMatches' | 'comparison'>('quickMatches');
+    const [homeView, setHomeView] = useState<'quickMatches'>('quickMatches');
 
     const [selectedTeam1, setSelectedTeam1] = useState<Team | null>(null);
     const [selectedTeam2, setSelectedTeam2] = useState<Team | null>(null);
@@ -102,8 +101,7 @@ const TournamentManager: React.FC<TournamentManagerProps> = (props) => {
     const [activeSuggestionBox, setActiveSuggestionBox] = useState<'team1' | 'team2' | null>(null);
 
     // State for swipe gestures
-    const [touchStartX, setTouchStartX] = useState<number | null>(null);
-    const [touchCurrentX, setTouchCurrentX] = useState<number | null>(null);
+
 
     const quickMatchHistoryTeams = useMemo(() => {
         const allTeams = teams;
@@ -253,47 +251,7 @@ const TournamentManager: React.FC<TournamentManagerProps> = (props) => {
         setTimeout(() => setIsSubmittingQuickMatch(false), 500);
     };
     
-    // Swipe handlers
-    const handleTouchStart = (e: React.TouchEvent) => {
-        const target = e.target as HTMLElement;
-        if (target.closest('button, a, input, select, textarea, [role="button"], .no-swipe, .recharts-surface, .overflow-x-auto, [data-no-swipe="true"]')) {
-            return;
-        }
-        setTouchStartX(e.targetTouches[0].clientX);
-        setTouchCurrentX(e.targetTouches[0].clientX);
-    };
 
-    const handleTouchMove = (e: React.TouchEvent) => {
-        if (touchStartX === null) return;
-        setTouchCurrentX(e.targetTouches[0].clientX);
-    };
-
-    const handleTouchEnd = () => {
-        if (touchStartX === null || touchCurrentX === null) {
-            return;
-        }
-
-        const diffX = touchStartX - touchCurrentX;
-        const SWIPE_THRESHOLD = 75;
-
-        if (Math.abs(diffX) > SWIPE_THRESHOLD) {
-            const tabs: ('quickMatches' | 'comparison')[] = ['quickMatches', 'comparison'];
-            const currentIndex = tabs.indexOf(homeView);
-
-            if (diffX > 0) { // Swiped left
-                if (currentIndex < tabs.length - 1) {
-                    setHomeView(tabs[currentIndex + 1]);
-                }
-            } else { // Swiped right
-                if (currentIndex > 0) {
-                    setHomeView(tabs[currentIndex - 1]);
-                }
-            }
-        }
-
-        setTouchStartX(null);
-        setTouchCurrentX(null);
-    };
 
     if (quickMatchSetupId && quickMatch) {
         return <QuickMatchSetup 
@@ -308,26 +266,16 @@ const TournamentManager: React.FC<TournamentManagerProps> = (props) => {
     return (
         <div className="space-y-6">
             
-            <div className="border-b border-brand-blue/15 flex items-center gap-4 overflow-x-auto no-scrollbar">
+            <div className="border-b border-brand-blue/15 flex items-center gap-4 overflow-x-auto no-scrollbar pb-1">
                 <button
                     onClick={() => setHomeView('quickMatches')}
                     className={`py-2 px-1 font-bold transition-colors duration-300 text-body flex-shrink-0 ${homeView === 'quickMatches' ? 'border-b-2 border-brand-blue text-brand-blue dark:text-white dark:border-brand-blue' : 'border-b-2 border-transparent text-text-secondary dark:text-gray-300 hover:text-text-primary'}`}
                 >
                     Quick Matches
                 </button>
-                <button
-                    onClick={() => setHomeView('comparison')}
-                    className={`py-2 px-1 font-bold transition-colors duration-300 text-body flex-shrink-0 ${homeView === 'comparison' ? 'border-b-2 border-brand-blue text-brand-blue dark:text-white dark:border-brand-blue' : 'border-b-2 border-transparent text-text-secondary dark:text-gray-300 hover:text-text-primary'}`}
-                >
-                    Compare
-                </button>
             </div>
             
-            <div
-                onTouchStart={handleTouchStart}
-                onTouchMove={handleTouchMove}
-                onTouchEnd={handleTouchEnd}
-            >
+            <div>
 
                 {homeView === 'quickMatches' && (
                     <div className="space-y-6 animate-fade-in">
@@ -460,11 +408,7 @@ const TournamentManager: React.FC<TournamentManagerProps> = (props) => {
                     </div>
                 )}
 
-                {homeView === 'comparison' && (
-                    <div className="animate-fade-in">
-                        <Comparison {...props} />
-                    </div>
-                )}
+
             </div>
 
             {confirmation && (
