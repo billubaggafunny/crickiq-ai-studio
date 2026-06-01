@@ -17,7 +17,7 @@ interface MatchScorecardProps {
     hideHeader?: boolean;
 }
 
-const InningsScorecard: React.FC<{ innings: Innings; teams: Team[]; }> = ({ innings, teams }) => {
+const InningsScorecard: React.FC<{ innings: Innings; teams: Team[]; match: Match; }> = ({ innings, teams, match }) => {
     const battingTeam = teams.find(t => t.id === innings.battingTeamId);
     const bowlingTeam = teams.find(t => t.id === innings.bowlingTeamId);
 
@@ -87,9 +87,20 @@ const InningsScorecard: React.FC<{ innings: Innings; teams: Team[]; }> = ({ inni
                                 const statusText = stats.status === BattingStatus.OUT 
                                     ? getDismissalText(stats.outDetails, getPlayerName)
                                     : stats.status;
+                                    
+                                const replacement = match.replacements?.find(r => r.incomingPlayerId === player.id);
+                                const replacementTag = replacement ? (
+                                    <span className={`ml-2 text-[10px] font-bold px-1.5 py-0.5 rounded uppercase ${replacement.reason === 'Impact Player' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-200' : 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200'}`}>
+                                        {replacement.reason === 'Impact Player' ? 'IP' : 'Sub'}
+                                    </span>
+                                ) : null;
+
                                 return (
                                     <Tr key={player.id} className="hover:bg-secondary/30 dark:hover:bg-black/20">
-                                        <Td className="font-bold text-slate-800 dark:">{player.name}</Td>
+                                        <Td className="font-bold text-slate-800 dark:">
+                                            {player.name}
+                                            {replacementTag}
+                                        </Td>
                                         <Td >{statusText}</Td>
                                         <Td className="text-right font-bold text-brand-blue">{stats.runs}</Td>
                                         <Td className="text-right">{stats.balls}</Td>
@@ -152,9 +163,19 @@ const InningsScorecard: React.FC<{ innings: Innings; teams: Team[]; }> = ({ inni
                         <Tbody >
                             {Object.values(innings.bowlerScores).map((stats: BowlerScore) => {
                                 const bowlerName = getPlayerName(stats.playerId);
+                                const replacement = match.replacements?.find(r => r.incomingPlayerId === stats.playerId);
+                                const replacementTag = replacement ? (
+                                    <span className={`ml-2 text-[10px] font-bold px-1.5 py-0.5 rounded uppercase ${replacement.reason === 'Impact Player' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-200' : 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200'}`}>
+                                        {replacement.reason === 'Impact Player' ? 'IP' : 'Sub'}
+                                    </span>
+                                ) : null;
+
                                 return (
                                     <Tr key={stats.playerId} className="hover:bg-secondary/30 dark:hover:bg-black/20">
-                                        <Td className="font-bold text-slate-800 dark:">{bowlerName}</Td>
+                                        <Td className="font-bold text-slate-800 dark:">
+                                            {bowlerName}
+                                            {replacementTag}
+                                        </Td>
                                         <Td className="text-right">{stats.overs}</Td>
                                         <Td className="text-right">{stats.maidens}</Td>
                                         <Td className="text-right">{stats.runsConceded}</Td>
@@ -373,7 +394,7 @@ const MatchScorecard: React.FC<MatchScorecardProps> = ({ match, tournament, team
     };
 
     return (
-        <div className="h-screen w-screen flex flex-col bg-secondary safe-pad-t safe-pad-l safe-pad-r">
+        <div className={hideHeader ? "flex flex-col h-full bg-secondary" : "h-screen w-screen flex flex-col bg-secondary safe-pad-t safe-pad-l safe-pad-r"}>
             {!hideHeader && (<Header 
                 title="Match Scorecard" 
                 showBack 
@@ -515,10 +536,31 @@ const MatchScorecard: React.FC<MatchScorecardProps> = ({ match, tournament, team
                             )}
                         </div>
                         <div key={activeTab} className="animate-fade-in">
-                            {activeTab === 'innings1' && <InningsScorecard innings={match.innings1} teams={teams} />}
-                            {activeTab === 'innings2' && match.innings2 && <InningsScorecard innings={match.innings2} teams={teams} />}
+                            {activeTab === 'innings1' && <InningsScorecard innings={match.innings1} teams={teams} match={match} />}
+                            {activeTab === 'innings2' && match.innings2 && <InningsScorecard innings={match.innings2} teams={teams} match={match} />}
                         </div>
                     </div>
+                 )}
+
+                 {match.replacements && match.replacements.length > 0 && (
+                     <div className="bg-primary p-4 rounded-xl shadow-sm border border-brand-blue/10">
+                         <h3 className="font-bold text-gray-900 dark:text-text-primary border-l-4 border-brand-blue pl-3 text-sm uppercase tracking-wider mb-3">Match Notes</h3>
+                         <ul className="space-y-2">
+                             {match.replacements.map((r, idx) => {
+                                 const incomingPlayer = getPlayerName(r.incomingPlayerId);
+                                 const outgoingPlayer = getPlayerName(r.outgoingPlayerId);
+                                 const isImpactPlayer = r.reason === 'Impact Player';
+                                 return (
+                                     <li key={idx} className="flex gap-2 items-start text-sm text-text-secondary">
+                                         <span className={`flex-shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full ${isImpactPlayer ? 'bg-blue-500' : 'bg-red-500'}`}></span>
+                                         <span>
+                                             <strong>{r.reason || 'Substitute'}:</strong> {incomingPlayer} replaced {outgoingPlayer}
+                                         </span>
+                                     </li>
+                                 );
+                             })}
+                         </ul>
+                     </div>
                  )}
              </div>
 

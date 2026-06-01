@@ -18,6 +18,8 @@ import Drawer from './components/Drawer';
 import ErrorBoundary from './components/ErrorBoundary';
 import Header from './components/Header';
 import AnalyticsWorkspace from './components/AnalyticsWorkspace';
+import TossModal from './components/TossModal';
+import MatchDetailsHub from './components/MatchDetailsHub';
 
 interface DrinksBreakOverlayProps {
     status: 'selecting' | 'active';
@@ -117,6 +119,15 @@ const DrinksBreakOverlay: React.FC<DrinksBreakOverlayProps> = ({
     );
 };
 
+export interface ReturnLocation {
+    activeTab?: string;
+    selectedTournamentId?: string | null;
+    isQuickMatchMode?: boolean;
+    quickMatchSetupId?: string | null;
+    matchManagerView?: string;
+    matchType?: boolean;
+}
+
 const AppUI: React.FC = () => {
     const { showNotification } = useNotification();
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -131,9 +142,89 @@ const AppUI: React.FC = () => {
     const [selectedTournamentId, setSelectedTournamentId] = useState<string | null>(null);
     const [isQuickMatchMode, setIsQuickMatchMode] = useState(false);
     const [viewingScorecardMatchId, setViewingScorecardMatchId] = useState<string | null>(null);
+    const [viewingMatchHubId, setViewingMatchHubId] = useState<string | null>(null);
+    const [matchHubReturnLocation, setMatchHubReturnLocation] = useState<{
+        activeTab: string;
+        selectedTournamentId: string | null;
+        isQuickMatchMode: boolean;
+        quickMatchSetupId?: string | null;
+        matchManagerView?: string;
+        matchType?: boolean;
+    } | null>(null);
+
+    const openMatchHub = (matchId: string, returnLocation?: Record<string, unknown>) => {
+        const match = tournamentState.matches.find(m => m.id === matchId);
+        if (!match) {
+            console.error('Match not found');
+            return;
+        }
+
+        const team1 = tournamentState.getTeamById(match.team1Id);
+        const team2 = tournamentState.getTeamById(match.team2Id);
+        if (!team1 || !team2) {
+            console.error('Teams not found');
+            return;
+        }
+
+        if (!match.isQuickMatch) {
+            if (!match.tournamentId) {
+                console.error('Tournament match must have a tournamentId');
+                return;
+            }
+            const tournament = tournamentState.getTournamentById(match.tournamentId);
+            if (!tournament) {
+                console.error('Tournament not found');
+                return;
+            }
+        }
+
+        setMatchHubReturnLocation({
+            activeTab,
+            selectedTournamentId,
+            isQuickMatchMode,
+            quickMatchSetupId,
+            ...(returnLocation || {})
+        });
+        setViewingMatchHubId(matchId);
+    };
+
+    useEffect(() => {
+        if (!viewingMatchHubId && matchHubReturnLocation !== null) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+            setMatchHubReturnLocation(null);
+        }
+    }, [viewingMatchHubId, matchHubReturnLocation]);
+
+    const closeMatchHub = () => {
+        if (matchHubReturnLocation) {
+            setActiveTab(matchHubReturnLocation.activeTab);
+            if (matchHubReturnLocation.selectedTournamentId !== undefined) {
+                setSelectedTournamentId(matchHubReturnLocation.selectedTournamentId);
+            }
+            if (matchHubReturnLocation.isQuickMatchMode !== undefined) {
+                setIsQuickMatchMode(matchHubReturnLocation.isQuickMatchMode);
+            }
+            if (matchHubReturnLocation.quickMatchSetupId !== undefined) {
+                setQuickMatchSetupId(matchHubReturnLocation.quickMatchSetupId);
+            }
+        } else {
+            setActiveTab('tournament');
+        }
+        setViewingMatchHubId(null);
+    };
+
     const [isJustFinished, setIsJustFinished] = useState(false);
     const [startRematchWithToss, setStartRematchWithToss] = useState(false);
     const [confirmation, setConfirmation] = useState<{ title: string; message: React.ReactNode; onConfirm: () => void; confirmText?: string; confirmVariant?: 'danger' | 'primary'; } | null>(null);
+
+    const [tossMatch, setTossMatch] = useState<Match | null>(null);
+
+    const handleTossConfirm = (winnerId: string, decision: 'bat' | 'bowl') => {
+        if (tossMatch) {
+            tournamentState.setTossForMatch(tossMatch.id, winnerId, decision);
+            setTossMatch(null);
+        }
+    };
 
     const [notificationsEnabled, setNotificationsEnabled] = useState(() => localStorage.getItem('notificationsEnabled') === 'true');
     const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>(() => 
@@ -362,6 +453,17 @@ const AppUI: React.FC = () => {
         }
     };
 
+    const handleEditMatch = (match: Match) => {
+        if (match.isQuickMatch) {
+            setIsQuickMatchMode(true);
+            setQuickMatchSetupId(match.id);
+            setActiveTab('tournament'); // Navigates to Home -> QuickMatchSetup
+        } else if (match.tournamentId) {
+            setSelectedTournamentId(match.tournamentId);
+            setActiveTab('matches'); // Navigates to Tournament details where editing happens
+        }
+    };
+
     const handleStartDrinksBreak = () => {
         setDrinksBreakStatus('selecting');
         showNotification("Select drinks break duration", 'info');
@@ -428,6 +530,16 @@ const AppUI: React.FC = () => {
         if (!scorecardMatchToView) return null;
         return tournamentState.getTournamentById(scorecardMatchToView.tournamentId);
     }, [scorecardMatchToView, tournamentState]);
+
+    const hubMatchToView = useMemo(() => {
+        if (!viewingMatchHubId) return null;
+        return tournamentState.matches.find(m => m.id === viewingMatchHubId);
+    }, [viewingMatchHubId, tournamentState.matches]);
+
+    const tournamentForHub = useMemo(() => {
+        if (!hubMatchToView || !hubMatchToView.tournamentId) return undefined;
+        return tournamentState.getTournamentById(hubMatchToView.tournamentId);
+    }, [hubMatchToView, tournamentState]);
 
     useEffect(() => {
         // If we are viewing a scorecard, but the match is no longer 'completed' (e.g., after an undo),
@@ -501,6 +613,35 @@ const AppUI: React.FC = () => {
         );
     }
     
+    if (hubMatchToView) {
+        const team1 = tournamentState.getTeamById(hubMatchToView.team1Id);
+        const team2 = tournamentState.getTeamById(hubMatchToView.team2Id);
+        if (team1 && team2) {
+            return (
+                <div className="theme-blue h-screen w-full">
+                    <ErrorBoundary componentName="Match Details Hub" onReset={closeMatchHub}>
+                        <MatchDetailsHub
+                            match={hubMatchToView}
+                            team1={team1}
+                            team2={team2}
+                            tournament={tournamentForHub}
+                            teams={tournamentState.teams}
+                            onBack={closeMatchHub}
+                            setManOfTheMatch={tournamentState.setManOfTheMatch}
+                            onStartMatch={(m) => { closeMatchHub(); handleStartMatch(m); }}
+                            onContinueMatch={(m) => { closeMatchHub(); handleContinueMatch(m); }}
+                            onSetToss={(m) => { closeMatchHub(); setTossMatch(m); }}
+                            onEditMatch={(m) => { closeMatchHub(); handleEditMatch(m); }}
+                            isMatchLive={isMatchActuallyLive}
+                            updateTeam={tournamentState.updateTeam}
+                            addPlayerReplacement={tournamentState.addPlayerReplacement}
+                        />
+                    </ErrorBoundary>
+                </div>
+            );
+        }
+    }
+
     if (!isAuthenticated) {
         return <Home onLogin={handleLogin} onGuest={handleGuest} />;
     }
@@ -536,11 +677,13 @@ const AppUI: React.FC = () => {
                             isMatchLive={isMatchActuallyLive}
                             handleShareMatch={() => { }} // Need to pass or implement
                             handleDeleteMatch={(id) => tournamentState.deleteMatch(id)}
-                            onStartMatch={(match) => tournamentState.onStartMatch(match)}
-                            onContinueMatch={(match) => tournamentState.onContinueMatch(match)}
+                            onStartMatch={(match) => handleStartMatch(match)}
+                            onContinueMatch={(match) => handleContinueMatch(match)}
                             onViewMatchResult={(matchId) => handleViewScorecard(matchId)}
-                            setTossMatch={() => {}} // Need to pass or implement
-                            setEditingMatch={() => {}} // Need to pass or implement
+                            setTossMatch={setTossMatch}
+                            setEditingMatch={handleEditMatch}
+                            onOpenMatchHub={openMatchHub}
+                            initialMatchType={matchHubReturnLocation?.matchType}
                         />
                     </ErrorBoundary>
                 );
@@ -557,6 +700,8 @@ const AppUI: React.FC = () => {
                             onBack={handleBackToTournaments}
                             onViewTournament={handleViewTournament}
                             onViewMatchResult={handleViewScorecard}
+                            onOpenMatchHub={openMatchHub}
+                            initialView={matchHubReturnLocation?.matchManagerView}
                         />
                     </ErrorBoundary>
                 );
@@ -597,6 +742,7 @@ const AppUI: React.FC = () => {
                              onTournamentCreated={handleTournamentCreated}
                              onRematch={handleRematch}
                              startRematchWithToss={startRematchWithToss}
+                             onOpenMatchHub={openMatchHub}
                         />
                     </ErrorBoundary>
                 );
@@ -718,6 +864,16 @@ const AppUI: React.FC = () => {
                         message={confirmation.message}
                         confirmText={confirmation.confirmText}
                         confirmVariant={confirmation.confirmVariant}
+                    />
+                )}
+
+                {tossMatch && (
+                    <TossModal
+                        isOpen={!!tossMatch}
+                        onClose={() => setTossMatch(null)}
+                        onConfirm={handleTossConfirm}
+                        team1={{ id: tossMatch.team1Id, name: tournamentState.getTeamById(tossMatch.team1Id)?.name || 'Team 1' }}
+                        team2={{ id: tossMatch.team2Id, name: tournamentState.getTeamById(tossMatch.team2Id)?.name || 'Team 2' }}
                     />
                 )}
             </div>

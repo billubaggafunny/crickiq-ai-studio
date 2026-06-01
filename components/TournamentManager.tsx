@@ -68,6 +68,7 @@ interface TournamentManagerProps extends UseCrickIQStateReturn {
     onTournamentCreated: () => void;
     onRematch: (matchId: string) => void;
     startRematchWithToss?: boolean;
+    onOpenMatchHub: (matchId: string, returnLocation?: Record<string, unknown>) => void;
 }
 
 
@@ -87,6 +88,7 @@ const TournamentManager: React.FC<TournamentManagerProps> = (props) => {
         onViewQuickMatchResult,
         onRematch,
         startRematchWithToss,
+        onOpenMatchHub
     } = props;
     const [quickTeam1, setQuickTeam1] = useState('');
     const [quickTeam2, setQuickTeam2] = useState('');
@@ -406,7 +408,7 @@ const TournamentManager: React.FC<TournamentManagerProps> = (props) => {
                                 </div>
                             </div>
                         </CrickIQCard>
-                        <QuickMatchHistory {...props} setQuickMatchSetupId={setQuickMatchSetupId} onViewResult={onViewQuickMatchResult} onRematch={onRematch} />
+                        <QuickMatchHistory {...props} setQuickMatchSetupId={setQuickMatchSetupId} onViewResult={onViewQuickMatchResult} onRematch={onRematch} onOpenMatchHub={onOpenMatchHub} />
                     </div>
                 )}
 

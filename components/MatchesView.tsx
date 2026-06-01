@@ -15,11 +15,17 @@ export interface MatchesViewProps {
     onContinueMatch: (match: Match) => void;
     onStartMatch: (match: Match) => void;
     setTossMatch: (match: Match) => void;
+    onOpenMatchHub?: (matchId: string, returnLocation?: Record<string, unknown>) => void;
+    initialMatchType?: boolean;
 }
 
 const MatchesView: React.FC<MatchesViewProps> = (props) => {
     // true: Tournament, false: Single Match (Quick Match)
-    const [matchType, setMatchType] = useState(true);
+    const [matchType, setMatchType] = useState(props.initialMatchType !== undefined ? props.initialMatchType : true);
+
+    const handleOpenMatchHub = (matchId: string) => {
+        props.onOpenMatchHub?.(matchId, { matchType });
+    };
 
     const filteredMatches = useMemo(() => {
         const today = new Date(props.today);
@@ -68,6 +74,7 @@ const MatchesView: React.FC<MatchesViewProps> = (props) => {
                title={matchType ? "Tournament Matches" : "Quick Matches"}
                emptyMessage={`No ${matchType ? "Tournament" : "Quick"} matches.`}
                {...props}
+               onOpenMatchHub={handleOpenMatchHub}
             />
         </div>
     );

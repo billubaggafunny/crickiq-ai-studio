@@ -193,6 +193,15 @@ export interface Match {
     wasAbandoned?: boolean;
     knockoutType?: 'semifinal' | 'final';
     groupId?: 'a' | 'b';
+    replacements?: PlayerReplacement[];
+}
+
+export interface PlayerReplacement {
+    teamId: string;
+    outgoingPlayerId: string;
+    incomingPlayerId: string;
+    replacedAt: string;
+    reason?: string;
 }
 
 export interface PlayerCareerStats {

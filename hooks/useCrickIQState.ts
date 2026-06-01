@@ -168,6 +168,7 @@ export const useCrickIQState = () => {
         addMatch: matchDomain.addMatch,
         addMatchesBatch: matchDomain.addMatchesBatch,
         updateMatch: matchDomain.updateMatch,
+        addPlayerReplacement: matchDomain.addPlayerReplacement,
         deleteMatch: matchDomain.deleteMatch,
         addQuickMatch: matchDomain.addQuickMatch,
         createRematch: matchDomain.createRematch,

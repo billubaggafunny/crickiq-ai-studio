@@ -1,13 +1,15 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 import { Table, Thead, Tbody, Tr, Th, Td } from './CrickIQTable';
 import CrickIQCard from './CrickIQCard';
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import type { UseCrickIQStateReturn } from '../hooks/useCrickIQState';
 import type { Match, Ball, BowlerScore, Innings } from '../types';
 import { BattingStatus, WicketType, PlayerRole } from '../types';
-import { calculateStrikeRate, getDismissalText, calculateRunRate } from '../utils/cricketLogic';
+import { calculateStrikeRate, getDismissalText, calculateRunRate, generateCommentaryData } from '../utils/cricketLogic';
 import { getRoleEmoji, SwapIcon, PlusIcon, MinusIcon } from '../constants';
 import ConfirmationModal from './ConfirmationModal';
 import { useNotification } from '../hooks/useNotification';
+import ImpactPlayerModal from './ImpactPlayerModal';
 
 // FIX: Define LiveScoringProps interface to resolve TypeScript error.
 interface LiveScoringProps extends UseCrickIQStateReturn {
@@ -80,56 +82,44 @@ function usePrevious<T>(value: T): T | undefined {
     return ref.current;
 }
 
-const generateCommentaryForBall = (ball: Ball, getPlayerName: (id: string) => string): string => {
-    const bowlerName = getPlayerName(ball.bowlerId).split(' ')[0] || '';
-    const batsmanName = getPlayerName(ball.batsmanId).split(' ')[0] || '';
-    let text = `${bowlerName} to ${batsmanName}, `;
 
-    if (ball.isWicket && ball.wicket) {
-        const outDetails = {
-            bowlerId: ball.bowlerId,
-            type: ball.wicket.type,
-            fielders: ball.wicket.fielderIds
-        };
-        const dismissalText = getDismissalText(outDetails, getPlayerName);
-        text += `WICKET! ${dismissalText}.`;
-        if (ball.runs > 0) {
-            text += ` Plus ${ball.runs} run${ball.runs > 1 ? 's' : ''}.`;
-        }
-        return text;
+const CommentaryFeedDisplay: React.FC<{ data: ReturnType<typeof generateCommentaryData> }> = ({ data }) => {
+    if (data.length === 0) {
+        return <p className="text-text-secondary text-center py-8">Commentary will appear here as the match progresses.</p>;
     }
 
-    if (ball.isWide) {
-        text += `wide. ${ball.runs > 0 ? `${ball.runs} extra run${ball.runs > 1 ? 's' : ''}.` : ''}`;
-        return text;
-    }
-    if (ball.isNoBall) {
-        text += `no ball. ${ball.runs > 0 ? `${ball.runs} run${ball.runs > 1 ? 's' : ''}.` : ''}`;
-        return text;
-    }
-    if (ball.isBye) {
-        text += `${ball.runs} bye${ball.runs !== 1 ? 's' : ''}.`;
-        return text;
-    }
-    if (ball.isLegBye) {
-        text += `${ball.runs} leg bye${ball.runs !== 1 ? 's' : ''}.`;
-        return text;
-    }
-
-    switch (ball.runs) {
-        case 0: text += 'no run.'; break;
-        case 1: text += '1 run.'; break;
-        case 4: text += 'FOUR runs.'; break;
-        case 6: text += 'SIX runs!'; break;
-        default: text += `${ball.runs} runs.`;
-    }
-    return text;
+    return (
+        <>
+            {data.map(({ over, balls }) => (
+                <div key={`over-${over}`}>
+                    <h4 className="font-bold text-text-primary mb-2 border-b border-brand-blue/15 pb-1 sticky top-0 bg-secondary/80 backdrop-blur-sm py-1">Over {over}</h4>
+                    <div className="space-y-4">
+                        {balls.map(({ ball, text, displayBallNumber }, index) => {
+                            const { className: ballClass, text: ballText } = getBallDisplay(ball);
+                            return (
+                                <div key={index} className="flex gap-4 items-start">
+                                    <div className="flex flex-col items-center flex-shrink-0">
+                                        <div className={`${ballClass} flex-shrink-0`}>{ballText}</div>
+                                        <span className="text-caption text-text-secondary font-mono mt-1">{displayBallNumber}</span>
+                                    </div>
+                                    <p className="text-sm text-text-primary pt-1">{text}</p>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            ))}
+        </>
+    );
 };
 
-
-const LiveScoring: React.FC<LiveScoringProps> = ({ match, recordBall, getTeamById, updateLivePlayers, onEndMatch, retireBatsman, undoLastBall, endInnings, toggleFreeHit, onStartDrinksBreak }) => {
+const LiveScoring: React.FC<LiveScoringProps> = ({ match, recordBall, getTeamById, updateLivePlayers, onEndMatch, retireBatsman, undoLastBall, endInnings, toggleFreeHit, onStartDrinksBreak, addPlayerReplacement, updateTeam }) => {
     const { showNotification } = useNotification();
     const [activeScoringTab, setActiveScoringTab] = useState<'scoring' | 'players' | 'scoreboard' | 'commentary'>('scoring');
+    
+    // Impact Player Modal State
+    const [isImpactModalOpen, setIsImpactModalOpen] = useState(false);
+    const [impactModalTeamId, setImpactModalTeamId] = useState<string | null>(null);
     const [runs, setRuns] = useState(0);
     const [isWide, setIsWide] = useState(false);
     const [isNoBall, setIsNoBall] = useState(false);
@@ -279,45 +269,8 @@ const LiveScoring: React.FC<LiveScoringProps> = ({ match, recordBall, getTeamByI
         return bowlingTeam?.players.find(p => p.id === id)?.name || battingTeam?.players.find(p => p.id === id)?.name || 'Unknown';
     }, [battingTeam, bowlingTeam]);
 
-    const generateCommentaryData = useCallback((innings: Innings | undefined) => {
-        if (!innings) return [];
-    
-        const grouped: { [over: number]: { ball: Ball, text: string, displayBallNumber: string }[] } = {};
-        let legalBallsInOver = 0;
-        let currentOverForDisplay = 0;
-    
-        innings.balls.forEach(ball => {
-            if (!ball.isWide && !ball.isNoBall) {
-                if (legalBallsInOver >= 6) {
-                    legalBallsInOver = 0;
-                    currentOverForDisplay++;
-                }
-                legalBallsInOver++;
-            }
-            
-            const overKey = currentOverForDisplay;
-            if (!grouped[overKey]) {
-                grouped[overKey] = [];
-            }
-    
-            let displayBallNumber = `${overKey}.${legalBallsInOver}`;
-            if (ball.isWide) displayBallNumber += ' (wd)';
-            if (ball.isNoBall) displayBallNumber += ' (nb)';
-    
-            grouped[overKey].push({
-                ball,
-                text: generateCommentaryForBall(ball, getPlayerName),
-                displayBallNumber
-            });
-        });
-    
-        return Object.entries(grouped)
-            .sort(([a], [b]) => Number(b) - Number(a)) // Newest over first
-            .map(([over, balls]) => ({ over: Number(over) + 1, balls: balls.reverse() })); // Newest ball first within over
-    }, [getPlayerName]);
-
-    const firstInningsCommentaryData = useMemo(() => generateCommentaryData(match.innings1), [match.innings1, generateCommentaryData]);
-    const currentInningsCommentaryData = useMemo(() => generateCommentaryData(currentInnings), [currentInnings, generateCommentaryData]);
+    const firstInningsCommentaryData = useMemo(() => generateCommentaryData(match.innings1, getPlayerName), [match.innings1, getPlayerName]);
+    const currentInningsCommentaryData = useMemo(() => generateCommentaryData(currentInnings, getPlayerName), [currentInnings, getPlayerName]);
 
     const prevOnStrikeId = usePrevious(onStrikeId);
     const prevCurrentBowlerId = usePrevious(currentBowlerId);
@@ -563,36 +516,6 @@ const LiveScoring: React.FC<LiveScoringProps> = ({ match, recordBall, getTeamByI
         setTouchStartX(null);
         setTouchCurrentX(null);
     };
-
-    const CommentaryFeedDisplay: React.FC<{ data: ReturnType<typeof generateCommentaryData> }> = ({ data }) => {
-        if (data.length === 0) {
-            return <p className="text-text-secondary text-center py-8">Commentary will appear here as the match progresses.</p>;
-        }
-    
-        return (
-            <>
-                {data.map(({ over, balls }) => (
-                    <div key={`over-${over}`}>
-                        <h4 className="font-bold text-text-primary mb-2 border-b border-brand-blue/15 pb-1 sticky top-0 bg-secondary/80 backdrop-blur-sm py-1">Over {over}</h4>
-                        <div className="space-y-4">
-                            {balls.map(({ ball, text, displayBallNumber }, index) => {
-                                const { className: ballClass, text: ballText } = getBallDisplay(ball);
-                                return (
-                                    <div key={index} className="flex gap-4 items-start">
-                                        <div className="flex flex-col items-center flex-shrink-0">
-                                            <div className={`${ballClass} flex-shrink-0`}>{ballText}</div>
-                                            <span className="text-caption text-text-secondary font-mono mt-1">{displayBallNumber}</span>
-                                        </div>
-                                        <p className="text-sm text-text-primary pt-1">{text}</p>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </div>
-                ))}
-            </>
-        );
-    };
     
     const ballsThisOver = useMemo(() => {
         if (!currentInnings) return [];
@@ -636,9 +559,12 @@ const LiveScoring: React.FC<LiveScoringProps> = ({ match, recordBall, getTeamByI
         };
     }, [currentInnings]);
     
-    const availableBatsmen = battingTeam.players.filter(p => currentInnings.batsmanScores[p.id]?.status !== BattingStatus.OUT);
+    const replacedPlayerIds = useMemo(() => match.replacements?.map(r => r.outgoingPlayerId) || [], [match.replacements]);
+
+    const availableBatsmen = useMemo(() => battingTeam.players.filter(p => !replacedPlayerIds.includes(p.id) && currentInnings.batsmanScores[p.id]?.status !== BattingStatus.OUT), [battingTeam.players, replacedPlayerIds, currentInnings.batsmanScores]);
+    
     const maxOvers = match.maxOversPerBowler;
-const baseEligibleBowlers = bowlingTeam.players.filter(p => p.id !== currentInnings.lastBowlerId);
+const baseEligibleBowlers = bowlingTeam.players.filter(p => !replacedPlayerIds.includes(p.id) && p.id !== currentInnings.lastBowlerId);
 const atLimitIds = baseEligibleBowlers.filter(p => { if (!maxOvers) return false; const stats = currentInnings.bowlerScores[p.id]; return stats && Math.floor(stats.overs) >= maxOvers; }).map(p => p.id);
 const isExceptionActive = !!maxOvers && atLimitIds.length === baseEligibleBowlers.length && baseEligibleBowlers.length > 0;
 const availableBowlers = baseEligibleBowlers.map(p => { const isAtLimit = atLimitIds.includes(p.id); const isDisabled = isAtLimit && !isExceptionActive; return { ...p, isDisabled, isAtLimit }; });
@@ -1159,7 +1085,31 @@ const availableBowlers = baseEligibleBowlers.map(p => { const isAtLimit = atLimi
                     {activeScoringTab === 'players' && (
                         <div className="space-y-4">
                             <div>
-                                <h3 className="font-bold text-body mb-2 text-text-primary">Live Player Selection</h3>
+                                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2 gap-2">
+                                    <h3 className="font-bold text-body text-text-primary">Live Player Selection</h3>
+                                    {!isMatchOver && (
+                                        <div className="flex gap-2">
+                                            <button 
+                                                onClick={() => {
+                                                    setImpactModalTeamId(battingTeam.id);
+                                                    setIsImpactModalOpen(true);
+                                                }}
+                                                className="px-2 py-1 bg-red-100 hover:bg-red-200 dark:bg-red-800/40 dark:hover:bg-red-800/60 text-red-800 dark:text-red-200 text-xs font-bold rounded border border-red-300 dark:border-red-700 transition-colors"
+                                            >
+                                                Replace Batter
+                                            </button>
+                                            <button 
+                                                onClick={() => {
+                                                    setImpactModalTeamId(bowlingTeam.id);
+                                                    setIsImpactModalOpen(true);
+                                                }}
+                                                className="px-2 py-1 bg-red-100 hover:bg-red-200 dark:bg-red-800/40 dark:hover:bg-red-800/60 text-red-800 dark:text-red-200 text-xs font-bold rounded border border-red-300 dark:border-red-700 transition-colors"
+                                            >
+                                                Replace Bowler
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                     <div className="md:col-span-2">
                                         <div className="flex items-end gap-2">
@@ -1449,6 +1399,18 @@ const availableBowlers = baseEligibleBowlers.map(p => { const isAtLimit = atLimi
                     confirmVariant={confirmation.confirmVariant}
                 />
             )}
+            
+            <ImpactPlayerModal
+                isOpen={isImpactModalOpen}
+                onClose={() => {
+                    setIsImpactModalOpen(false);
+                    setImpactModalTeamId(null);
+                }}
+                match={match}
+                team={impactModalTeamId ? getTeamById(impactModalTeamId) : undefined}
+                updateTeam={updateTeam}
+                addPlayerReplacement={addPlayerReplacement}
+            />
         </div>
     );
 };

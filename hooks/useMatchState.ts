@@ -88,6 +88,14 @@ export const useMatchState = (
         console.log('[useMatchState] MATCH_UPDATED:', matchId);
     }, [teams, setMatches]);
 
+    const addPlayerReplacement = useCallback((matchId: string, teamId: string, outgoingPlayerId: string, incomingPlayerId: string, reason?: string) => {
+        setMatches(prev => prev.map(m => {
+            if (m.id !== matchId) return m;
+            const rep = { teamId, outgoingPlayerId, incomingPlayerId, reason, replacedAt: new Date().toISOString() };
+            return { ...m, replacements: [...(m.replacements || []), rep], updatedAt: createTimestamp() };
+        }));
+    }, [setMatches]);
+
     const deleteMatch = useCallback((matchId: string) => {
         setMatches(prev => prev.filter(m => m.id !== matchId));
     }, [setMatches]);
@@ -748,6 +756,7 @@ export const useMatchState = (
         addMatch,
         addMatchesBatch,
         updateMatch,
+        addPlayerReplacement,
         deleteMatch,
         addQuickMatch,
         createRematch,

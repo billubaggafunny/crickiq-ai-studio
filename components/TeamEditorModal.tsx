@@ -9,6 +9,7 @@ import ConfirmationModal from './ConfirmationModal';
 import { useNotification } from '../hooks/useNotification';
 import { calculatePlayerCareerStats } from '../utils/cricketLogic';
 import { localStorageAdapter } from '../storage/localStorageAdapter';
+import ImpactPlayerModal from './ImpactPlayerModal';
 
 const Button: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'primary' | 'secondary' | 'blue' }> = ({ children, className, variant = 'primary', ...props }) => {
     const baseClasses = 'px-4 py-2 rounded-2xl text-button transition-all duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-md';
@@ -26,10 +27,11 @@ interface TeamEditorModalProps extends Pick<UseCrickIQStateReturn, 'updateTeam' 
     onClose: () => void;
     onDone?: (teamId: string) => void;
     isMatchLive: boolean;
+    addPlayerReplacement?: UseCrickIQStateReturn['addPlayerReplacement'];
 }
 
 export const TeamEditorModal: React.FC<TeamEditorModalProps> = (props) => {
-    const { team, onClose, onDone, isMatchLive, updateTeam, getTournamentById, matches, tournamentId } = props;
+    const { team, onClose, onDone, isMatchLive, updateTeam, getTournamentById, matches, tournamentId, addPlayerReplacement } = props;
     const { showNotification } = useNotification();
     const [editedTeam, setEditedTeam] = useState<Team>(() => JSON.parse(JSON.stringify(team)));
     
@@ -61,6 +63,27 @@ export const TeamEditorModal: React.FC<TeamEditorModalProps> = (props) => {
 
     const tournament = useMemo(() => getTournamentById(tournamentId), [tournamentId, getTournamentById]);
     const maxPlayers = useMemo(() => tournament?.numberOfPlayers || 11, [tournament]);
+
+    const activeMatchForLock = useMemo(() => {
+        if (isMatchLive) {
+            return matches.find(m => m.status === 'live');
+        }
+        return matches.find(m => 
+            m.tournamentId === tournamentId && 
+            (m.team1Id === team.id || m.team2Id === team.id) &&
+            (
+                m.status === 'live' || 
+                m.status === 'completed' || 
+                m.wasAbandoned === true || 
+                m.toss !== undefined ||
+                (m.innings1 !== undefined && m.innings1.overs && m.innings1.overs.length > 0)
+            )
+        );
+    }, [matches, tournamentId, team.id, isMatchLive]);
+
+    const isTeamLocked = !!activeMatchForLock;
+
+    const [isImpactPlayerModalOpen, setIsImpactPlayerModalOpen] = useState(false);
 
     const isTeamFull = editedTeam.players.length >= maxPlayers;
 
@@ -171,9 +194,12 @@ export const TeamEditorModal: React.FC<TeamEditorModalProps> = (props) => {
     };
 
     const isUpdateDisabled = Object.keys(rowErrors).length > 0 || !editedTeam.name.trim();
-    const isSaveDisabled = isUpdateDisabled || isKeeperMissing || isCaptainMissing || isViceCaptainMissing;
+    const isSaveDisabled = isTeamLocked || isUpdateDisabled || isKeeperMissing || isCaptainMissing || isViceCaptainMissing;
     
     const saveButtonTitle = useMemo(() => {
+        if (isTeamLocked) {
+            return 'Team editing is disabled because this match has already started or toss has been set.';
+        }
         if (isKeeperMissing) {
             return `A team of ${maxPlayers} must have a Wicket Keeper.`;
         }
@@ -187,7 +213,7 @@ export const TeamEditorModal: React.FC<TeamEditorModalProps> = (props) => {
             return "Fix errors before saving";
         }
         return "";
-    }, [isKeeperMissing, isCaptainMissing, isViceCaptainMissing, isUpdateDisabled, maxPlayers]);
+    }, [isTeamLocked, isKeeperMissing, isCaptainMissing, isViceCaptainMissing, isUpdateDisabled, maxPlayers]);
 
     const [isSavingTeam, setIsSavingTeam] = useState(false);
 
@@ -250,21 +276,40 @@ export const TeamEditorModal: React.FC<TeamEditorModalProps> = (props) => {
                             >
                                 {editedTeam.name.substring(0, 2).toUpperCase()}
                             </div>
-                            <input
-                                type="color"
-                                value={editedTeam.logo}
-                                onChange={e => handleTeamInfoChange('logo', e.target.value)}
-                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                title="Change team color"
-                            />
+                            {!isTeamLocked && (
+                                <input
+                                    type="color"
+                                    value={editedTeam.logo}
+                                    onChange={e => handleTeamInfoChange('logo', e.target.value)}
+                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                    title="Change team color"
+                                />
+                            )}
                         </div>
-                        <input value={editedTeam.name} onChange={e => handleTeamInfoChange('name', e.target.value)} className={`w-full max-w-xs text-h2 font-bold text-center text-text-primary bg-primary/50 p-1.5 rounded-lg focus:outline-none border-2 transition-colors ${!editedTeam.name.trim() ? 'border-highlight focus:border-highlight' : 'border-brand-blue/15 focus:border-brand-blue'}`} placeholder="Team Name" />
+                        <input disabled={isTeamLocked} value={editedTeam.name} onChange={e => handleTeamInfoChange('name', e.target.value)} className={`w-full max-w-xs text-h2 font-bold text-center text-text-primary bg-primary/50 p-1.5 rounded-lg focus:outline-none border-2 transition-colors ${!editedTeam.name.trim() ? 'border-highlight focus:border-highlight' : 'border-brand-blue/15 focus:border-brand-blue'} ${isTeamLocked ? 'opacity-90' : ''}`} placeholder="Team Name" />
                     </div>
                     <button onClick={onClose} className="absolute text-h1 leading-none transform -translate-y-1/2 top-1/2 right-4 md:right-6 text-text-secondary hover:text-text-primary">&times;</button>
                 </div>
                 <div className="flex-grow p-4 md:p-6 overflow-y-auto no-scrollbar">
-                    <p className="text-sm text-center text-text-secondary mb-4 -mt-2">Edit player details directly in the table, or add a new player below.</p>
-                    {isKeeperMissing && (
+                    {isTeamLocked ? (
+                        <div className="p-3 mb-4 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800 text-sm font-bold rounded-lg flex flex-col md:flex-row items-center justify-between gap-4 text-center text-balance">
+                            <div className="flex items-center justify-center gap-2">
+                                <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                                <span>Lineup locked after toss or match start.</span>
+                            </div>
+                            {activeMatchForLock && activeMatchForLock.status !== 'completed' && !activeMatchForLock.wasAbandoned && addPlayerReplacement && (
+                                <button 
+                                    onClick={() => setIsImpactPlayerModalOpen(true)}
+                                    className="px-3 py-1.5 bg-red-100 hover:bg-red-200 dark:bg-red-800/40 dark:hover:bg-red-800/60 text-red-800 dark:text-red-200 rounded-md whitespace-nowrap border border-red-300 dark:border-red-700 transition-colors"
+                                >
+                                    Emergency Replacement
+                                </button>
+                            )}
+                        </div>
+                    ) : (
+                        <p className="text-sm text-center text-text-secondary mb-4 -mt-2">Edit player details directly in the table, or add a new player below.</p>
+                    )}
+                    {isKeeperMissing && !isTeamLocked && (
                         <div className="p-2 mb-4 bg-warning/20 dark:bg-warning/20 text-yellow-800 dark:text-yellow-300 text-body font-semibold rounded-md text-center">
                             A team of {maxPlayers} must have one designated Wicket Keeper.
                         </div>
@@ -291,25 +336,28 @@ export const TeamEditorModal: React.FC<TeamEditorModalProps> = (props) => {
                                         <Td className="p-1">
                                             <input
                                                 type="number"
+                                                disabled={isTeamLocked}
                                                 value={player.number}
                                                 onChange={e => handlePlayerChange(player.id, 'number', e.target.value === '' ? '' : parseInt(e.target.value, 10))}
-                                                className={`w-full text-center bg-primary p-1 rounded-md focus:outline-none focus:ring-2 ${rowErrors[player.id] ? 'ring-highlight' : 'ring-brand-blue'}`}
+                                                className={`w-full text-center bg-primary p-1 rounded-md focus:outline-none focus:ring-2 ${rowErrors[player.id] ? 'ring-highlight' : 'ring-brand-blue'} ${isTeamLocked ? 'opacity-80' : ''}`}
                                                 min="1"
                                             />
                                         </Td>
                                         <Td className="p-1">
                                             <input
                                                 type="text"
+                                                disabled={isTeamLocked}
                                                 value={player.name}
                                                 onChange={e => handlePlayerChange(player.id, 'name', e.target.value)}
-                                                className={`w-full bg-primary p-1 rounded-md focus:outline-none focus:ring-2 ${rowErrors[player.id] ? 'ring-highlight' : 'ring-brand-blue'}`}
+                                                className={`w-full bg-primary p-1 rounded-md focus:outline-none focus:ring-2 ${rowErrors[player.id] ? 'ring-highlight' : 'ring-brand-blue'} ${isTeamLocked ? 'opacity-80' : ''}`}
                                             />
                                         </Td>
                                         <Td className="p-1">
                                             <select
+                                                disabled={isTeamLocked}
                                                 value={player.role}
                                                 onChange={e => handlePlayerChange(player.id, 'role', e.target.value)}
-                                                className="w-full bg-primary p-1 rounded-md focus:outline-none focus:ring-2 ring-brand-blue appearance-none text-center"
+                                                className={`w-full bg-primary p-1 rounded-md focus:outline-none focus:ring-2 ring-brand-blue appearance-none text-center ${isTeamLocked ? 'opacity-80' : ''}`}
                                             >
                                                 {PLAYER_ROLES.map(role => <option key={role} value={role}>{getRoleEmoji(role)} {getShortRoleName(role)}</option>)}
                                             </select>
@@ -317,29 +365,31 @@ export const TeamEditorModal: React.FC<TeamEditorModalProps> = (props) => {
                                         <Td className="p-1 text-center">
                                             <input
                                                 type="radio"
+                                                disabled={isTeamLocked}
                                                 name="captain"
                                                 checked={editedTeam.captainId === player.id}
                                                 onChange={() => handleCaptainChange(player.id, false)}
-                                                className="w-5 h-5 accent-brand-blue"
+                                                className="w-5 h-5 accent-brand-blue disabled:opacity-70 disabled:cursor-not-allowed"
                                                 title="Set as Captain"
                                             />
                                         </Td>
                                         <Td className="p-1 text-center">
                                             <input
                                                 type="radio"
+                                                disabled={isTeamLocked}
                                                 name="vice-captain"
                                                 checked={editedTeam.viceCaptainId === player.id}
                                                 onChange={() => handleCaptainChange(player.id, true)}
-                                                className="w-5 h-5 accent-warning"
+                                                className="w-5 h-5 accent-warning disabled:opacity-70 disabled:cursor-not-allowed"
                                                 title="Set as Vice-Captain"
                                             />
                                         </Td>
                                         <Td className="p-1 text-center">
                                             <button
                                                 onClick={() => requestDeletePlayer(player)}
-                                                disabled={isMatchLive}
-                                                className="p-2 rounded-2xl text-text-secondary hover:text-highlight hover:bg-highlight/10 disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 disabled:cursor-not-allowed"
-                                                title={isMatchLive ? "Cannot delete players during a live match" : "Delete Player"}
+                                                disabled={isTeamLocked}
+                                                className="p-2 rounded-2xl text-text-secondary hover:text-highlight hover:bg-highlight/10 disabled:opacity-40 disabled:cursor-not-allowed"
+                                                title={isTeamLocked ? "Lineup locked" : "Delete Player"}
                                             >
                                                 <TrashIcon />
                                             </button>
@@ -349,7 +399,7 @@ export const TeamEditorModal: React.FC<TeamEditorModalProps> = (props) => {
                             </Tbody>
                         </Table>
 
-                    {!isTeamFull && (
+                    {!isTeamLocked && !isTeamFull && (
                         <div className="mt-4 pt-4 border-t border-gray-300 dark:border-gray-700">
                             <h4 className="font-bold text-text-primary mb-2 text-center">Add New Player</h4>
                             <div className="grid grid-cols-1 sm:grid-cols-[1fr_2fr_1fr_auto] gap-2 items-start">
@@ -404,6 +454,19 @@ export const TeamEditorModal: React.FC<TeamEditorModalProps> = (props) => {
                         message={deleteConfirmationMessage}
                         onClose={() => setConfirmDeletePlayer(null)}
                         onConfirm={handleConfirmDelete}
+                    />
+                )}
+                {activeMatchForLock && addPlayerReplacement && (
+                    <ImpactPlayerModal
+                        isOpen={isImpactPlayerModalOpen}
+                        onClose={() => setIsImpactPlayerModalOpen(false)}
+                        match={activeMatchForLock}
+                        team={editedTeam}
+                        updateTeam={(t) => {
+                            setEditedTeam(t);
+                            updateTeam(t);
+                        }}
+                        addPlayerReplacement={addPlayerReplacement}
                     />
                 )}
             </div>

@@ -206,11 +206,11 @@ const QuickMatchSetup: React.FC<QuickMatchSetupProps> = ({ match: initialMatch, 
                     >
                         {activeLineupTab === 'team1' ? (
                             <div className="animate-fade-in">
-                                <LineupPreview team={team1} playerStats={team1Stats} />
+                                <LineupPreview team={team1} playerStats={team1Stats} match={match} />
                             </div>
                         ) : (
                             <div className="animate-fade-in">
-                                <LineupPreview team={team2} playerStats={team2Stats} />
+                                <LineupPreview team={team2} playerStats={team2Stats} match={match} />
                             </div>
                         )}
                     </div>
@@ -303,7 +303,7 @@ const QuickMatchSetup: React.FC<QuickMatchSetupProps> = ({ match: initialMatch, 
                                 <h3 className="text-h2 text-text-primary">Team Preview</h3>
                                 <button onClick={() => setPreviewingTeam(null)} className="text-3xl leading-none text-text-secondary hover:text-text-primary">&times;</button>
                             </div>
-                            <LineupPreview team={previewingTeam} playerStats={previewingTeam.id === team1.id ? team1Stats : team2Stats} />
+                            <LineupPreview team={previewingTeam} playerStats={previewingTeam.id === team1.id ? team1Stats : team2Stats} match={match} />
                             <div className="mt-4 flex justify-end gap-2">
                                 <Button 
                                     onClick={() => { setEditingTeam(previewingTeam); setPreviewingTeam(null); }} 

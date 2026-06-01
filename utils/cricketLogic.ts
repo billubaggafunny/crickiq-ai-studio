@@ -589,3 +589,132 @@ export const calculatePointsTable = (
         return a.teamName.localeCompare(b.teamName);
     });
 };
+
+export const getBallDisplay = (ball: Ball) => {
+    let text = '';
+    let className = 'w-7 h-7 rounded-full flex items-center justify-center text-button ';
+    let title = '';
+
+    if (ball.isWicket) {
+        text = 'W';
+        if (ball.runs > 0) text = `${ball.runs}W`;
+        className += 'bg-highlight text-white';
+        title = `Wicket! ${ball.runs > 0 ? `+ ${ball.runs} run(s)` : ''}`;
+    } else if (ball.isWide) {
+        const totalRuns = ball.runs + 1;
+        text = `${totalRuns}wd`;
+        className += 'bg-yellow-400/80 text-gray-900 text-[10px]';
+        title = `${totalRuns} run(s) from wide`;
+    } else if (ball.isNoBall) {
+        text = `${ball.runs}nb`;
+        className += 'bg-yellow-400/80 text-gray-900 text-[10px]';
+        title = `${ball.runs + 1} run(s) from no-ball`;
+    } else if (ball.isBye) {
+        text = `${ball.runs}b`;
+        className += 'bg-gray-200 text-gray-700 text-[10px]';
+        title = `${ball.runs} bye(s)`;
+    } else if (ball.isLegBye) {
+        text = `${ball.runs}lb`;
+        className += 'bg-gray-200 text-gray-700 text-[10px]';
+        title = `${ball.runs} leg-bye(s)`;
+    } else if (ball.runs === 0) {
+        text = '•';
+        className += 'bg-gray-100 text-gray-500';
+        title = 'Dot ball';
+    } else {
+        text = ball.runs.toString();
+        title = `${ball.runs} runs`;
+        if (ball.runs === 4) {
+             className += 'bg-blue-500 text-white font-bold';
+        } else if (ball.runs === 6) {
+             className += 'bg-purple-600 text-white font-bold';
+        } else {
+             className += 'bg-white border border-gray-200 text-gray-800';
+        }
+    }
+
+    return { text, className, title };
+};
+
+export const generateCommentaryForBall = (ball: Ball, getPlayerName: (id: string) => string): string => {
+    const bowlerName = getPlayerName(ball.bowlerId).split(' ')[0] || '';
+    const batsmanName = getPlayerName(ball.batsmanId).split(' ')[0] || '';
+    let text = `${bowlerName} to ${batsmanName}, `;
+
+    if (ball.isWicket && ball.wicket) {
+        const outDetails = {
+            bowlerId: ball.bowlerId,
+            type: ball.wicket.type,
+            fielders: ball.wicket.fielderIds
+        };
+        const dismissalText = getDismissalText(outDetails, getPlayerName);
+        text += `WICKET! ${dismissalText}.`;
+        if (ball.runs > 0) {
+            text += ` Plus ${ball.runs} run${ball.runs > 1 ? 's' : ''}.`;
+        }
+        return text;
+    }
+
+    if (ball.isWide) {
+        text += `wide. ${ball.runs > 0 ? `${ball.runs} extra run${ball.runs > 1 ? 's' : ''}.` : ''}`;
+        return text;
+    }
+    if (ball.isNoBall) {
+        text += `no ball. ${ball.runs > 0 ? `${ball.runs} run${ball.runs > 1 ? 's' : ''}.` : ''}`;
+        return text;
+    }
+    if (ball.isBye) {
+        text += `${ball.runs} bye${ball.runs !== 1 ? 's' : ''}.`;
+        return text;
+    }
+    if (ball.isLegBye) {
+        text += `${ball.runs} leg bye${ball.runs !== 1 ? 's' : ''}.`;
+        return text;
+    }
+
+    switch (ball.runs) {
+        case 0: text += 'no run.'; break;
+        case 1: text += '1 run.'; break;
+        case 4: text += 'FOUR runs.'; break;
+        case 6: text += 'SIX runs!'; break;
+        default: text += `${ball.runs} runs.`;
+    }
+    return text;
+};
+
+export const generateCommentaryData = (innings: Innings | undefined, getPlayerName?: (id: string) => string) => {
+    if (!innings) return [];
+
+    const grouped: { [over: number]: { ball: Ball, text: string, displayBallNumber: string }[] } = {};
+    let legalBallsInOver = 0;
+    let currentOverForDisplay = 0;
+
+    innings.balls.forEach(ball => {
+        if (!ball.isWide && !ball.isNoBall) {
+            if (legalBallsInOver >= 6) {
+                legalBallsInOver = 0;
+                currentOverForDisplay++;
+            }
+            legalBallsInOver++;
+        }
+        
+        const overKey = currentOverForDisplay;
+        if (!grouped[overKey]) {
+            grouped[overKey] = [];
+        }
+
+        let displayBallNumber = `${overKey}.${legalBallsInOver}`;
+        if (ball.isWide) displayBallNumber += ' (wd)';
+        if (ball.isNoBall) displayBallNumber += ' (nb)';
+
+        grouped[overKey].push({
+            ball,
+            text: getPlayerName ? generateCommentaryForBall(ball, getPlayerName) : `${ball.runs} runs`, // simplified fallback
+            displayBallNumber
+        });
+    });
+
+    return Object.entries(grouped)
+        .sort(([a], [b]) => Number(b) - Number(a)) // Newest over first
+        .map(([over, balls]) => ({ over: Number(over) + 1, balls: balls.reverse() })); // Newest ball first within over
+};

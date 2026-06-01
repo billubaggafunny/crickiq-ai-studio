@@ -46,6 +46,8 @@ interface MatchManagerProps extends UseCrickIQStateReturn {
     onBack: () => void;
     onViewTournament: (tournamentId: string) => void;
     onViewMatchResult: (matchId: string) => void;
+    onOpenMatchHub?: (matchId: string, returnLocation?: Record<string, unknown>) => void;
+    initialView?: string;
 }
 
 const MatchManager: React.FC<MatchManagerProps> = (props) => {
@@ -53,11 +55,18 @@ const MatchManager: React.FC<MatchManagerProps> = (props) => {
         tournaments, teams, matches, addMatch, deleteMatch, updateToss, onStartMatch,
         onContinueMatch, getTeamById, getTournamentById, updateMatch,
         isMatchLive, selectedTournamentId,
-        addTeamToTournament, removeTeamFromTournament, onViewTournament, onViewMatchResult
+        addTeamToTournament, removeTeamFromTournament, onViewTournament, onViewMatchResult,
+        onOpenMatchHub,
+        initialView,
+        addPlayerReplacement
     } = props;
     const { showNotification } = useNotification();
     type View = 'tournaments' | 'schedule' | 'history' | 'teams' | 'stats' | 'points' | 'semifinals' | 'final';
-    const [view, setView] = useState<View>(selectedTournamentId ? 'teams' : 'tournaments');
+    const [view, setView] = useState<View>((initialView as View) || (selectedTournamentId ? 'teams' : 'tournaments'));
+
+    const handleOpenMatchHub = (matchId: string) => {
+        onOpenMatchHub?.(matchId, { matchManagerView: view });
+    };
     const [fixtureView, setFixtureView] = useState<'manual' | 'automation'>('manual');
     
     const [touchStartX, setTouchStartX] = useState<number | null>(null);
@@ -713,7 +722,8 @@ const MatchManager: React.FC<MatchManagerProps> = (props) => {
         onViewMatchResult,
         onContinueMatch,
         onStartMatch,
-        setTossMatch
+        setTossMatch,
+        onOpenMatchHub: handleOpenMatchHub
     };
 
     const getStageTag = (match: Match) => {
@@ -1080,6 +1090,7 @@ const MatchManager: React.FC<MatchManagerProps> = (props) => {
                 <TeamEditorModal 
                     team={editingTeam}
                     tournamentId={selectedTournamentId}
+                    addPlayerReplacement={addPlayerReplacement}
                     onClose={() => setEditingTeam(null)}
                     isMatchLive={isMatchLive}
                     onDone={() => {

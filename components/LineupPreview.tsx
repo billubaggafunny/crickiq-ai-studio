@@ -1,13 +1,14 @@
 import React from 'react';
-import type { Team } from '../types';
+import type { Team, Match } from '../types';
 import { getRoleIcon } from '../constants';
 
 interface LineupPreviewProps {
     team: Team;
     playerStats: Map<string, { matches: number; runsScored: number; wicketsTaken: number; }>;
+    match?: Match;
 }
 
-const LineupPreview: React.FC<LineupPreviewProps> = ({ team, playerStats }) => (
+const LineupPreview: React.FC<LineupPreviewProps> = ({ team, playerStats, match }) => (
     <div className="bg-primary/50 rounded-xl p-4">
         <h4
             className="text-center text-button text-white text-body p-2 rounded-lg mb-2"
@@ -30,12 +31,21 @@ const LineupPreview: React.FC<LineupPreviewProps> = ({ team, playerStats }) => (
                     const isCaptain = player.id === team.captainId;
                     const isViceCaptain = player.id === team.viceCaptainId;
                     const stats = playerStats.get(player.id) || { matches: 0, runsScored: 0, wicketsTaken: 0 };
+                    
+                    const replacement = match?.replacements?.find(r => r.incomingPlayerId === player.id);
+                    const replacementTag = replacement ? (
+                        <span className={`flex-shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded uppercase ${replacement.reason === 'Impact Player' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-200' : 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200'}`}>
+                            {replacement.reason === 'Impact Player' ? 'IP' : 'Sub'}
+                        </span>
+                    ) : null;
+
                     return (
                         <li key={player.id} className="grid grid-cols-[1fr_auto_auto_auto_auto] gap-x-2 items-center p-1.5 bg-secondary/70 dark:bg-black/20 rounded-md text-body">
                             <div className="flex items-center gap-2 overflow-hidden">
                                 <span className="font-mono text-caption text-text-secondary w-5 text-center flex-shrink-0">{player.number}</span>
                                 <div className="flex items-center gap-1 truncate">
                                     <span className="font-semibold text-text-primary truncate">{player.name}</span>
+                                    {replacementTag}
                                     {isCaptain && <span className="flex-shrink-0 text-caption font-bold text-warning bg-warning/100/20 px-1.5 rounded-2xl">C</span>}
                                     {isViceCaptain && <span className="flex-shrink-0 text-caption font-bold text-slate-600 bg-gray-500/20 px-1.5 rounded-2xl">VC</span>}
                                 </div>

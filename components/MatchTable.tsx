@@ -1,6 +1,6 @@
 import React from 'react';
 import CrickIQCard from './CrickIQCard';
-import { CalendarIcon, ShareIcon, EditIcon, TrashIcon, BallIcon, ClockIcon } from '../constants';
+import { CalendarIcon } from '../constants';
 import type { Match, Team, Tournament } from '../types';
 
 export interface MatchTableProps {
@@ -11,21 +11,13 @@ export interface MatchTableProps {
     getTeamById: (id: string) => Team | undefined;
     getTournamentById: (id: string) => Tournament | undefined;
     isMatchLive: boolean;
-    handleShareMatch: (match: Match) => void;
     setEditingMatch: (match: Match) => void;
-    handleDeleteMatch: (id: string) => void;
     onViewMatchResult: (id: string) => void;
     onContinueMatch: (match: Match) => void;
     onStartMatch: (match: Match) => void;
     setTossMatch: (match: Match) => void;
+    onOpenMatchHub?: (matchId: string, returnLocation?: Record<string, unknown>) => void;
 }
-
-const formatTime = (timeString: string | undefined) => {
-    if (!timeString) return '';
-    const [hourString, minute] = timeString.split(':');
-    const hour = +hourString % 24;
-    return new Date(1970, 0, 1, hour, +minute).toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit', hour12: true});
-};
 
 const MatchTable: React.FC<MatchTableProps> = ({
     list,
@@ -35,17 +27,40 @@ const MatchTable: React.FC<MatchTableProps> = ({
     getTeamById,
     getTournamentById,
     isMatchLive,
-    handleShareMatch,
     setEditingMatch,
-    handleDeleteMatch,
     onViewMatchResult,
     onContinueMatch,
     onStartMatch,
-    setTossMatch
+    setTossMatch,
+    onOpenMatchHub
 }) => {
     const dayAfterTomorrow = new Date(today);
     dayAfterTomorrow.setDate(today.getDate() + 2);
     dayAfterTomorrow.setHours(23, 59, 59, 999);
+
+    const getMatchDisplayState = (match: Match) => {
+        const matchDateObj = new Date(match.date.replace(/-/g, '/'));
+        matchDateObj.setHours(0, 0, 0, 0);
+        const todayNoTime = new Date(today);
+        todayNoTime.setHours(0, 0, 0, 0);
+        
+        const isToday = matchDateObj.getTime() === todayNoTime.getTime();
+        const isFuture = matchDateObj.getTime() > todayNoTime.getTime();
+
+        if (match.status === 'completed') return { type: 'completed', label: match.winnerId === 'draw' ? 'Match Drawn / Tied' : 'Completed' };
+        if (match.wasAbandoned) return { type: 'abandoned', label: 'Abandoned' };
+        if (match.status === 'live') return { type: 'live', label: 'Live Match' };
+        if (match.isDraft) return { type: 'draft', label: 'Setup Pending' };
+        
+        if (isToday) {
+            if (!match.toss) return { type: 'readyToToss', label: 'Ready for Toss' };
+            return { type: 'readyToStart', label: 'Ready to Start' };
+        }
+        
+        if (isFuture) return { type: 'upcoming', label: 'Upcoming Match' };
+        
+        return { type: 'pastUnplayed', label: 'Not Started' };
+    };
 
     return (
         <div className="space-y-6">
@@ -62,105 +77,121 @@ const MatchTable: React.FC<MatchTableProps> = ({
                     {list.map(match => {
                         const team1 = getTeamById(match.team1Id);
                         const team2 = getTeamById(match.team2Id);
-                        const tournament = getTournamentById(match.tournamentId);
+                        const tournament = getTournamentById(match.tournamentId || '');
                         if (!team1 || !team2) return null;
 
                         const arePlayerCountsEqual = team1.players.length === team2.players.length;
                         const playerMismatchTitle = `Teams must have same number of players (${team1.players.length} vs ${team2.players.length})`;
                         
-                        let statusDisplay = '';
-                        if (match.wasAbandoned) statusDisplay = 'Abandoned';
-                        else if (match.status === 'live') statusDisplay = 'Live';
-                        else if (match.status === 'completed') statusDisplay = 'Finished';
-                        else if (match.isDraft) statusDisplay = 'Upcoming';
-                        else {
-                            const matchDateObj = new Date(match.date.replace(/-/g, '/'));
-                            matchDateObj.setHours(0, 0, 0, 0);
-                            const todayStart = new Date(today);
-                            todayStart.setHours(0, 0, 0, 0);
-
-                            if (matchDateObj < todayStart) statusDisplay = 'Scheduled'; // Past scheduled, treat as scheduled
-                            else if (matchDateObj > dayAfterTomorrow) statusDisplay = 'Coming Soon';
-                            else statusDisplay = 'Scheduled';
-                        }
+                        const displayState = getMatchDisplayState(match);
 
                         return (
-                            <CrickIQCard key={match.id} className="flex flex-col space-y-2">
-                                <div className="flex justify-between items-start">
-                                    <div className="h-5 flex items-center gap-2">
-                                        <span className="text-[10px] font-bold text-gray-500 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-2xl flex items-center gap-1">
-                                            {statusDisplay}
+                            <CrickIQCard 
+                                key={match.id}
+                                accentColor={team1.logo}
+                                className="flex flex-col p-0 overflow-hidden shadow-sm hover:shadow-md bg-white rounded-xl transition-all duration-300"
+                            >
+                                <div 
+                                    className="p-5 cursor-pointer hover:bg-gray-50 flex-grow" 
+                                    onClick={() => {
+                                        if (displayState.type === 'draft') {
+                                            setEditingMatch(match);
+                                        } else {
+                                            onOpenMatchHub?.(match.id);
+                                        }
+                                    }}
+                                >
+                                    <div className="flex justify-between items-center mb-4">
+                                        <span className="bg-gray-100 px-2 py-0.5 rounded font-bold text-[10px] uppercase text-gray-600 tracking-wider">
+                                            {displayState.label}
                                         </span>
-                                        {/* Keep existing status indicators like LIVE, Group, etc. */}
-                                        {match.status === 'live' && (
-                                            <span className="text-[10px] font-bold text-danger bg-danger/20 dark:bg-red-900/30 px-2 py-0.5 rounded-2xl flex items-center gap-1 animate-pulse">
-                                                <span className="relative flex h-1.5 w-1.5"><span className="animate-ping absolute inline-flex h-full w-full rounded-2xl bg-red-400 opacity-75"></span><span className="relative inline-flex rounded-2xl h-1.5 w-1.5 bg-danger/100"></span></span>
+                                        <span className="text-sm font-medium text-gray-500">
+                                            {match.oversPerInnings} Overs
+                                        </span>
+                                    </div>
+                                    <div className="text-gray-500 text-xs text-center -mt-3 mb-3">
+                                        {new Date(match.date).toLocaleDateString()} {match.time ? `• ${match.time}` : ''}
+                                    </div>
+                                    
+                                    <h3 className="text-center font-bold text-gray-900 text-lg mb-4">
+                                        {team1.name} vs {team2.name}
+                                    </h3>
+                                    
+                                    {tournament && (
+                                        <div className="text-center text-xs font-semibold text-brand-blue mb-4">
+                                            {tournament.name} • {match.knockoutType ? (match.knockoutType === 'semifinal' ? 'Semi Final' : 'Final') : match.groupId ? `Group ${match.groupId.toUpperCase()}` : 'League Match'}
+                                        </div>
+                                    )}
+                                    {!tournament && !match.isDraft && (
+                                        <div className="text-center text-xs font-medium text-gray-400 mb-4 uppercase tracking-wider">
+                                            Quick Match
+                                        </div>
+                                    )}
+                                    
+                                    {displayState.type === 'live' ? (
+                                        <div className="flex justify-center mb-4">
+                                            <span className="text-xs font-bold text-red-600 bg-red-100 px-3 py-1 rounded-full flex items-center gap-1.5 animate-pulse">
+                                                <span className="flex h-2 w-2 rounded-full bg-red-500"></span>
                                                 LIVE
                                             </span>
-                                        )}
-                                        {match.groupId && (
-                                            <span className="text-[10px] font-bold text-teal-600 bg-teal-100 dark:bg-teal-900/30 px-2 py-0.5 rounded-2xl uppercase">Group {match.groupId.toUpperCase()}</span>
-                                        )}
-                                        {tournament?.format && !match.knockoutType && !match.groupId && (
-                                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-2xl uppercase ${
-                                                tournament.format === 'Round Robin' ? 'text-brand-blue bg-brand-blue/20 dark:bg-blue-900/30' : 
-                                                tournament.format === 'Knockout' ? 'text-brand-lavender bg-brand-lavender/20 dark:bg-brand-lavender/30' : ''
-                                            }`}>{tournament.format}</span>
-                                        )}
-                                        {match.knockoutType === 'final' && (
-                                            <span className="text-[10px] font-bold text-warning bg-warning/20 dark:bg-warning/20 px-2 py-0.5 rounded-2xl uppercase">Final</span>
-                                        )}
-                                        {match.knockoutType === 'semifinal' && (
-                                            <span className="text-[10px] font-bold text-brand-blue bg-brand-blue/20 dark:bg-blue-900/30 px-2 py-0.5 rounded-2xl uppercase">Semifinal</span>
-                                        )}
-                                    </div>
-                                    <div className="flex items-center -mt-1 -mr-1">
-                                        <button onClick={() => handleShareMatch(match)} className="p-1.5 rounded-full text-text-secondary hover:bg-primary transition-colors" title="Share Match"><ShareIcon className="w-4 h-4" /></button>
-                                        {match.status === 'scheduled' && (
-                                            <button onClick={() => setEditingMatch(match)} disabled={isMatchLive} className="p-1.5 rounded-full text-text-secondary hover:bg-primary transition-colors disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 disabled:cursor-not-allowed" title={isMatchLive ? "Cannot edit while a match is live" : "Edit Match"}><EditIcon className="w-4 h-4" /></button>
-                                        )}
-                                        <button onClick={() => handleDeleteMatch(match.id)} disabled={isMatchLive} className="p-1.5 rounded-full text-text-secondary hover:text-highlight hover:bg-highlight/10 transition-colors disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 disabled:cursor-not-allowed" title={isMatchLive ? "Cannot delete while a match is live" : "Delete Match"}><TrashIcon className="w-4 h-4" /></button>
-                                    </div>
-                                </div>
-    
-                                <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 text-center -mt-2">
-                                    <div className="flex flex-col items-center gap-1">
-                                        <div className="w-12 h-12 flex items-center justify-center rounded-lg text-white text-h2 shadow-md" style={{ backgroundColor: team1.logo }}>{team1.name.substring(0, 3).toUpperCase()}</div>
-                                        <h3 className="text-base font-bold text-text-primary truncate w-full">{team1.name}</h3>
-                                    </div>
-                                    <span className="text-lg text-text-secondary">VS</span>
-                                    <div className="flex flex-col items-center gap-1">
-                                        <div className="w-12 h-12 flex items-center justify-center rounded-lg text-white text-h2 shadow-md" style={{ backgroundColor: team2.logo }}>{team2.name.substring(0, 3).toUpperCase()}</div>
-                                        <h3 className="text-base font-bold text-text-primary truncate w-full">{team2.name}</h3>
-                                    </div>
-                                </div>
-    
-                                <div className="space-y-2 pt-2 border-t border-brand-blue/15">
-                                    {!arePlayerCountsEqual && ( <div className="text-center text-highlight font-semibold text-[10px] p-1 bg-highlight/10 rounded-md">Unequal players ({team1.players.length} vs {team2.players.length})</div>)}
-                                    <div className="flex justify-around items-center text-[11px] text-text-secondary">
-                                        <div className="flex items-center gap-1.5"><CalendarIcon className="w-3 h-3" /> <span className="font-semibold">{new Date(match.date.replace(/-/g, '/')).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</span></div>
-                                        <div className="flex items-center gap-1.5"><ClockIcon className="w-3 h-3" /> <span className="font-semibold">{formatTime(match.time)}</span></div>
-                                        <div className="flex items-center gap-1.5"><BallIcon className="w-3 h-3" /> <span className="font-semibold">{match.oversPerInnings} Overs</span></div>
-                                    </div>
-                                </div>
-                                
-                                <div className="text-center pt-2">
-                                    {match.status === 'completed' ? (
-                                        <button onClick={() => onViewMatchResult(match.id)} className="w-full px-4 py-4 text-body rounded-2xl font-bold bg-brand-gradient text-white shadow-md transform hover:-translate-y-0.5 transition-transform">
-                                            View Scorecard
-                                        </button>
-                                    ) : match.status === 'live' ? (
-                                        <button onClick={() => onContinueMatch(match)} className="w-full px-4 py-4 text-body rounded-2xl font-bold bg-brand-gradient text-white shadow-md transform hover:-translate-y-0.5 transition-transform">Continue Live Match</button>
-                                    ) : match.isDraft ? (
-                                        <button onClick={() => setEditingMatch(match)} className="w-full px-4 py-4 text-body rounded-2xl font-bold bg-brand-gradient text-white shadow-md transform hover:-translate-y-0.5 transition-transform">Setup Teams</button>
+                                        </div>
                                     ) : match.toss ? (
-                                        <>
-                                            <p className="text-[10px] text-text-secondary mb-1">{getTeamById(match.toss.winner)?.name} won toss & chose to {match.toss.decision}</p>
-                                            <button disabled={isMatchLive || !arePlayerCountsEqual} onClick={() => onStartMatch(match)} className="w-full px-8 py-4 rounded-2xl font-bold text-h3 bg-brand-gradient text-white shadow-lg disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 transform hover:-translate-y-0.5 transition-transform" title={!arePlayerCountsEqual ? playerMismatchTitle : (isMatchLive ? 'Another match is live' : 'Start Match')}>{isMatchLive ? 'Match Live' : (arePlayerCountsEqual ? 'Start Match' : 'Unequal Players')}</button>
-                                        </>
-                                    ) : (
-                                        <button disabled={isMatchLive || !arePlayerCountsEqual} onClick={() => setTossMatch(match)} className="w-full px-4 py-4 text-body rounded-2xl font-bold bg-brand-gradient text-white shadow-md disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 transform hover:-translate-y-0.5 transition-transform" title={!arePlayerCountsEqual ? playerMismatchTitle : (isMatchLive ? 'Another match is live' : 'Set Toss')}>{isMatchLive ? 'Match Live' : (arePlayerCountsEqual ? 'Set Toss' : 'Unequal Players')}</button>
-                                    )}
+                                        <p className="text-sm text-center text-gray-600 mb-4 px-2">
+                                            {getTeamById(match.toss.winner)?.name} won the toss and chose to {match.toss.decision}.
+                                        </p>
+                                    ) : null}
+                                    
+                                    <div className="space-y-3 mb-4">
+                                        <div className="flex justify-between items-center text-gray-900 font-bold">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-8 h-8 flex items-center justify-center rounded-lg text-white font-bold text-xs" style={{ backgroundColor: team1.logo }}>
+                                                    {team1.name.substring(0, 2).toUpperCase()}
+                                                </div>
+                                                <span className="text-base">{team1.name}</span>
+                                            </div>
+                                            <span className="font-mono text-base">
+                                                {(match.status !== 'scheduled' && !match.isDraft) ? `${team1.id === match.innings1?.battingTeamId ? (match.innings1?.score ?? 0) : (match.innings2?.score ?? 0)}/${team1.id === match.innings1?.battingTeamId ? (match.innings1?.wickets ?? 0) : (match.innings2?.wickets ?? 0)}` : 'DNB'}
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between items-center text-gray-900 font-bold">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-8 h-8 flex items-center justify-center rounded-lg text-white font-bold text-xs" style={{ backgroundColor: team2.logo }}>
+                                                    {team2.name.substring(0, 2).toUpperCase()}
+                                                </div>
+                                                <span className="text-base">{team2.name}</span>
+                                            </div>
+                                            <span className="font-mono text-base">
+                                                {(match.status !== 'scheduled' && !match.isDraft) ? `${team2.id === match.innings1?.battingTeamId ? (match.innings1?.score ?? 0) : (match.innings2?.score ?? 0)}/${team2.id === match.innings1?.battingTeamId ? (match.innings1?.wickets ?? 0) : (match.innings2?.wickets ?? 0)}` : 'DNB'}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="mt-4 text-center text-md font-bold text-gray-900 pt-3 border-t border-gray-100 uppercase tracking-wider">
+                                        {displayState.type === 'completed' ? (
+                                            <div className="text-center text-sm font-semibold text-gray-900">
+                                                <p className="font-bold">{getTeamById(match.winnerId)?.name} won</p>
+                                                {match.manOfTheMatchId && (
+                                                    <p className="text-xs text-gray-500 mt-1 normal-case">MOM: {getTeamById(match.team1Id)?.players.find(p => p.id === match.manOfTheMatchId)?.name || getTeamById(match.team2Id)?.players.find(p => p.id === match.manOfTheMatchId)?.name}</p>
+                                                )}
+                                            </div>
+                                        ) : displayState.type === 'abandoned' ? 'Match Abandoned' : displayState.label}
+                                    </div>
+                                    
+                                    <div className="mt-4">
+                                        {displayState.type === 'completed' ? (
+                                            <button onClick={(e) => { e.stopPropagation(); onViewMatchResult(match.id); }} className="w-full px-4 py-3 text-sm rounded-xl font-bold bg-gray-100 text-gray-900 shadow-sm hover:bg-gray-200">
+                                                View Scorecard
+                                            </button>
+                                        ) : displayState.type === 'live' ? (
+                                            <button onClick={(e) => { e.stopPropagation(); onContinueMatch(match); }} className="w-full px-4 py-3 text-sm rounded-xl font-bold bg-brand-blue text-white shadow-md">Continue Live Match</button>
+                                        ) : displayState.type === 'draft' ? (
+                                            <button onClick={(e) => { e.stopPropagation(); setEditingMatch(match); }} className="w-full px-4 py-3 text-sm rounded-xl font-bold bg-brand-blue text-white shadow-md">Setup Teams</button>
+                                        ) : displayState.type === 'readyToToss' ? (
+                                            <button disabled={isMatchLive || !arePlayerCountsEqual} onClick={(e) => { e.stopPropagation(); setTossMatch(match); }} className="w-full px-4 py-3 text-sm rounded-xl font-bold bg-brand-blue text-white shadow-md disabled:bg-gray-300" title={!arePlayerCountsEqual ? playerMismatchTitle : (isMatchLive ? 'Another match is live' : 'Set Toss')}>{isMatchLive ? 'Match Live' : (arePlayerCountsEqual ? 'Set Toss' : 'Unequal Players')}</button>
+                                        ) : displayState.type === 'readyToStart' ? (
+                                            <button onClick={(e) => { e.stopPropagation(); onStartMatch(match); }} className="w-full px-4 py-3 text-sm rounded-xl font-bold bg-brand-blue text-white shadow-md">Start Match</button>
+                                        ) : null}
+                                    </div>
                                 </div>
                             </CrickIQCard>
                         )
