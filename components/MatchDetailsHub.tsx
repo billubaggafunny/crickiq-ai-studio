@@ -6,6 +6,7 @@ import MatchScorecard from './MatchScorecard';
 import MatchOvers from './MatchOvers';
 import MatchCommentary from './MatchCommentary';
 import ImpactPlayerModal from './ImpactPlayerModal';
+import TeamDetailsPage from './TeamDetailsPage';
 
 export interface MatchDetailsHubProps {
     match: Match;
@@ -22,6 +23,10 @@ export interface MatchDetailsHubProps {
     isMatchLive?: boolean;
     updateTeam?: (team: Team) => void;
     addPlayerReplacement?: (matchId: string, teamId: string, outgoingPlayerId: string, incomingPlayerId: string, reason?: string) => void;
+    addPlayer?: (teamId: string, player: Player) => void;
+    deletePlayer?: (teamId: string, playerId: string) => void;
+    getTournamentById?: (id: string) => Tournament | undefined;
+    matches?: Match[];
 }
 
 const MatchDetailsHub: React.FC<MatchDetailsHubProps> = ({ 
@@ -38,7 +43,11 @@ const MatchDetailsHub: React.FC<MatchDetailsHubProps> = ({
     onContinueMatch,
     isMatchLive = false,
     updateTeam,
-    addPlayerReplacement
+    addPlayerReplacement,
+    addPlayer,
+    deletePlayer,
+    getTournamentById,
+    matches
 }) => {
     const [activeTab, setActiveTab] = useState<'overview' | 'matchCenter' | 'scorecard' | 'overs' | 'commentary'>(
         match.status === 'completed' && match.isQuickMatch ? 'scorecard' : 'overview'
@@ -47,6 +56,7 @@ const MatchDetailsHub: React.FC<MatchDetailsHubProps> = ({
 
     const [isImpactModalOpen, setIsImpactModalOpen] = useState(false);
     const [impactModalTeamId, setImpactModalTeamId] = useState<string | null>(null);
+    const [viewingTeamId, setViewingTeamId] = useState<string | null>(null);
 
     const getMatchDisplayState = (m: Match) => {
         const matchDateObj = new Date(m.date.replace(/-/g, '/'));
@@ -210,6 +220,32 @@ const MatchDetailsHub: React.FC<MatchDetailsHubProps> = ({
 
     const isWinner = (t: Team) => match.winnerId === t.id;
 
+    if (viewingTeamId !== null) {
+        const viewingTeam = teams.find(t => t.id === viewingTeamId);
+        if (viewingTeam) {
+            return (
+                <TeamDetailsPage
+                    team={viewingTeam}
+                    match={match}
+                    opponentTeam={viewingTeam.id === team1.id ? team2 : team1}
+                    tournament={tournament}
+                    teamId={viewingTeam.id}
+                    matchId={match.id}
+                    tournamentId={match.tournamentId}
+                    isQuickMatch={match.isQuickMatch}
+                    isMatchLive={isMatchLive}
+                    updateTeam={updateTeam}
+                    addPlayerReplacement={addPlayerReplacement}
+                    addPlayer={addPlayer}
+                    deletePlayer={deletePlayer}
+                    getTournamentById={getTournamentById}
+                    matches={matches}
+                    onBack={() => setViewingTeamId(null)}
+                />
+            );
+        }
+    }
+
     return (
         <div className="flex flex-col h-full bg-body-bg relative">
             {/* Header Area */}
@@ -302,50 +338,34 @@ const MatchDetailsHub: React.FC<MatchDetailsHubProps> = ({
                             </div>
                             <div className="divide-y divide-gray-100 p-0">
                                 {/* Team 1 */}
-                                <div className="p-4 flex items-center gap-4 bg-white justify-between">
-                                    <div className="flex items-center gap-4">
+                                <div className="p-4 flex items-center gap-4 bg-white hover:bg-gray-50 transition-colors justify-between cursor-pointer" onClick={() => setViewingTeamId(team1.id)}>
+                                    <div className="flex items-center gap-4 w-full">
                                         <div className="w-12 h-12 rounded-xl flex-shrink-0 flex items-center justify-center text-white font-bold text-lg shadow-sm overflow-hidden" style={{ backgroundColor: team1.logo || '#3b82f6' }}>
                                             {team1.name.substring(0, 2).toUpperCase()}
                                         </div>
                                         <div>
-                                            <h4 className="font-bold text-gray-900 text-base">{team1.name}</h4>
+                                            <h4 className="font-bold text-gray-900 text-base flex items-center gap-2">
+                                                {team1.name}
+                                                <ChevronLeft className="w-4 h-4 rotate-180 text-gray-400" />
+                                            </h4>
                                             <p className="text-xs text-gray-500 font-medium mt-0.5">{team1.players.length} Players</p>
                                         </div>
                                     </div>
-                                    {isMatchLive && updateTeam && addPlayerReplacement && match.status !== 'completed' && !match.wasAbandoned && (
-                                        <button 
-                                            onClick={() => {
-                                                setImpactModalTeamId(team1.id);
-                                                setIsImpactModalOpen(true);
-                                            }}
-                                            className="px-2 py-1 bg-red-50 hover:bg-red-100 text-red-700 text-xs font-bold rounded border border-red-200 transition-colors"
-                                        >
-                                            Emergency Rep.
-                                        </button>
-                                    )}
                                 </div>
                                 {/* Team 2 */}
-                                <div className="p-4 flex items-center gap-4 bg-white justify-between">
-                                    <div className="flex items-center gap-4">
+                                <div className="p-4 flex items-center gap-4 bg-white hover:bg-gray-50 transition-colors justify-between cursor-pointer" onClick={() => setViewingTeamId(team2.id)}>
+                                    <div className="flex items-center gap-4 w-full">
                                         <div className="w-12 h-12 rounded-xl flex-shrink-0 flex items-center justify-center text-white font-bold text-lg shadow-sm overflow-hidden" style={{ backgroundColor: team2.logo || '#ef4444' }}>
                                             {team2.name.substring(0, 2).toUpperCase()}
                                         </div>
                                         <div>
-                                            <h4 className="font-bold text-gray-900 text-base">{team2.name}</h4>
+                                            <h4 className="font-bold text-gray-900 text-base flex items-center gap-2">
+                                                {team2.name}
+                                                <ChevronLeft className="w-4 h-4 rotate-180 text-gray-400" />
+                                            </h4>
                                             <p className="text-xs text-gray-500 font-medium mt-0.5">{team2.players.length} Players</p>
                                         </div>
                                     </div>
-                                    {isMatchLive && updateTeam && addPlayerReplacement && match.status !== 'completed' && !match.wasAbandoned && (
-                                        <button 
-                                            onClick={() => {
-                                                setImpactModalTeamId(team2.id);
-                                                setIsImpactModalOpen(true);
-                                            }}
-                                            className="px-2 py-1 bg-red-50 hover:bg-red-100 text-red-700 text-xs font-bold rounded border border-red-200 transition-colors"
-                                        >
-                                            Emergency Rep.
-                                        </button>
-                                    )}
                                 </div>
                             </div>
                         </CrickIQCard>

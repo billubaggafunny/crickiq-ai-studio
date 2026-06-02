@@ -635,6 +635,10 @@ const AppUI: React.FC = () => {
                             isMatchLive={isMatchActuallyLive}
                             updateTeam={tournamentState.updateTeam}
                             addPlayerReplacement={tournamentState.addPlayerReplacement}
+                            addPlayer={tournamentState.addPlayer}
+                            deletePlayer={tournamentState.deletePlayer}
+                            getTournamentById={tournamentState.getTournamentById}
+                            matches={tournamentState.matches}
                         />
                     </ErrorBoundary>
                 </div>
