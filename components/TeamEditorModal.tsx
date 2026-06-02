@@ -142,8 +142,10 @@ export const TeamEditorModal: React.FC<TeamEditorModalProps> = (props) => {
             return;
         }
 
+        const newPlayerId = `p_${Date.now()}`;
         const newPlayer: Player = {
-            id: `p_${Date.now()}`,
+            id: newPlayerId,
+            globalPlayerId: `gp_${Date.now()}`,
             number: Number(newPlayerNumber),
             name: newPlayerName.trim(),
             role: newPlayerRole as PlayerRole,

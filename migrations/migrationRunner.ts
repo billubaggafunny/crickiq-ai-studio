@@ -2,6 +2,7 @@ import { Tournament, Team, Match } from '../types';
 import { CURRENT_SCHEMA_VERSION, STORAGE_KEY } from '../constants/schema';
 import { migrateLegacyToV1 } from './migrateLegacyToV1';
 import { migrateV1ToV2 } from './migrateV1ToV2';
+import { migrateV2ToV3 } from './migrateV2ToV3';
 import { localStorageAdapter } from '../storage/localStorageAdapter';
 import { indexedDbAdapter } from '../storage/indexedDbAdapter';
 import { migrateLocalStorageToIndexedDB } from '../storage/migrateLocalStorageToIndexedDB';
@@ -66,6 +67,9 @@ export const runMigrations = (rawData: Record<string, unknown>): EnvelopedData =
             switch (toVersion) {
                 case 2:
                     currentData = migrateV1ToV2(currentData);
+                    break;
+                case 3:
+                    currentData = migrateV2ToV3(currentData);
                     break;
                 default:
                     console.warn(`No migration found for version ${toVersion}. Stopping.`);

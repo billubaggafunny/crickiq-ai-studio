@@ -21,6 +21,7 @@ interface TeamDetailsPageProps {
     deletePlayer?: (teamId: string, playerId: string) => void;
     getTournamentById?: (id: string) => Tournament | undefined;
     matches?: Match[];
+    teams?: Team[];
     onBack: () => void;
 }
 
@@ -37,6 +38,7 @@ const TeamDetailsPage: React.FC<TeamDetailsPageProps> = ({
     deletePlayer,
     getTournamentById,
     matches,
+    teams,
     onBack,
 }) => {
     const [viewingPlayerId, setViewingPlayerId] = useState<string | null>(null);
@@ -53,6 +55,7 @@ const TeamDetailsPage: React.FC<TeamDetailsPageProps> = ({
                     opponentTeam={opponentTeam}
                     tournament={tournament}
                     matches={matches}
+                    teams={teams}
                     tournamentId={tournamentId}
                     isMatchLive={isMatchLive}
                     updateTeam={updateTeam}

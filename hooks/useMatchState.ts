@@ -138,12 +138,16 @@ export const useMatchState = (
 
                 const newId = `team_${generateEntityId()}`;
                 const defaultRoles = generateDefaultRoles(numberOfPlayers);
-                const players = Array.from({ length: numberOfPlayers }, (_, i) => ({
-                    id: `p_${generateEntityId()}`,
-                    number: i + 1,
-                    name: `Player ${i + 1}`,
-                    role: defaultRoles[i] || PlayerRole.BATSMAN,
-                }));
+                const players = Array.from({ length: numberOfPlayers }, (_, i) => {
+                    const entityId = generateEntityId();
+                    return {
+                        id: `p_${entityId}`,
+                        globalPlayerId: `gp_${entityId}`,
+                        number: i + 1,
+                        name: `Player ${i + 1}`,
+                        role: defaultRoles[i] || PlayerRole.BATSMAN,
+                    };
+                });
                 const timestamp = createTimestamp();
                 const newTeam: Team = {
                     id: newId,

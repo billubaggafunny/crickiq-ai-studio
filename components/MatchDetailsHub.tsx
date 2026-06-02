@@ -240,6 +240,7 @@ const MatchDetailsHub: React.FC<MatchDetailsHubProps> = ({
                     deletePlayer={deletePlayer}
                     getTournamentById={getTournamentById}
                     matches={matches}
+                    teams={teams}
                     onBack={() => setViewingTeamId(null)}
                 />
             );

@@ -39,6 +39,7 @@ export enum WicketType {
 export interface Player {
     id: string;
     originalId?: string;
+    globalPlayerId?: string;
     number: number;
     name: string;
     role: PlayerRole;

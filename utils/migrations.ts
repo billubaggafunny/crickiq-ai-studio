@@ -57,10 +57,37 @@ export const migrateTournament = (tournament: any): Tournament => {
     } as Tournament;
 };
 
+export const ensureGlobalPlayerIds = (state: AppState): AppState => {
+    if (!state || !state.teams || !Array.isArray(state.teams)) return state;
+
+    state.teams = state.teams.map(team => {
+        if (!team.players || !Array.isArray(team.players)) return team;
+
+        const updatedPlayers = team.players.map(player => {
+            if (!player.globalPlayerId && player.id) {
+                // Determine base string securely
+                const strippedId = player.id.replace(/^[pP]_?/, '');
+                return {
+                    ...player,
+                    globalPlayerId: `gp_${strippedId}`
+                };
+            }
+            return player;
+        });
+
+        return {
+            ...team,
+            players: updatedPlayers
+        };
+    });
+
+    return state;
+};
+
 export const migrateState = (state: AppState & { schemaVersion?: number }): AppState & { schemaVersion?: number } => {
     if (!state) return state;
     
-    const migratedState = { ...state };
+    let migratedState = { ...state };
     
     // Schema versioning support
     const currentVersion = migratedState.schemaVersion || 0;
@@ -76,6 +103,9 @@ export const migrateState = (state: AppState & { schemaVersion?: number }): AppS
         
         migratedState.schemaVersion = 1;
     }
+    
+    // Safety Net: Ensure globalPlayerIds are populated in all teams
+    migratedState = ensureGlobalPlayerIds(migratedState as AppState);
     
     return migratedState;
 };
