@@ -1,6 +1,7 @@
 import CrickIQCard from './CrickIQCard';
 import React, { useMemo, useState } from "react";
 import type { UseCrickIQStateReturn } from "../hooks/useCrickIQState";
+import { getMaxPlayers } from '../utils/matchConfig';
 import MatchScorecard from "./MatchScorecard";
 import QuickMatchResults from "./QuickMatchResults";
 import {
@@ -438,8 +439,10 @@ const AnalyticsOverview: React.FC<AnalyticsOverviewProps> = (props) => {
                         recentMatch.innings2 &&
                         winner.id === recentMatch.innings2.battingTeamId
                       ) {
+                        const maxPlayers = getMaxPlayers(recentMatch);
+                        const totalPlayers = winner.players?.length > 0 ? winner.players.length : maxPlayers;
                         const wicketsLeft =
-                          (winner.players.length || 11) -
+                          totalPlayers -
                           1 -
                           (recentMatch.innings2.wickets || 0);
                         winnerMessage = `${winner.name} won by ${wicketsLeft} wickets`;

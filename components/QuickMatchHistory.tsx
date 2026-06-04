@@ -2,6 +2,7 @@ import CrickIQCard from './CrickIQCard';
 import React from 'react';
 import type { UseCrickIQStateReturn } from '../hooks/useCrickIQState';
 import type { Match, Team } from '../types';
+import { getMaxPlayers } from '../utils/matchConfig';
 
 
 
@@ -34,7 +35,9 @@ const QuickMatchHistory: React.FC<QuickMatchHistoryProps> = ({ matches, getTeamB
     
         if (match.innings2 && winner.id === match.innings2.battingTeamId) {
             const battingTeam = getTeamById(match.innings2.battingTeamId);
-            const wicketsLeft = (battingTeam?.players.length || 11) - 1 - (match.innings2.wickets || 0);
+            const maxPlayers = getMaxPlayers(match);
+            const totalPlayers = battingTeam?.players?.length > 0 ? battingTeam.players.length : maxPlayers;
+            const wicketsLeft = totalPlayers - 1 - (match.innings2.wickets || 0);
             return { message: `${winner.name} won by ${wicketsLeft} wickets`, winnerTeam: winner };
         } else if (match.innings1 && winner.id === match.innings1.battingTeamId) {
             const runMargin = (match.innings1.score || 0) - (match.innings2?.score || 0);

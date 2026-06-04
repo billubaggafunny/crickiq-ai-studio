@@ -9,6 +9,8 @@ import type { Match, Theme, FontSize, Team } from './types';
 import SettingsModal from './components/SettingsModal';
 import Home from './components/Home';
 import { NotificationProvider, useNotification } from './hooks/useNotification';
+import { PlayerNavigationProvider, usePlayerNavigation } from './contexts/PlayerNavigationContext';
+import PlayerDetailsPage from './components/PlayerDetailsPage';
 import DynamicNotificationBar from './components/DynamicNotificationBar';
 import { useNotificationScheduler } from './hooks/useNotificationScheduler';
 import MatchScorecard from './components/MatchScorecard';
@@ -130,6 +132,7 @@ export interface ReturnLocation {
 
 const AppUI: React.FC = () => {
     const { showNotification } = useNotification();
+    const { navigationContext, returnFromPlayerDetails } = usePlayerNavigation();
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const tournamentState = useCrickIQState();
     const [activeTab, setActiveTab] = useState('tournament');
@@ -596,6 +599,51 @@ const AppUI: React.FC = () => {
         );
     }
 
+    const renderPlayerDetailsPage = () => {
+        if (!navigationContext) return null;
+        
+        let player = undefined;
+        let team = undefined;
+        
+        if (navigationContext.teamId) {
+            team = tournamentState.getTeamById(navigationContext.teamId);
+            if (team && navigationContext.playerId) {
+                player = team.players.find(p => p.id === navigationContext.playerId);
+            }
+        }
+
+        if (team && (player || navigationContext.mode === 'add')) {
+            const contextMatch = navigationContext.matchId ? tournamentState.matches.find(m => m.id === navigationContext.matchId) : undefined;
+            const contextTournament = navigationContext.tournamentId ? tournamentState.getTournamentById(navigationContext.tournamentId) : undefined;
+            const contextOpponentTeam = contextMatch 
+                ? tournamentState.getTeamById(contextMatch.team1Id === team.id ? contextMatch.team2Id : contextMatch.team1Id) 
+                : undefined;
+
+            return (
+                <div className="fixed inset-0 z-[100] bg-secondary flex flex-col h-full w-full select-none safe-pad-t safe-pad-r safe-pad-l safe-pad-b">
+                    <ErrorBoundary componentName="Global Player Details Page" onReset={returnFromPlayerDetails}>
+                        <PlayerDetailsPage
+                            player={player}
+                            team={team}
+                            match={contextMatch}
+                            opponentTeam={contextOpponentTeam}
+                            tournament={contextTournament}
+                            matches={tournamentState.matches}
+                            teams={tournamentState.teams}
+                            tournamentId={navigationContext.tournamentId}
+                            isMatchLive={isMatchActuallyLive}
+                            updateTeam={tournamentState.updateTeam}
+                            updateMatch={tournamentState.updateMatch}
+                            onBack={returnFromPlayerDetails}
+                            mode={navigationContext.mode || 'view'}
+                        />
+                    </ErrorBoundary>
+                </div>
+            );
+        }
+        return null;
+    };
+
     if (scorecardMatchToView && tournamentForScorecard) {
         return (
             <div className="theme-blue h-screen w-full">
@@ -880,6 +928,8 @@ const AppUI: React.FC = () => {
                         team2={{ id: tossMatch.team2Id, name: tournamentState.getTeamById(tossMatch.team2Id)?.name || 'Team 2' }}
                     />
                 )}
+                
+                {renderPlayerDetailsPage()}
             </div>
         </>
     );
@@ -889,7 +939,9 @@ const AppUI: React.FC = () => {
 const App: React.FC = () => {
     return (
         <NotificationProvider>
-            <AppUI />
+            <PlayerNavigationProvider>
+                <AppUI />
+            </PlayerNavigationProvider>
         </NotificationProvider>
     );
 };

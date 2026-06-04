@@ -2,6 +2,8 @@ import React from 'react';
 import CrickIQCard from './CrickIQCard';
 import { CalendarIcon } from '../constants';
 import type { Match, Team, Tournament } from '../types';
+import { getRequiredSquadSize } from '../utils/matchConfig';
+import { canEnableSetToss } from '../utils/validation';
 
 export interface MatchTableProps {
     list: Match[];
@@ -80,8 +82,26 @@ const MatchTable: React.FC<MatchTableProps> = ({
                         const tournament = getTournamentById(match.tournamentId || '');
                         if (!team1 || !team2) return null;
 
-                        const arePlayerCountsEqual = team1.players.length === team2.players.length;
-                        const playerMismatchTitle = `Teams must have same number of players (${team1.players.length} vs ${team2.players.length})`;
+                        const requiredSquadSize = getRequiredSquadSize(match, tournament);
+                        const t1Selected = { ...team1, players: team1.players.filter(p => (match.team1SquadIds || []).includes(p.id)) };
+                        const t2Selected = { ...team2, players: team2.players.filter(p => (match.team2SquadIds || []).includes(p.id)) };
+                        const setTossValidation = canEnableSetToss(t1Selected, t2Selected, match.oversPerInnings, requiredSquadSize, requiredSquadSize);
+                        const canToss = setTossValidation.canEnable;
+
+                        let playerMismatchTitle = "Set Toss";
+                        if (!canToss) {
+                            if ((match.team1SquadIds || []).length !== requiredSquadSize) {
+                                playerMismatchTitle = `${team1.name} squad must have ${requiredSquadSize} players (currently ${(match.team1SquadIds || []).length}/${requiredSquadSize})`;
+                            } else if ((match.team2SquadIds || []).length !== requiredSquadSize) {
+                                playerMismatchTitle = `${team2.name} squad must have ${requiredSquadSize} players (currently ${(match.team2SquadIds || []).length}/${requiredSquadSize})`;
+                            } else if (!setTossValidation.teamAValid) {
+                                playerMismatchTitle = `${team1.name} squad rules incomplete: ${setTossValidation.teamAErrors[0] || 'Check roles'}`;
+                            } else if (!setTossValidation.teamBValid) {
+                                playerMismatchTitle = `${team2.name} squad rules incomplete: ${setTossValidation.teamBErrors[0] || 'Check roles'}`;
+                            } else {
+                                playerMismatchTitle = "Roster or overs count validation failed.";
+                            }
+                        }
                         
                         const displayState = getMatchDisplayState(match);
 
@@ -187,7 +207,7 @@ const MatchTable: React.FC<MatchTableProps> = ({
                                         ) : displayState.type === 'draft' ? (
                                             <button onClick={(e) => { e.stopPropagation(); setEditingMatch(match); }} className="w-full px-4 py-3 text-sm rounded-xl font-bold bg-brand-blue text-white shadow-md">Setup Teams</button>
                                         ) : displayState.type === 'readyToToss' ? (
-                                            <button disabled={isMatchLive || !arePlayerCountsEqual} onClick={(e) => { e.stopPropagation(); setTossMatch(match); }} className="w-full px-4 py-3 text-sm rounded-xl font-bold bg-brand-blue text-white shadow-md disabled:bg-gray-300" title={!arePlayerCountsEqual ? playerMismatchTitle : (isMatchLive ? 'Another match is live' : 'Set Toss')}>{isMatchLive ? 'Match Live' : (arePlayerCountsEqual ? 'Set Toss' : 'Unequal Players')}</button>
+                                            <button disabled={isMatchLive || !canToss} onClick={(e) => { e.stopPropagation(); setTossMatch(match); }} className="w-full px-4 py-3 text-sm rounded-xl font-bold bg-brand-blue text-white shadow-md disabled:bg-gray-300" title={!canToss ? playerMismatchTitle : (isMatchLive ? 'Another match is live' : 'Set Toss')}>{isMatchLive ? 'Match Live' : (canToss ? 'Set Toss' : 'Squads Incomplete')}</button>
                                         ) : displayState.type === 'readyToStart' ? (
                                             <button onClick={(e) => { e.stopPropagation(); onStartMatch(match); }} className="w-full px-4 py-3 text-sm rounded-xl font-bold bg-brand-blue text-white shadow-md">Start Match</button>
                                         ) : null}

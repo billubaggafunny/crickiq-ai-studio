@@ -6,6 +6,7 @@ import type { UseCrickIQStateReturn } from '../hooks/useCrickIQState';
 import type { Match, Ball, BowlerScore, Innings } from '../types';
 import { BattingStatus, WicketType, PlayerRole } from '../types';
 import { calculateStrikeRate, getDismissalText, calculateRunRate, generateCommentaryData } from '../utils/cricketLogic';
+import { getEffectiveSquadPlayers } from '../utils/matchConfig';
 import { getRoleEmoji, SwapIcon, PlusIcon, MinusIcon } from '../constants';
 import ConfirmationModal from './ConfirmationModal';
 import { useNotification } from '../hooks/useNotification';
@@ -161,6 +162,32 @@ const LiveScoring: React.FC<LiveScoringProps> = ({ match, recordBall, getTeamByI
     const currentInnings = useMemo(() => match.innings2 || match.innings1, [match]);
     const battingTeam = useMemo(() => getTeamById(currentInnings?.battingTeamId || ''), [currentInnings, getTeamById]);
     const bowlingTeam = useMemo(() => getTeamById(currentInnings?.bowlingTeamId || ''), [currentInnings, getTeamById]);
+
+    const battingSquadTeam = useMemo(() => {
+        if (!battingTeam) return battingTeam;
+        const isTeam1 = battingTeam.id === match.team1Id;
+        const squadIds = isTeam1 ? (match.team1SquadIds) : (match.team2SquadIds);
+        if (squadIds && squadIds.length > 0) {
+            return {
+                ...battingTeam,
+                players: getEffectiveSquadPlayers(battingTeam, match)
+            };
+        }
+        return battingTeam;
+    }, [battingTeam, match]);
+
+    const bowlingSquadTeam = useMemo(() => {
+        if (!bowlingTeam) return bowlingTeam;
+        const isTeam1 = bowlingTeam.id === match.team1Id;
+        const squadIds = isTeam1 ? (match.team1SquadIds) : (match.team2SquadIds);
+        if (squadIds && squadIds.length > 0) {
+            return {
+                ...bowlingTeam,
+                players: getEffectiveSquadPlayers(bowlingTeam, match)
+            };
+        }
+        return bowlingTeam;
+    }, [bowlingTeam, match]);
     
     // Rule enforcement for Byes/Leg Byes
     useEffect(() => {
@@ -186,8 +213,8 @@ const LiveScoring: React.FC<LiveScoringProps> = ({ match, recordBall, getTeamByI
 
     // Rule enforcement for Stumped dismissal
     useEffect(() => {
-        if (wicketDetails.type === WicketType.STUMPED && bowlingTeam) {
-            const keeper = bowlingTeam.players.find(p => p.role === PlayerRole.WICKET_KEEPER);
+        if (wicketDetails.type === WicketType.STUMPED && bowlingSquadTeam) {
+            const keeper = bowlingSquadTeam.players.find(p => p.role === PlayerRole.WICKET_KEEPER);
             if (keeper) {
                 // Only update if it's not already set, to avoid loops
                 if (wicketDetails.fielderId !== keeper.id) {
@@ -196,7 +223,7 @@ const LiveScoring: React.FC<LiveScoringProps> = ({ match, recordBall, getTeamByI
                 }
             }
         }
-    }, [wicketDetails.type, bowlingTeam, wicketDetails.fielderId, showNotification]);
+    }, [wicketDetails.type, bowlingSquadTeam, wicketDetails.fielderId, showNotification]);
 
     // Rule enforcement: Reset runs for dismissals where runs off the bat are not possible.
     useEffect(() => {
@@ -425,8 +452,8 @@ const LiveScoring: React.FC<LiveScoringProps> = ({ match, recordBall, getTeamByI
     };
 
     const handleRetireBatsman = () => {
-        if (onStrikeId && battingTeam) {
-            const batsmanName = battingTeam.players.find(p => p.id === onStrikeId)?.name || 'the current batsman';
+        if (onStrikeId && battingSquadTeam) {
+            const batsmanName = battingSquadTeam.players.find(p => p.id === onStrikeId)?.name || 'the current batsman';
             setConfirmation({
                 title: 'Retire Batsman',
                 message: (
@@ -561,10 +588,10 @@ const LiveScoring: React.FC<LiveScoringProps> = ({ match, recordBall, getTeamByI
     
     const replacedPlayerIds = useMemo(() => match.replacements?.map(r => r.outgoingPlayerId) || [], [match.replacements]);
 
-    const availableBatsmen = useMemo(() => battingTeam.players.filter(p => !replacedPlayerIds.includes(p.id) && currentInnings.batsmanScores[p.id]?.status !== BattingStatus.OUT), [battingTeam.players, replacedPlayerIds, currentInnings.batsmanScores]);
+    const availableBatsmen = useMemo(() => battingSquadTeam.players.filter(p => !replacedPlayerIds.includes(p.id) && currentInnings.batsmanScores[p.id]?.status !== BattingStatus.OUT), [battingSquadTeam.players, replacedPlayerIds, currentInnings.batsmanScores]);
     
     const maxOvers = match.maxOversPerBowler;
-const baseEligibleBowlers = bowlingTeam.players.filter(p => !replacedPlayerIds.includes(p.id) && p.id !== currentInnings.lastBowlerId);
+const baseEligibleBowlers = bowlingSquadTeam.players.filter(p => !replacedPlayerIds.includes(p.id) && p.id !== currentInnings.lastBowlerId);
 const atLimitIds = baseEligibleBowlers.filter(p => { if (!maxOvers) return false; const stats = currentInnings.bowlerScores[p.id]; return stats && Math.floor(stats.overs) >= maxOvers; }).map(p => p.id);
 const isExceptionActive = !!maxOvers && atLimitIds.length === baseEligibleBowlers.length && baseEligibleBowlers.length > 0;
 const availableBowlers = baseEligibleBowlers.map(p => { const isAtLimit = atLimitIds.includes(p.id); const isDisabled = isAtLimit && !isExceptionActive; return { ...p, isDisabled, isAtLimit }; });
@@ -630,12 +657,12 @@ const availableBowlers = baseEligibleBowlers.map(p => { const isAtLimit = atLimi
         return `Need ${runsNeeded} runs in ${ballsRemaining} balls`;
     }, [match]);
     
-    const striker = onStrikeId ? battingTeam.players.find(p => p.id === onStrikeId) : null;
-    const nonStriker = nonStrikerId ? battingTeam.players.find(p => p.id === nonStrikerId) : null;
+    const striker = onStrikeId ? battingSquadTeam.players.find(p => p.id === onStrikeId) : null;
+    const nonStriker = nonStrikerId ? battingSquadTeam.players.find(p => p.id === nonStrikerId) : null;
     const strikerStats = onStrikeId ? currentInnings.batsmanScores[onStrikeId] : null;
     const nonStrikerStats = nonStrikerId ? currentInnings.batsmanScores[nonStrikerId] : null;
 
-    const bowler = currentBowlerId ? bowlingTeam.players.find(p => p.id === currentBowlerId) : null;
+    const bowler = currentBowlerId ? bowlingSquadTeam.players.find(p => p.id === currentBowlerId) : null;
     const bowlerStats = currentBowlerId ? currentInnings.bowlerScores[currentBowlerId] : null;
 
     const wicketTypeOptions = useMemo(() => {
@@ -991,15 +1018,15 @@ const availableBowlers = baseEligibleBowlers.map(p => { const isAtLimit = atLimi
                                                         <Select 
                                                             value={wicketDetails.fielderId} 
                                                             onChange={e => setWicketDetails(prev => ({ ...prev, fielderId: e.target.value }))}
-                                                            disabled={wicketDetails.type === WicketType.STUMPED && bowlingTeam.players.some(p => p.role === PlayerRole.WICKET_KEEPER)}
+                                                            disabled={wicketDetails.type === WicketType.STUMPED && bowlingSquadTeam.players.some(p => p.role === PlayerRole.WICKET_KEEPER)}
                                                             title={
-                                                                (wicketDetails.type === WicketType.STUMPED && bowlingTeam.players.some(p => p.role === PlayerRole.WICKET_KEEPER))
+                                                                (wicketDetails.type === WicketType.STUMPED && bowlingSquadTeam.players.some(p => p.role === PlayerRole.WICKET_KEEPER))
                                                                 ? "Wicket keeper is automatically selected for stumping."
                                                                 : undefined
                                                             }
                                                         >
                                                             <option value="">Select Player</option>
-                                                            {bowlingTeam.players.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                                                            {bowlingSquadTeam.players.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
                                                         </Select>
                                                     </div>
                                                 )}
@@ -1096,7 +1123,7 @@ const availableBowlers = baseEligibleBowlers.map(p => { const isAtLimit = atLimi
                                                 }}
                                                 className="px-2 py-1 bg-red-100 hover:bg-red-200 dark:bg-red-800/40 dark:hover:bg-red-800/60 text-red-800 dark:text-red-200 text-xs font-bold rounded border border-red-300 dark:border-red-700 transition-colors"
                                             >
-                                                Replace Batter
+                                                {battingTeam ? `${battingTeam.name}: Replace Player` : 'Replace Player'}
                                             </button>
                                             <button 
                                                 onClick={() => {
@@ -1105,7 +1132,7 @@ const availableBowlers = baseEligibleBowlers.map(p => { const isAtLimit = atLimi
                                                 }}
                                                 className="px-2 py-1 bg-red-100 hover:bg-red-200 dark:bg-red-800/40 dark:hover:bg-red-800/60 text-red-800 dark:text-red-200 text-xs font-bold rounded border border-red-300 dark:border-red-700 transition-colors"
                                             >
-                                                Replace Bowler
+                                                {bowlingTeam ? `${bowlingTeam.name}: Replace Player` : 'Replace Player'}
                                             </button>
                                         </div>
                                     )}
@@ -1246,7 +1273,7 @@ const availableBowlers = baseEligibleBowlers.map(p => { const isAtLimit = atLimi
                                                 </Tr>
                                             </Thead>
                                             <Tbody >
-                                                {battingTeam.players
+                                                {battingSquadTeam.players
                                                     .filter(player => {
                                                         const stats = currentInnings.batsmanScores[player.id];
                                                         if (!stats) {
@@ -1312,7 +1339,7 @@ const availableBowlers = baseEligibleBowlers.map(p => { const isAtLimit = atLimi
                                             </Thead>
                                             <Tbody >
                                                 {Object.values(currentInnings.bowlerScores).map((stats: BowlerScore) => {
-                                                    const bowler = bowlingTeam.players.find(p => p.id === stats.playerId);
+                                                    const bowler = bowlingSquadTeam.players.find(p => p.id === stats.playerId);
                                                     const isBowling = currentBowlerId === stats.playerId;
                                                     return (
                                                         <Tr key={stats.playerId} className={`${isBowling ? 'bg-brand-blue/10' : 'hover:bg-primary/50'}`}>

@@ -4,6 +4,7 @@ import type { Team, Tournament, Player } from '../types';
 import { PlayerRole } from '../types';
 import { generateEntityId, createTimestamp, createSyncMetadata } from '../utils/idGenerator';
 import { generateDefaultRoles, LOGO_OPTIONS } from '../utils/initialData';
+import { getMaxPlayers } from '../utils/matchConfig';
 
 export const useTeamState = (
     teams: Team[],
@@ -29,12 +30,12 @@ export const useTeamState = (
         let teamIdToAdd: string;
     
         if (existingTeam) {
-            if (existingTeam.players.length !== tournament.numberOfPlayers) {
-                return { success: false, error: `Cannot add team: ${existingTeam.name} has ${existingTeam.players.length} players, but tournament requires ${tournament.numberOfPlayers}.` };
+            if (existingTeam.players.length !== getMaxPlayers(undefined, tournament)) {
+                return { success: false, error: `Cannot add team: ${existingTeam.name} has ${existingTeam.players.length} players, but tournament requires ${getMaxPlayers(undefined, tournament)}.` };
             }
             teamIdToAdd = existingTeam.id;
         } else {
-            const numPlayers = tournament.numberOfPlayers || 11;
+            const numPlayers = getMaxPlayers(undefined, tournament);
             const newTeamId = `team_${generateEntityId()}`;
             const defaultRoles = generateDefaultRoles(numPlayers);
             const players = Array.from({ length: numPlayers }, (_, i) => ({
@@ -91,7 +92,7 @@ export const useTeamState = (
                 const tournament = tournaments.find(t => t.id === tournamentId);
                 if (!tournament) return team;
                 
-                const maxPlayers = tournament.numberOfPlayers || 11;
+                const maxPlayers = getMaxPlayers(undefined, tournament);
 
                 if (team.players.length >= maxPlayers) {
                     console.warn(`[RuntimeValidation] Cannot add player: Team is full (${maxPlayers} players maximum).`);

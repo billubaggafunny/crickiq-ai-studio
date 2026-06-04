@@ -4,6 +4,7 @@ import type { UseCrickIQStateReturn } from '../hooks/useCrickIQState';
 import type { Match, Innings, PlayerCareerStats } from '../types';
 import ComparisonBarChart from './ComparisonBarChart';
 import { calculatePlayerCareerStats, calculateStrikeRate, calculateEconomy } from '../utils/cricketLogic';
+import { getMaxPlayers } from '../utils/matchConfig';
 import { useNotification } from '../hooks/useNotification';
 
 
@@ -85,7 +86,7 @@ const Comparison: React.FC<UseCrickIQStateReturn> = ({ teams, matches, getTourna
             if (!match.innings1 || !match.innings2) return;
     
             const tournament = getTournamentById(match.tournamentId);
-            const numPlayers = tournament?.numberOfPlayers || 11;
+            const numPlayers = getMaxPlayers(match, tournament);
     
             const team1Innings = match.innings1.battingTeamId === team1.id ? match.innings1 : match.innings2;
             const team2Innings = match.innings1.battingTeamId === team2.id ? match.innings1 : match.innings2;

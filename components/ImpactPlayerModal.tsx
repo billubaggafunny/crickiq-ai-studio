@@ -5,6 +5,7 @@ import CrickIQCard from './CrickIQCard';
 import { useCrickIQState } from '../hooks/useCrickIQState';
 import { PLAYER_ROLES, getShortRoleName, getRoleEmoji } from '../constants';
 import { useNotification } from '../hooks/useNotification';
+import { getEffectiveSquadIds, getEffectiveSquadPlayers } from '../utils/matchConfig';
 
 const Button: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'primary' | 'secondary' | 'danger' | 'blue' }> = ({ children, className, variant = 'primary', ...props }) => {
     const baseClasses = 'px-4 py-2 rounded-2xl text-button transition-all duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-md';
@@ -62,19 +63,26 @@ export const ImpactPlayerModal: React.FC<ImpactPlayerModalProps> = ({ isOpen, on
     // Existing replaced players
     const replacedPlayerIds = useMemo(() => match.replacements?.map(r => r.outgoingPlayerId) || [], [match.replacements]);
 
+    const effectiveSquadPlayers = useMemo(() => {
+        return getEffectiveSquadPlayers(team, match);
+    }, [team, match]);
+
     const eligibleOutgoingPlayers = useMemo(() => {
-        if (!team) return [];
-        return team.players.filter(p => !replacedPlayerIds.includes(p.id) && canReplacePlayer(match, p.id));
-    }, [team, match, replacedPlayerIds]);
+        return effectiveSquadPlayers.filter(p => !replacedPlayerIds.includes(p.id) && canReplacePlayer(match, p.id));
+    }, [effectiveSquadPlayers, match, replacedPlayerIds]);
 
     const unusedIncomingPlayers = useMemo(() => {
-        if (!team) return [];
-        // Available to replace IN: players who aren't currently playing in this match. BUT since everyone in team counts as playing basically...
-        // We'll just allow any player who hasn't batted/bowled and isn't replaced.
-        // Actually, this is highly confusing if no "Squad" vs "XI" exists.
-        // Easiest is just force creation of a new player since tournament limits the team anyway.
-        return team.players.filter(p => !replacedPlayerIds.includes(p.id) && canReplacePlayer(match, p.id) && p.id !== selectedOutgoingPlayer);
-    }, [team, match, replacedPlayerIds, selectedOutgoingPlayer]);
+        if (!team || !match) return [];
+        const effectiveSquadIds = getEffectiveSquadIds(match, team.id);
+        const alreadyIncomingIds = match.replacements?.map(r => r.incomingPlayerId) || [];
+        const alreadyOutgoingIds = match.replacements?.map(r => r.outgoingPlayerId) || [];
+        
+        return team.players.filter(p => 
+            !effectiveSquadIds.includes(p.id) && 
+            !alreadyIncomingIds.includes(p.id) &&
+            !alreadyOutgoingIds.includes(p.id)
+        );
+    }, [team, match]);
 
     if (!isOpen || !team) return null;
 
@@ -82,7 +90,7 @@ export const ImpactPlayerModal: React.FC<ImpactPlayerModalProps> = ({ isOpen, on
         return (
             <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
                 <CrickIQCard className="max-w-md w-full">
-                    <h3 className="text-xl font-bold text-gray-900 mb-4">Impact Player Replacement</h3>
+                    <h3 className="text-xl font-bold text-gray-900 mb-4">Player Replacement</h3>
                     <div className="p-4 bg-yellow-50 text-yellow-800 rounded-lg">
                         No eligible replacement available. Only players who have not batted or bowled can be replaced.
                     </div>
@@ -140,7 +148,7 @@ export const ImpactPlayerModal: React.FC<ImpactPlayerModalProps> = ({ isOpen, on
                 <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
                     <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">Emergency Replacement</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Player Replacement</h3>
                 <p className="text-sm text-gray-500 border-b border-gray-100 pb-4 mb-4">
                     Replace a player who hasn't participated yet. This will replace the selected player for the remaining match. Existing scorecard data will not be changed.
                 </p>

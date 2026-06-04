@@ -190,6 +190,9 @@ export interface Match {
     winnerId?: Team['id'] | 'draw';
     manOfTheMatchId?: Player['id'];
     isQuickMatch?: boolean;
+    numberOfPlayers?: number;
+    team1SquadIds?: string[]; // Match Squad separation (Step 1)
+    team2SquadIds?: string[]; // Match Squad separation (Step 1)
     isDraft?: boolean;
     wasAbandoned?: boolean;
     knockoutType?: 'semifinal' | 'final';

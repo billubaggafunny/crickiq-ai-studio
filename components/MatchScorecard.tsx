@@ -2,6 +2,7 @@ import { Table, Thead, Tbody, Tr, Th, Td } from './CrickIQTable';
 import React, { useMemo, useState } from 'react';
 import type { Match, Team, Innings, BatsmanScore, BowlerScore, Tournament } from '../types';
 import { BattingStatus } from '../types';
+import { getMaxPlayers } from '../utils/matchConfig';
 import { calculateStrikeRate, getTopPerformers, getDismissalText, calculateRunRate } from '../utils/cricketLogic';
 import { TrophyIcon, ShareIcon, UndoIcon } from '../constants';
 import { useNotification } from '../hooks/useNotification';
@@ -226,8 +227,19 @@ const MatchScorecard: React.FC<MatchScorecardProps> = ({ match, tournament, team
         if (!winner) return "Match Drawn";
 
         if (match.innings2 && winner.id === match.innings2.battingTeamId) {
-            const battingTeam = teams.find(t => t.id === match.innings2!.battingTeamId);
-            const wicketsLeft = (battingTeam?.players.length || 11) - 1 - (match.innings2.wickets || 0);
+            const rawBattingTeam = teams.find(t => t.id === match.innings2!.battingTeamId);
+            const isTeam1 = rawBattingTeam?.id === match.team1Id;
+            const squadIds = isTeam1 ? match.team1SquadIds : match.team2SquadIds;
+            const maxPlayers = getMaxPlayers(match);
+            
+            let totalPlayers = maxPlayers;
+            if (squadIds && squadIds.length > 0) {
+                 totalPlayers = squadIds.length;
+            } else if (rawBattingTeam?.players?.length) {
+                 totalPlayers = rawBattingTeam.players.length;
+            }
+            
+            const wicketsLeft = totalPlayers - 1 - (match.innings2.wickets || 0);
             return `${winner.name} won by ${wicketsLeft} wickets`;
         } else if (match.innings1 && winner.id === match.innings1.battingTeamId) {
             const runMargin = (match.innings1.score || 0) - (match.innings2?.score || 0);

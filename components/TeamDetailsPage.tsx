@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { Player, Team, Match, Tournament } from '../types';
 import { ChevronLeft } from 'lucide-react';
 import { getRoleIcon } from '../constants';
-import PlayerDetailsPage from './PlayerDetailsPage';
 import { TeamEditorModal } from './TeamEditorModal';
+import { usePlayerNavigation } from '../contexts/PlayerNavigationContext';
 
 interface TeamDetailsPageProps {
     team: Team;
@@ -28,8 +28,6 @@ interface TeamDetailsPageProps {
 const TeamDetailsPage: React.FC<TeamDetailsPageProps> = ({
     team,
     match,
-    opponentTeam,
-    tournament,
     tournamentId,
     isMatchLive = false,
     updateTeam,
@@ -38,32 +36,22 @@ const TeamDetailsPage: React.FC<TeamDetailsPageProps> = ({
     deletePlayer,
     getTournamentById,
     matches,
-    teams,
     onBack,
 }) => {
-    const [viewingPlayerId, setViewingPlayerId] = useState<string | null>(null);
     const [isEditingTeam, setIsEditingTeam] = useState(false);
+    const { openPlayerDetails } = usePlayerNavigation();
 
-    if (viewingPlayerId) {
-        const viewingPlayer = team?.players?.find(p => p.id === viewingPlayerId);
-        if (viewingPlayer) {
-            return (
-                <PlayerDetailsPage
-                    player={viewingPlayer}
-                    team={team}
-                    match={match}
-                    opponentTeam={opponentTeam}
-                    tournament={tournament}
-                    matches={matches}
-                    teams={teams}
-                    tournamentId={tournamentId}
-                    isMatchLive={isMatchLive}
-                    updateTeam={updateTeam}
-                    onBack={() => setViewingPlayerId(null)}
-                />
-            );
-        }
-    }
+    const handlePlayerClick = (player: Player) => {
+        openPlayerDetails({
+            sourceScreen: 'TeamDetailsPage',
+            teamId: team.id,
+            playerId: player.id,
+            matchId: match.id,
+            tournamentId: tournamentId,
+            returnTo: 'team_details',
+            mode: 'view'
+        });
+    };
 
     return (
         <div className="absolute inset-0 z-50 bg-secondary flex flex-col h-full w-full select-none safe-pad-t safe-pad-r safe-pad-l">
@@ -85,7 +73,7 @@ const TeamDetailsPage: React.FC<TeamDetailsPageProps> = ({
             </div>
 
             {/* Content */}
-            <div className="flex-1 overflow-y-auto w-full max-w-3xl mx-auto pb-safe">
+            <div className="flex-1 overflow-y-auto w-full max-w-3xl mx-auto safe-pad-b">
                 {/* Team Summary */}
                 <div className="p-4 bg-primary border-b border-brand-blue/15">
                     <div className="flex justify-between items-center mb-4">
@@ -138,7 +126,7 @@ const TeamDetailsPage: React.FC<TeamDetailsPageProps> = ({
                                 <div 
                                     key={player.id} 
                                     className="flex items-center gap-3 p-3 bg-primary rounded-xl shadow-sm border border-brand-blue/10 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
-                                    onClick={() => setViewingPlayerId(player.id)}
+                                    onClick={() => handlePlayerClick(player)}
                                 >
                                     <div className="w-10 h-10 flex flex-shrink-0 items-center justify-center rounded-lg bg-secondary text-text-primary overflow-hidden shadow-inner">
                                         <div className="w-full h-full flex flex-col items-center justify-center">

@@ -139,19 +139,9 @@ const TournamentManager: React.FC<TournamentManagerProps> = (props) => {
     };
     
     const handleSelectSuggestion1 = (team: Team) => {
-        if (selectedTeam2 && team.players.length !== selectedTeam2.players.length) {
-            showNotification(`Team player counts must match. ${selectedTeam2.name} has ${selectedTeam2.players.length}, while ${team.name} has ${team.players.length}.`, 'error');
-            setQuickTeam1('');
-            setSelectedTeam1(null);
-            setActiveSuggestionBox(null);
-            return;
-        }
         setQuickTeam1(team.name);
         setSelectedTeam1(team);
         setActiveSuggestionBox(null);
-        if (!selectedTeam2) {
-            setQuickPlayers(team.players.length);
-        }
     };
 
     const handleTeam2Change = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -172,22 +162,10 @@ const TournamentManager: React.FC<TournamentManagerProps> = (props) => {
     };
 
     const handleSelectSuggestion2 = (team: Team) => {
-        if (selectedTeam1 && team.players.length !== selectedTeam1.players.length) {
-            showNotification(`Team player counts must match. ${selectedTeam1.name} has ${selectedTeam1.players.length}, while ${team.name} has ${team.players.length}.`, 'error');
-            setQuickTeam2('');
-            setSelectedTeam2(null);
-            setActiveSuggestionBox(null);
-            return;
-        }
         setQuickTeam2(team.name);
         setSelectedTeam2(team);
         setActiveSuggestionBox(null);
-        if (!selectedTeam1) {
-            setQuickPlayers(team.players.length);
-        }
     };
-
-    const isPlayersInputDisabled = !!(selectedTeam1 || selectedTeam2);
 
     const quickMatch = useMemo(() => {
         if (!quickMatchSetupId) return null;
@@ -394,7 +372,7 @@ const TournamentManager: React.FC<TournamentManagerProps> = (props) => {
                                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                                 <input type="number" value={quickOvers} onChange={e => setQuickOvers(e.target.value === '' ? '' : parseInt(e.target.value, 10))} placeholder="Overs" className="w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" />
                                                 <input type="number" value={quickMaxOvers} onChange={e => setQuickMaxOvers(e.target.value === '' ? '' : parseInt(e.target.value, 10))} placeholder="Max Overs/Bowler" className="w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" />
-                                                <input type="number" value={quickPlayers} onChange={handleQuickPlayersChange} placeholder="Players" className="w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue disabled:bg-primary/30 disabled:cursor-not-allowed" disabled={isPlayersInputDisabled} title={isPlayersInputDisabled ? 'Player count is determined by the selected historical team.' : ''} />
+                                                <input type="number" value={quickPlayers} onChange={handleQuickPlayersChange} placeholder="Players" className="w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" />
                                             </div>
                                             <Button
                                                 onClick={handleAddQuickMatch}

@@ -7,6 +7,8 @@ import MatchOvers from './MatchOvers';
 import MatchCommentary from './MatchCommentary';
 import ImpactPlayerModal from './ImpactPlayerModal';
 import TeamDetailsPage from './TeamDetailsPage';
+import { getRequiredSquadSize, getMaxPlayers } from '../utils/matchConfig';
+import { canEnableSetToss } from '../utils/validation';
 
 export interface MatchDetailsHubProps {
     match: Match;
@@ -104,8 +106,26 @@ const MatchDetailsHub: React.FC<MatchDetailsHubProps> = ({
     const renderMatchActions = () => {
         if (displayState.type === 'completed' || displayState.type === 'abandoned' || displayState.type === 'pastUnplayed') return null;
 
-        const arePlayerCountsEqual = team1.players.length === team2.players.length && team1.players.length > 0;
-        const playerMismatchTitle = "Teams must have an equal number of players (at least 1) before the toss.";
+        const requiredSquadSize = getRequiredSquadSize(match, tournament);
+        const t1Selected = { ...team1, players: team1.players.filter(p => (match.team1SquadIds || []).includes(p.id)) };
+        const t2Selected = { ...team2, players: team2.players.filter(p => (match.team2SquadIds || []).includes(p.id)) };
+        const setTossValidation = canEnableSetToss(t1Selected, t2Selected, match.oversPerInnings, requiredSquadSize, requiredSquadSize);
+        const canToss = setTossValidation.canEnable;
+
+        let playerMismatchTitle = "Set Toss";
+        if (!canToss) {
+            if ((match.team1SquadIds || []).length !== requiredSquadSize) {
+                playerMismatchTitle = `${team1.name} squad must have ${requiredSquadSize} players (currently ${(match.team1SquadIds || []).length}/${requiredSquadSize})`;
+            } else if ((match.team2SquadIds || []).length !== requiredSquadSize) {
+                playerMismatchTitle = `${team2.name} squad must have ${requiredSquadSize} players (currently ${(match.team2SquadIds || []).length}/${requiredSquadSize})`;
+            } else if (!setTossValidation.teamAValid) {
+                playerMismatchTitle = `${team1.name} squad rules incomplete: ${setTossValidation.teamAErrors[0] || 'Check roles'}`;
+            } else if (!setTossValidation.teamBValid) {
+                playerMismatchTitle = `${team2.name} squad rules incomplete: ${setTossValidation.teamBErrors[0] || 'Check roles'}`;
+            } else {
+                playerMismatchTitle = "Roster or overs count validation failed.";
+            }
+        }
 
         if (displayState.type === 'live' && onContinueMatch) {
             return (
@@ -143,12 +163,12 @@ const MatchDetailsHub: React.FC<MatchDetailsHubProps> = ({
         if (displayState.type === 'readyToToss' && onSetToss) {
             return (
                 <button 
-                    disabled={isMatchLive || !arePlayerCountsEqual}
+                    disabled={isMatchLive || !canToss}
                     onClick={() => onSetToss(match)}
-                    title={!arePlayerCountsEqual ? playerMismatchTitle : (isMatchLive ? 'Another match is currently live' : 'Set Toss')}
+                    title={!canToss ? playerMismatchTitle : (isMatchLive ? 'Another match is currently live' : 'Set Toss')}
                     className="w-full mt-4 py-4 bg-brand-blue text-white rounded-xl font-bold uppercase tracking-wide shadow-md hover:bg-brand-blue/90 disabled:bg-gray-300 disabled:text-gray-500 transition-colors"
                 >
-                    {isMatchLive ? 'Another Match is Live' : (arePlayerCountsEqual ? 'Set Toss' : 'Teams need equal players')}
+                    {isMatchLive ? 'Another Match is Live' : (canToss ? 'Set Toss' : 'Squads Incomplete')}
                 </button>
             );
         }
@@ -174,7 +194,10 @@ const MatchDetailsHub: React.FC<MatchDetailsHubProps> = ({
         if (!winner) return 'Winner unknown';
     
         if (match.innings2 && winner.id === match.innings2.battingTeamId) {
-            const wicketsLeft = (winner.players.length || 11) - 1 - (match.innings2.wickets || 0);
+            const maxPlayers = getMaxPlayers(match);
+            const squadIds = match.team1Id === winner.id ? (match.team1SquadIds || []) : (match.team2SquadIds || []);
+            const totalPlayers = squadIds.length > 0 ? squadIds.length : maxPlayers;
+            const wicketsLeft = totalPlayers - 1 - (match.innings2.wickets || 0);
             return `${winner.name} won by ${wicketsLeft} wickets`;
         } else if (match.innings1 && winner.id === match.innings1.battingTeamId) {
             const runMargin = (match.innings1.score || 0) - (match.innings2?.score || 0);

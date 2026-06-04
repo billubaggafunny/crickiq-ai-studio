@@ -8,6 +8,8 @@ import { EditIcon } from '../constants';
 import { calculatePlayerCareerStats } from '../utils/cricketLogic';
 import LineupPreview from './LineupPreview';
 import TossModal from './TossModal';
+import { canEnableSetToss } from '../utils/validation';
+import { getRequiredSquadSize } from '../utils/matchConfig';
 
 // FIX: Updated Card component to accept and spread additional props (e.g., onClick) to resolve type errors.
 
@@ -53,14 +55,14 @@ const TeamPanel: React.FC<{ team: Team, isReady: boolean, onManage: () => void }
 );
 
 const QuickMatchSetup: React.FC<QuickMatchSetupProps> = ({ match: initialMatch, onStartMatch, matches, startWithToss, ...tournamentState }) => {
-    const { getTeamById, updateToss, updateTeam, getTournamentById, addPlayer, deletePlayer } = tournamentState;
+    const { getTeamById, updateToss, updateTeam, getTournamentById, addPlayer, deletePlayer, updateMatch } = tournamentState;
 
     const match = matches.find(m => m.id === initialMatch.id) || initialMatch;
 
     const [team1Ready, setTeam1Ready] = useState(false);
     const [team2Ready, setTeam2Ready] = useState(false);
-    const [editingTeam, setEditingTeam] = useState<Team | null>(null);
-    const [previewingTeam, setPreviewingTeam] = useState<Team | null>(null);
+    const [editingTeamId, setEditingTeamId] = useState<string | null>(null);
+    const [previewingTeamId, setPreviewingTeamId] = useState<string | null>(null);
     const [showTossModal, setShowTossModal] = useState(false);
     const [activeLineupTab, setActiveLineupTab] = useState<'team1' | 'team2'>('team1');
     const [touchStartX, setTouchStartX] = useState<number | null>(null);
@@ -77,8 +79,16 @@ const QuickMatchSetup: React.FC<QuickMatchSetupProps> = ({ match: initialMatch, 
         }
     }, [startWithToss]);
 
-    const team1 = getTeamById(match.team1Id);
-    const team2 = getTeamById(match.team2Id);
+    const team1Pool = getTeamById(match.team1Id);
+    const team2Pool = getTeamById(match.team2Id);
+    
+    // Step 1: Match Squad Separation
+    // Match Squad starts empty if teamXSquadIds is undefined, allowing user to select from the pool.
+    const team1SquadIds = useMemo(() => match.team1SquadIds || [], [match.team1SquadIds]);
+    const team2SquadIds = useMemo(() => match.team2SquadIds || [], [match.team2SquadIds]);
+    
+    const team1 = useMemo(() => team1Pool ? { ...team1Pool, players: team1Pool.players.filter(p => team1SquadIds.includes(p.id)) } : undefined, [team1Pool, team1SquadIds]);
+    const team2 = useMemo(() => team2Pool ? { ...team2Pool, players: team2Pool.players.filter(p => team2SquadIds.includes(p.id)) } : undefined, [team2Pool, team2SquadIds]);
 
     const quickMatches = useMemo(() => matches.filter(m => m.isQuickMatch && m.status === 'completed'), [matches]);
 
@@ -98,22 +108,20 @@ const QuickMatchSetup: React.FC<QuickMatchSetupProps> = ({ match: initialMatch, 
         return statsMap;
     };
 
-    // eslint-disable-next-line react-hooks/preserve-manual-memoization
-    const team1Stats = useMemo(() => getPlayerStatsMap(team1, quickMatches), [team1, quickMatches]);
-    // eslint-disable-next-line react-hooks/preserve-manual-memoization
-    const team2Stats = useMemo(() => getPlayerStatsMap(team2, quickMatches), [team2, quickMatches]);
+    const team1Stats = getPlayerStatsMap(team1, quickMatches);
+    const team2Stats = getPlayerStatsMap(team2, quickMatches);
 
     const handleTeamReady = (teamId: string) => {
         if (teamId === team1?.id) setTeam1Ready(true);
         if (teamId === team2?.id) setTeam2Ready(true);
-        setEditingTeam(null);
+        setEditingTeamId(null);
     };
     
     const handleTeamPanelClick = (team: Team, isReady: boolean) => {
         if (isReady) {
-            setPreviewingTeam(team);
+            setPreviewingTeamId(team.id);
         } else {
-            setEditingTeam(team);
+            setEditingTeamId(team.id);
         }
     };
 
@@ -156,19 +164,26 @@ const QuickMatchSetup: React.FC<QuickMatchSetupProps> = ({ match: initialMatch, 
     };
 
     const arePlayerCountsEqual = team1?.players.length === team2?.players.length;
-    const isTossDisabled = !(team1Ready && team2Ready && arePlayerCountsEqual);
+    const tournament = match.tournamentId ? getTournamentById(match.tournamentId) : undefined;
+    const maxPlayers = getRequiredSquadSize(match, tournament);
+    const setTossValidation = canEnableSetToss(team1, team2, match.oversPerInnings, maxPlayers, maxPlayers);
+    const isTossDisabled = !(team1Ready && team2Ready && setTossValidation.canEnable);
 
     const tossButtonTitle = useMemo(() => {
         if (!team1 || !team2) return 'Loading...';
         if (!team1Ready || !team2Ready) {
             return 'Both teams must be marked as ready';
         }
-        if (!arePlayerCountsEqual) {
-            return `Teams must have same number of players (${team1.players.length} vs ${team2.players.length})`;
+        if (!setTossValidation.canEnable) {
+            if (team1.players.length !== maxPlayers) return `${team1.name} must have ${maxPlayers} players`;
+            if (team2.players.length !== maxPlayers) return `${team2.name} must have ${maxPlayers} players`;
+            if (!arePlayerCountsEqual) return `Teams must have same number of players (${team1.players.length} vs ${team2.players.length})`;
+            if (!setTossValidation.teamAValid) return `${team1.name} roster is invalid: ${setTossValidation.teamAErrors[0]}`;
+            if (!setTossValidation.teamBValid) return `${team2.name} roster is invalid: ${setTossValidation.teamBErrors[0]}`;
+            return 'Fix roster issues to proceed';
         }
         return 'Proceed to toss';
-    // eslint-disable-next-line react-hooks/preserve-manual-memoization
-    }, [team1, team2, team1Ready, team2Ready, arePlayerCountsEqual]);
+    }, [team1, team2, team1Ready, team2Ready, setTossValidation, arePlayerCountsEqual, maxPlayers]);
 
     if (!team1 || !team2) {
         return <div className="text-center p-8">Loading teams...</div>;
@@ -280,11 +295,11 @@ const QuickMatchSetup: React.FC<QuickMatchSetupProps> = ({ match: initialMatch, 
                 </div>
             </CrickIQCard>
 
-            {editingTeam && (
+            {editingTeamId && getTeamById(editingTeamId) && (
                 <TeamEditorModal
-                    team={editingTeam}
+                    team={getTeamById(editingTeamId)!}
                     tournamentId={match.tournamentId}
-                    onClose={() => setEditingTeam(null)}
+                    onClose={() => setEditingTeamId(null)}
                     onDone={handleTeamReady}
                     isMatchLive={false}
                     updateTeam={updateTeam}
@@ -292,21 +307,23 @@ const QuickMatchSetup: React.FC<QuickMatchSetupProps> = ({ match: initialMatch, 
                     addPlayer={addPlayer}
                     deletePlayer={deletePlayer}
                     matches={matches}
+                    match={match}
+                    updateMatch={updateMatch}
                 />
             )}
             
-            {previewingTeam && (
-                <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50 p-4" onClick={() => setPreviewingTeam(null)}>
+            {previewingTeamId && getTeamById(previewingTeamId) && (
+                <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50 p-4" onClick={() => setPreviewingTeamId(null)}>
                     <div className="w-full max-w-lg" onClick={e => e.stopPropagation()}>
                         <CrickIQCard>
                             <div className="flex justify-between items-center mb-4">
                                 <h3 className="text-h2 text-text-primary">Team Preview</h3>
-                                <button onClick={() => setPreviewingTeam(null)} className="text-3xl leading-none text-text-secondary hover:text-text-primary">&times;</button>
+                                <button onClick={() => setPreviewingTeamId(null)} className="text-3xl leading-none text-text-secondary hover:text-text-primary">&times;</button>
                             </div>
-                            <LineupPreview team={previewingTeam} playerStats={previewingTeam.id === team1.id ? team1Stats : team2Stats} match={match} />
+                            <LineupPreview team={getTeamById(previewingTeamId)!} playerStats={previewingTeamId === team1?.id ? team1Stats : team2Stats} match={match} />
                             <div className="mt-4 flex justify-end gap-2">
                                 <Button 
-                                    onClick={() => { setEditingTeam(previewingTeam); setPreviewingTeam(null); }} 
+                                    onClick={() => { setEditingTeamId(previewingTeamId); setPreviewingTeamId(null); }} 
                                     variant="secondary"
                                 >
                                     <EditIcon /> Edit Team

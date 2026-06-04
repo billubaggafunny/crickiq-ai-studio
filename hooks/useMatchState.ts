@@ -5,6 +5,7 @@ import { PlayerRole, BattingStatus } from '../types';
 import { generateEntityId, createTimestamp, createSyncMetadata } from '../utils/idGenerator';
 import { calculateStats, rebuildInnings, determineWinner, calculatePointsTable } from '../utils/cricketLogic';
 import { generateDefaultRoles, LOGO_OPTIONS } from '../utils/initialData';
+import { getMaxPlayers } from '../utils/matchConfig';
 
 export const useMatchState = (
     matches: Match[],
@@ -67,8 +68,8 @@ export const useMatchState = (
         setMatches(prev => [...prev, ...newMatches]);
     }, [setMatches]);
     
-    const updateMatch = useCallback((matchId: string, updatedDetails: Pick<Match, 'team1Id' | 'team2Id' | 'date' | 'time' | 'oversPerInnings' | 'maxOversPerBowler'>) => {
-        if (updatedDetails.team1Id === updatedDetails.team2Id) {
+    const updateMatch = useCallback((matchId: string, updatedDetails: Partial<Match>) => {
+        if (updatedDetails.team1Id && updatedDetails.team2Id && updatedDetails.team1Id === updatedDetails.team2Id) {
             console.warn("[RuntimeValidation] Cannot update match: Teams cannot be the same.");
             return;
         }
@@ -77,10 +78,19 @@ export const useMatchState = (
             return;
         }
         
-        const t1 = teams.find(t => t.id === updatedDetails.team1Id);
-        const t2 = teams.find(t => t.id === updatedDetails.team2Id);
-        if (!t1 || !t2) {
-            console.warn("[RuntimeValidation] Cannot update match: Teams not found.");
+        if (updatedDetails.team1Id || updatedDetails.team2Id) {
+            setMatches(prev => {
+                const existing = prev.find(m => m.id === matchId);
+                const t1Id = updatedDetails.team1Id || existing?.team1Id;
+                const t2Id = updatedDetails.team2Id || existing?.team2Id;
+                const t1 = teams.find(t => t.id === t1Id);
+                const t2 = teams.find(t => t.id === t2Id);
+                if (!t1 || !t2) {
+                    console.warn("[RuntimeValidation] Cannot update match: Teams not found.");
+                    return prev;
+                }
+                return prev.map(m => (m.id === matchId ? { ...m, ...updatedDetails, updatedAt: createTimestamp() } : m));
+            });
             return;
         }
         
@@ -183,6 +193,9 @@ export const useMatchState = (
             return t;
         }));
 
+        const isTeam1New = newTeamsToCreate.some(t => t.id === finalTeam1.id);
+        const isTeam2New = newTeamsToCreate.some(t => t.id === finalTeam2.id);
+
         const newMatchId = `m_${generateEntityId()}`;
         const now = new Date();
         const time = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
@@ -200,6 +213,9 @@ export const useMatchState = (
             isDraft,
             oversPerInnings,
             isQuickMatch: true,
+            numberOfPlayers,
+            team1SquadIds: isTeam1New ? finalTeam1.players.map(p => p.id) : undefined,
+            team2SquadIds: isTeam2New ? finalTeam2.players.map(p => p.id) : undefined,
             maxOversPerBowler,
             createdAt: timestamp,
             updatedAt: timestamp,
@@ -236,6 +252,9 @@ export const useMatchState = (
             maxOversPerBowler: originalMatch.maxOversPerBowler,
             status: 'scheduled',
             isQuickMatch: true,
+            numberOfPlayers: originalMatch.numberOfPlayers,
+            team1SquadIds: originalMatch.team1SquadIds ? [...originalMatch.team1SquadIds] : undefined,
+            team2SquadIds: originalMatch.team2SquadIds ? [...originalMatch.team2SquadIds] : undefined,
             createdAt: timestamp,
             updatedAt: timestamp,
             ...createSyncMetadata()
@@ -465,7 +484,9 @@ export const useMatchState = (
             }
 
             const battingTeam = teams.find(t => t.id === updatedInnings.battingTeamId);
-            const totalPlayers = battingTeam?.players.length || 11;
+            const parentTournament = m.tournamentId ? tournaments.find(t => t.id === m.tournamentId) : undefined;
+            const maxPlayers = getMaxPlayers(m, parentTournament);
+            const totalPlayers = battingTeam?.players?.length > 0 ? battingTeam.players.length : maxPlayers;
             const isAllOut = updatedInnings.wickets >= totalPlayers - 1;
             const isOversFinished = updatedInnings.overs >= m.oversPerInnings;
 
@@ -494,7 +515,7 @@ export const useMatchState = (
             
             return { ...m, [currentInningsKey]: updatedInnings, updatedAt: createTimestamp() };
         }));
-    }, [teams, setMatches]);
+    }, [teams, setMatches, tournaments]);
     
     const updateLivePlayers = useCallback((matchId: string, onStrikeId: string, nonStrikerId: string | null, bowlerId: string | null) => {
         if (onStrikeId && nonStrikerId && onStrikeId === nonStrikerId) {

@@ -19,6 +19,7 @@ import LineupPreview from './LineupPreview';
 import ScheduleGenerator from './ScheduleGenerator';
 import { calculatePlayerCareerStats } from '../utils/cricketLogic';
 import { validateTournamentMatch, validateMaxOversPerBowler } from '../utils/validation';
+import { getMaxPlayers } from '../utils/matchConfig';
 import TossModal from './TossModal';
 import PointsTable from './PointsTable';
 
@@ -125,11 +126,11 @@ const MatchManager: React.FC<MatchManagerProps> = (props) => {
     const calendarContainerRef = useRef<HTMLDivElement>(null);
 
     const [newTeamName, setNewTeamName] = useState('');
-    const [editingTeam, setEditingTeam] = useState<Team | null>(null);
+    const [editingTeamId, setEditingTeamId] = useState<string | null>(null);
     const [previewingTeam, setPreviewingTeam] = useState<Team | null>(null);
     
     const tournament = useMemo(() => getTournamentById(selectedTournamentId || ''), [getTournamentById, selectedTournamentId]);
-    const maxPlayers = useMemo(() => tournament?.numberOfPlayers || 11, [tournament]);
+    const maxPlayers = useMemo(() => getMaxPlayers(undefined, tournament), [tournament]);
 
     const tournamentMatches = useMemo(() => {
         if (!selectedTournamentId) return [];
@@ -251,7 +252,7 @@ const MatchManager: React.FC<MatchManagerProps> = (props) => {
     const checkTeamReadiness = useCallback((team: Team): boolean => {
         if (!team || !effectiveTournament) return false;
         
-        const maxPlayers = effectiveTournament.numberOfPlayers || 11;
+        const maxPlayers = getMaxPlayers(undefined, effectiveTournament);
 
         if (team.players.length !== maxPlayers) return false;
         if (team.players.some(p => !p.name.trim())) return false;
@@ -867,7 +868,9 @@ const MatchManager: React.FC<MatchManagerProps> = (props) => {
                                         if (winner) {
                                             if (match.innings2 && winner.id === match.innings2.battingTeamId) {
                                                 const battingTeam = getTeamById(match.innings2.battingTeamId);
-                                                const wicketsLeft = (battingTeam?.players.length || 11) - 1 - (match.innings2.wickets || 0);
+                                                const maxPlayers = getMaxPlayers(match);
+                                                const totalPlayers = battingTeam?.players?.length > 0 ? battingTeam.players.length : maxPlayers;
+                                                const wicketsLeft = totalPlayers - 1 - (match.innings2.wickets || 0);
                                                 winnerMessage = `${winner.name} won by ${wicketsLeft} wickets`;
                                             } else if (match.innings1 && winner.id === match.innings1.battingTeamId) {
                                                 const runMargin = (match.innings1.score || 0) - (match.innings2?.score || 0);
@@ -980,7 +983,7 @@ const MatchManager: React.FC<MatchManagerProps> = (props) => {
                                             if (isReady) {
                                                 setPreviewingTeam(team);
                                             } else {
-                                                setEditingTeam(team);
+                                                setEditingTeamId(team.id);
                                             }
                                         }}
                                     >
@@ -989,7 +992,7 @@ const MatchManager: React.FC<MatchManagerProps> = (props) => {
                                                 <h3 className="text-h2 truncate pr-4">{team.name}</h3>
                                                 <div className="flex items-center -mr-2 -mt-2">
                                                     <button
-                                                        onClick={(e) => { e.stopPropagation(); setEditingTeam(team); }}
+                                                        onClick={(e) => { e.stopPropagation(); setEditingTeamId(team.id); }}
                                                         className="p-2 rounded-2xl bg-white/10 hover:bg-white/20 transition-colors"
                                                         title="Edit Team"
                                                     >
@@ -1076,7 +1079,7 @@ const MatchManager: React.FC<MatchManagerProps> = (props) => {
                             <LineupPreview team={previewingTeam} playerStats={previewingTeamStats} />
                             <div className="mt-4 flex justify-end gap-2">
                                 <Button 
-                                    onClick={() => { setEditingTeam(previewingTeam); setPreviewingTeam(null); }} 
+                                    onClick={() => { setEditingTeamId(previewingTeam.id); setPreviewingTeam(null); }} 
                                     variant="secondary"
                                 >
                                     <EditIcon /> Edit Team
@@ -1086,15 +1089,15 @@ const MatchManager: React.FC<MatchManagerProps> = (props) => {
                     </div>
                 </div>
             )}
-            {editingTeam && selectedTournamentId && (
+            {editingTeamId && selectedTournamentId && getTeamById(editingTeamId) && (
                 <TeamEditorModal 
-                    team={editingTeam}
+                    team={getTeamById(editingTeamId)!}
                     tournamentId={selectedTournamentId}
                     addPlayerReplacement={addPlayerReplacement}
-                    onClose={() => setEditingTeam(null)}
+                    onClose={() => setEditingTeamId(null)}
                     isMatchLive={isMatchLive}
                     onDone={() => {
-                        setEditingTeam(null);
+                        setEditingTeamId(null);
                     }}
                     {...props}
                 />

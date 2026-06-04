@@ -1,14 +1,16 @@
 import React, { useState, useMemo } from 'react';
 import { Player, Team, Match, PlayerRole, Tournament, Innings } from '../types';
-import { ChevronLeft, ChevronRight, Edit2, X, Info } from 'lucide-react';
+import { ChevronLeft, ChevronRight, X, Info } from 'lucide-react';
 import { getRoleIcon, PLAYER_ROLES } from '../constants';
 import { validatePlayer } from '../utils/validation';
 import { useNotification } from '../hooks/useNotification';
+import { useTeamLock } from '../hooks/useTeamLock';
+import { getMaxPlayers } from '../utils/matchConfig';
 
 interface PlayerDetailsPageProps {
-    player: Player;
+    player?: Player;
     team: Team;
-    match: Match;
+    match?: Match;
     opponentTeam?: Team;
     tournament?: Tournament;
     matches?: Match[];
@@ -16,10 +18,12 @@ interface PlayerDetailsPageProps {
     tournamentId?: string;
     isMatchLive?: boolean;
     updateTeam?: (team: Team) => void;
+    updateMatch?: (matchId: string, updates: Partial<Match>) => void;
     onBack: () => void;
+    mode?: 'view' | 'edit' | 'add';
 }
 
-const PlayerDetailsPage: React.FC<PlayerDetailsPageProps> = ({
+const PlayerDetailsView: React.FC<PlayerDetailsPageProps> = ({
     player,
     team,
     match,
@@ -27,16 +31,12 @@ const PlayerDetailsPage: React.FC<PlayerDetailsPageProps> = ({
     tournament,
     matches = [],
     teams = [],
-    tournamentId,
-    isMatchLive = false,
-    updateTeam,
     onBack
 }) => {
-    const { showNotification } = useNotification();
-    const isCaptain = player?.id === team?.captainId;
-    const isViceCaptain = player?.id === team?.viceCaptainId;
-    
-    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    // Cast player as Player since view mode always has a player
+    const safePlayer = player as Player;
+    const isCaptain = safePlayer?.id === team?.captainId;
+    const isViceCaptain = safePlayer?.id === team?.viceCaptainId;
     
     const [activeTab, setActiveTab] = useState('Overview');
     const tabs = ['Overview', 'Stats', 'Matches', 'Teams', 'Tournaments'];
@@ -45,10 +45,10 @@ const PlayerDetailsPage: React.FC<PlayerDetailsPageProps> = ({
     const [statSection, setStatSection] = useState<'Batting' | 'Bowling' | 'Keeping' | 'Fielding'>('Batting');
 
     const playerStats = useMemo(() => {
-        const globalId = (player as Player & { globalPlayerId?: string }).globalPlayerId || player.id;
+        const globalId = (safePlayer as Player & { globalPlayerId?: string }).globalPlayerId || safePlayer.id;
         const linkedIds = new Set<string>();
         
-        linkedIds.add(player.id);
+        linkedIds.add(safePlayer.id);
         
         teams.forEach(t => {
             t.players.forEach(p => {
@@ -90,7 +90,7 @@ const PlayerDetailsPage: React.FC<PlayerDetailsPageProps> = ({
 
         let momCountInner = 0;
         
-        const isWicketKeeper = player.role === 'Wicket Keeper';
+        const isWicketKeeper = safePlayer.role === 'Wicket Keeper';
 
         matches.filter(m => m.status === 'completed').forEach(m => {
             let playedBatting = false;
@@ -238,13 +238,13 @@ const PlayerDetailsPage: React.FC<PlayerDetailsPageProps> = ({
             },
             mom: momCountInner
         };
-    }, [matches, teams, player]);
+    }, [matches, teams, safePlayer]);
 
         // Linked Teams logic
     const linkedTeams = useMemo(() => {
-        if (player?.id) { // In CrickIQ, usually player.id matches globalPlayerId if not explicitly separated, let's check globalPlayerId
+        if (safePlayer?.id) { // In CrickIQ, usually player.id matches globalPlayerId if not explicitly separated, let's check globalPlayerId
             // We use globalPlayerId if available, fallback to player.id to be safe
-            const globalId = (player as Player & { globalPlayerId?: string }).globalPlayerId || player.id;
+            const globalId = (safePlayer as Player & { globalPlayerId?: string }).globalPlayerId || safePlayer.id;
             const foundTeams = teams.filter(t => t.players.some(p => ((p as Player & { globalPlayerId?: string }).globalPlayerId || p.id) === globalId));
             
             // Deduplicate teams by ID
@@ -255,14 +255,14 @@ const PlayerDetailsPage: React.FC<PlayerDetailsPageProps> = ({
             return uniqueTeams.length > 0 ? uniqueTeams : (team ? [team] : []);
         }
         return team ? [team] : [];
-    }, [teams, player, team]);
+    }, [teams, safePlayer, team]);
 
     // Overview tab variables
-    const PlayerInfo = player as Player & { country?: string; dob?: string };
+    const PlayerInfo = safePlayer as Player & { country?: string; dob?: string };
     
     const momCount = useMemo(() => {
-        return matches.filter(m => m.status === 'completed' && m.manOfTheMatchId === player.id).length;
-    }, [matches, player.id]);
+        return matches.filter(m => m.status === 'completed' && m.manOfTheMatchId === safePlayer.id).length;
+    }, [matches, safePlayer.id]);
 
     const liveMatchContext = useMemo(() => {
         const lMatch = matches.find(m => m.status === 'live' && (m.team1Id === team?.id || m.team2Id === team?.id));
@@ -280,12 +280,12 @@ const PlayerDetailsPage: React.FC<PlayerDetailsPageProps> = ({
         let battingString = '';
         let bowlingString = '';
 
-        const batScore = currentInnings?.batsmanScores?.[player.id] || lMatch.innings1?.batsmanScores?.[player.id];
-        const bowlScore = currentInnings?.bowlerScores?.[player.id] || lMatch.innings1?.bowlerScores?.[player.id];
+        const batScore = currentInnings?.batsmanScores?.[safePlayer.id] || lMatch.innings1?.batsmanScores?.[safePlayer.id];
+        const bowlScore = currentInnings?.bowlerScores?.[safePlayer.id] || lMatch.innings1?.bowlerScores?.[safePlayer.id];
 
         if (currentInnings) {
-             const isBattingNow = currentInnings.currentBatsmen?.includes(player.id);
-             const isBowlingNow = currentInnings.currentBowler === player.id;
+             const isBattingNow = currentInnings.currentBatsmen?.includes(safePlayer.id);
+             const isBowlingNow = currentInnings.currentBowler === safePlayer.id;
              
              if (isBattingNow) stateStatus = 'Live Batting';
              else if (isBowlingNow) stateStatus = 'Live Bowling';
@@ -294,14 +294,14 @@ const PlayerDetailsPage: React.FC<PlayerDetailsPageProps> = ({
         }
 
         if (batScore) {
-           battingString = `${batScore.runs}${currentInnings?.currentBatsmen?.includes(player.id) ? '*' : ''} (${batScore.balls})`;
+           battingString = `${batScore.runs}${currentInnings?.currentBatsmen?.includes(safePlayer.id) ? '*' : ''} (${batScore.balls})`;
         }
         if (bowlScore) {
            bowlingString = `${bowlScore.wickets}-${bowlScore.runsConceded} (${bowlScore.overs})`;
         }
 
         return { matchTitle, stateStatus, battingString, bowlingString, teamName: team?.name || 'Team' };
-    }, [matches, team, player.id, teams]);
+    }, [matches, team, safePlayer.id, teams]);
 
     const recentPerformances = useMemo(() => {
         return matches
@@ -309,8 +309,8 @@ const PlayerDetailsPage: React.FC<PlayerDetailsPageProps> = ({
             .slice(-5)
             .reverse()
             .map(m => {
-                const bat = m.innings1?.batsmanScores?.[player.id] || m.innings2?.batsmanScores?.[player.id];
-                const bowl = m.innings1?.bowlerScores?.[player.id] || m.innings2?.bowlerScores?.[player.id];
+                const bat = m.innings1?.batsmanScores?.[safePlayer.id] || m.innings2?.batsmanScores?.[safePlayer.id];
+                const bowl = m.innings1?.bowlerScores?.[safePlayer.id] || m.innings2?.bowlerScores?.[safePlayer.id];
                 
                 let display = 'Did Not Play';
                 if (bat?.balls && bowl?.overs) {
@@ -332,101 +332,8 @@ const PlayerDetailsPage: React.FC<PlayerDetailsPageProps> = ({
                     opponent: opponentName
                 };
             });
-    }, [matches, team, player.id, teams]);
+    }, [matches, team, safePlayer.id, teams]);
     
-    // Form state
-    const [editName, setEditName] = useState(player?.name || '');
-    const [editNumber, setEditNumber] = useState<number | string>(player?.number !== undefined ? player.number : '');
-    const [editRole, setEditRole] = useState(player?.role || '');
-    const [editIsCaptain, setEditIsCaptain] = useState(isCaptain);
-    const [editIsViceCaptain, setEditIsViceCaptain] = useState(isViceCaptain);
-    const [errors, setErrors] = useState<{name: string | null, number: string | null, role: string | null}>({name: null, number: null, role: null});
-
-    // Check if player editing should be locked
-    const activeMatchForLock = useMemo(() => {
-        if (isMatchLive) {
-            return matches.find(m => m.status === 'live');
-        }
-        return matches.find(m => 
-            m.tournamentId === tournamentId && 
-            (m.team1Id === team.id || m.team2Id === team.id) &&
-            (
-                m.status === 'live' || 
-                m.status === 'completed' || 
-                m.wasAbandoned === true || 
-                m.toss !== undefined ||
-                (m.innings1 !== undefined && m.innings1.overs && m.innings1.overs.length > 0)
-            )
-        );
-    }, [matches, tournamentId, team.id, isMatchLive]);
-
-    const isEditingLocked = !!activeMatchForLock;
-
-    const handleOpenEdit = () => {
-        // Reset form state to current player
-        setEditName(player?.name || '');
-        setEditNumber(player?.number !== undefined ? player.number : '');
-        setEditRole(player?.role || '');
-        setEditIsCaptain(player?.id === team?.captainId);
-        setEditIsViceCaptain(player?.id === team?.viceCaptainId);
-        setErrors({name: null, number: null, role: null});
-        setIsEditModalOpen(true);
-    };
-
-    const handleSaveEdit = () => {
-        if (!player || !team || !updateTeam) return;
-
-        if (isEditingLocked) {
-            showNotification('Player editing is locked because the match has started or toss has been completed.', 'error');
-            return;
-        }
-
-        const filteredPlayers = team.players.filter(p => p.id !== player.id);
-        const validation = validatePlayer(editName, editNumber, editRole, filteredPlayers);
-        
-        if (!validation.valid) {
-            setErrors(validation.errors as {name: string | null, number: string | null, role: string | null});
-            showNotification('Please fix errors before saving.', 'error');
-            return;
-        }
-
-        const updatedPlayer = {
-            ...player,
-            name: editName.trim(),
-            number: Number(editNumber),
-            role: editRole as PlayerRole
-        };
-
-        const updatedTeam = {
-            ...team,
-            players: team.players.map(p => p.id === player.id ? updatedPlayer : p)
-        };
-
-        // Handle Captaincy logic (ensure a player isn't both captain and vice captain)
-        if (editIsCaptain && updatedTeam.viceCaptainId === player.id) {
-            updatedTeam.viceCaptainId = null;
-        }
-        if (editIsViceCaptain && updatedTeam.captainId === player.id) {
-            updatedTeam.captainId = null;
-        }
-
-        if (editIsCaptain) {
-            updatedTeam.captainId = player.id;
-        } else if (updatedTeam.captainId === player.id) {
-            updatedTeam.captainId = null;
-        }
-
-        if (editIsViceCaptain) {
-            updatedTeam.viceCaptainId = player.id;
-        } else if (updatedTeam.viceCaptainId === player.id) {
-            updatedTeam.viceCaptainId = null;
-        }
-
-        updateTeam(updatedTeam);
-        showNotification('Player updated successfully.', 'success');
-        setIsEditModalOpen(false);
-    };
-
     // Derived Match Context
     const matchName = opponentTeam ? `${team.name} vs ${opponentTeam.name}` : `Match vs Opponent`;
 
@@ -442,31 +349,32 @@ const PlayerDetailsPage: React.FC<PlayerDetailsPageProps> = ({
     
     const checkInnings = (innings: Innings | undefined) => {
         if (!innings) return;
-        if (innings.batsmanScores?.[player.id]) {
+        if (innings.batsmanScores?.[safePlayer.id]) {
             hasBatted = true;
-            if (innings.batsmanScores[player.id].status === 'Out') isOut = true;
-            if (innings.batsmanScores[player.id].status === 'Retired Hurt') {
+            if (innings.batsmanScores[safePlayer.id].status === 'Out') isOut = true;
+            if (innings.batsmanScores[safePlayer.id].status === 'Retired Hurt') {
                 isOut = true;
                 retiredNote = 'Retired Hurt';
             }
         }
-        if (innings.bowlerScores?.[player.id]) {
+        if (innings.bowlerScores?.[safePlayer.id]) {
             hasBowled = true;
         }
-        if (innings.currentBatsmen?.includes(player.id)) {
+        if (innings.currentBatsmen?.includes(safePlayer.id)) {
             isCurrentBatter = true;
         }
-        if (innings.currentBowler === player.id) {
+        if (innings.currentBowler === safePlayer.id) {
             isCurrentBowler = true;
         }
     };
     
-    checkInnings(match.innings1);
-    checkInnings(match.innings2);
-    
-    if (match.replacements) {
-        const outRep = match.replacements.find(r => r.outgoingPlayerId === player.id);
-        const inRep = match.replacements.find(r => r.incomingPlayerId === player.id);
+    if (match) {
+        checkInnings(match.innings1);
+        checkInnings(match.innings2);
+        
+        if (match.replacements) {
+            const outRep = match.replacements.find(r => r.outgoingPlayerId === safePlayer.id);
+            const inRep = match.replacements.find(r => r.incomingPlayerId === safePlayer.id);
         
         if (outRep) {
             const inPlayer = team?.players?.find(p => p.id === outRep.incomingPlayerId);
@@ -477,9 +385,10 @@ const PlayerDetailsPage: React.FC<PlayerDetailsPageProps> = ({
             replacementNote = `Replacement for ${outPlayer?.name || 'another player'}${inRep.reason ? ` - ${inRep.reason}` : ''}`;
         }
     }
+    }
     
     return (
-        <div className="absolute inset-0 z-50 bg-secondary flex flex-col h-full w-full select-none safe-pad-t safe-pad-r safe-pad-l">
+        <div className="relative w-full h-full bg-secondary flex flex-col select-none safe-pad-t safe-pad-r safe-pad-l">
             {/* Header */}
             <div className="flex items-center justify-between p-4 bg-primary text-text-primary border-b border-brand-blue/15 relative">
                 <button
@@ -490,18 +399,9 @@ const PlayerDetailsPage: React.FC<PlayerDetailsPageProps> = ({
                     <ChevronLeft size={24} />
                 </button>
                 <div className="absolute inset-0 flex items-center justify-center space-x-2 pointer-events-none">
-                    <span className="font-bold text-lg text-text-primary truncate max-w-[200px]">{player?.name || 'Unknown Player'}</span>
+                    <span className="font-bold text-lg text-text-primary truncate max-w-[200px]">{safePlayer?.name || 'Unknown Player'}</span>
                 </div>
                 <div className="w-10 flex justify-end">
-                    {updateTeam && (
-                        <button
-                            onClick={handleOpenEdit}
-                            className="p-2 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-full transition-colors z-10 text-brand-blue"
-                            aria-label="Edit player"
-                        >
-                            <Edit2 size={20} />
-                        </button>
-                    )}
                 </div>
             </div>
 
@@ -524,18 +424,18 @@ const PlayerDetailsPage: React.FC<PlayerDetailsPageProps> = ({
 
             {/* Overview Tab Content */}
             {activeTab === 'Overview' && (
-                <div className="flex-1 overflow-y-auto w-full max-w-3xl mx-auto pb-safe bg-secondary">
+                <div className="flex-1 overflow-y-auto w-full max-w-3xl mx-auto safe-pad-b bg-secondary">
                     
                     {/* Section 1 - Profile Card */}
                     <div className="bg-primary p-6 border-b border-brand-blue/10 flex items-center gap-6">
                         <div className="w-24 h-24 flex-shrink-0 flex items-center justify-center rounded-[20px] bg-secondary text-text-primary overflow-hidden shadow-inner border border-brand-blue/10">
                             <span className="text-3xl font-black opacity-30">
-                                {player?.name?.substring(0, 2).toUpperCase() || 'UN'}
+                                {safePlayer?.name?.substring(0, 2).toUpperCase() || 'UN'}
                             </span>
                         </div>
                         <div className="flex flex-col">
-                            <h2 className="text-2xl font-black text-text-primary tracking-tight">{player?.name || 'Unknown Player'}</h2>
-                            <p className="text-sm font-bold text-brand-blue mt-1">{player?.role || '-'}</p>
+                            <h2 className="text-2xl font-black text-text-primary tracking-tight">{safePlayer?.name || 'Unknown Player'}</h2>
+                            <p className="text-sm font-bold text-brand-blue mt-1">{safePlayer?.role || '-'}</p>
                             <p className="text-sm font-medium text-text-secondary mt-0.5">{team?.name || 'No Team Assigned'}</p>
                         </div>
                     </div>
@@ -600,7 +500,7 @@ const PlayerDetailsPage: React.FC<PlayerDetailsPageProps> = ({
             
             {/* Stats Tab Content */}
             {activeTab === 'Stats' && (
-                <div className="flex-1 overflow-y-auto w-full max-w-3xl mx-auto pb-safe bg-secondary">
+                <div className="flex-1 overflow-y-auto w-full max-w-3xl mx-auto safe-pad-b bg-secondary">
                     {playerStats.overallMatches === 0 ? (
                         <div className="p-6 m-4 text-center text-sm font-medium text-text-secondary bg-primary rounded-[20px] shadow-sm border border-brand-blue/10">
                             No career stats available yet.
@@ -793,7 +693,7 @@ const PlayerDetailsPage: React.FC<PlayerDetailsPageProps> = ({
 
             {/* Teams Tab Content */}
             {activeTab === 'Teams' && (
-                <div className="flex-1 overflow-y-auto w-full max-w-3xl mx-auto pb-safe bg-secondary">
+                <div className="flex-1 overflow-y-auto w-full max-w-3xl mx-auto safe-pad-b bg-secondary">
                     <div className="p-4">
                         <div className="bg-primary rounded-[20px] border border-brand-blue/10 shadow-sm overflow-hidden flex flex-col">
                             {linkedTeams.length > 0 ? (
@@ -951,145 +851,198 @@ const PlayerDetailsPage: React.FC<PlayerDetailsPageProps> = ({
                         </div>
                     )}
                     
-                    {updateTeam && (
-                        <div className="pt-4 pb-8 flex justify-center">
-                            <button
-                                onClick={handleOpenEdit}
-                                className="bg-brand-blue/10 text-brand-blue font-bold px-6 py-3 rounded-xl text-sm hover:bg-brand-blue/20 transition-colors flex items-center gap-2"
-                            >
-                                <Edit2 size={16} /> Edit Player
-                            </button>
-                        </div>
-                    )}
                 </div>
             </div>
             )}
-
-            {/* Slide up panel for Edit Player */}
-            {isEditModalOpen && (
-                <div className="fixed inset-0 z-[60] flex flex-col justify-end">
-                    {/* Backdrop */}
-                    <div 
-                        className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-fade-in"
-                        onClick={() => setIsEditModalOpen(false)}
-                    />
-                    
-                    {/* Panel */}
-                    <div className="bg-primary rounded-t-3xl w-full max-w-md mx-auto relative z-10 animate-slide-up pb-safe shadow-2xl border-t border-brand-blue/15 flex flex-col max-h-[85vh]">
-                        <div className="flex-shrink-0 w-12 h-1 bg-gray-300 dark:bg-gray-700 rounded-full mx-auto my-3" />
-                        
-                        <div className="flex-shrink-0 p-4 pb-2 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center">
-                            <h3 className="font-bold text-lg text-text-primary">Edit Player</h3>
-                            <button onClick={() => setIsEditModalOpen(false)} className="p-2 -mr-2 text-text-secondary hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors active:scale-95 touch-manipulation">
-                                <X size={20} />
-                            </button>
-                        </div>
-                        
-                        <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                            {isEditingLocked ? (
-                                <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-200 rounded-xl text-sm flex items-start gap-3 border border-yellow-200 dark:border-yellow-800/50">
-                                    Player editing is locked because the match has started or toss has been completed.
-                                </div>
-                            ) : (
-                                <>
-                                    <div>
-                                        <label className="block text-sm font-medium text-text-secondary mb-1">Name</label>
-                                        <input
-                                            type="text"
-                                            value={editName}
-                                            onChange={(e) => setEditName(e.target.value)}
-                                            className="w-full bg-secondary border border-brand-blue/15 rounded-xl px-4 py-3 outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue text-text-primary transition-all text-base"
-                                            placeholder="Player Name"
-                                        />
-                                        {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
-                                    </div>
-                                    
-                                    <div>
-                                        <label className="block text-sm font-medium text-text-secondary mb-1">Jersey Number</label>
-                                        <input
-                                            type="number"
-                                            value={editNumber}
-                                            onChange={(e) => setEditNumber(e.target.value)}
-                                            className="w-full bg-secondary border border-brand-blue/15 rounded-xl px-4 py-3 outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue text-text-primary transition-all text-base"
-                                            placeholder="Jersey #"
-                                        />
-                                        {errors.number && <p className="text-red-500 text-xs mt-1">{errors.number}</p>}
-                                    </div>
-                                    
-                                    <div>
-                                        <label className="block text-sm font-medium text-text-secondary mb-1">Role</label>
-                                        <div className="grid grid-cols-2 gap-2">
-                                            {PLAYER_ROLES.map(role => (
-                                                <button
-                                                    key={role}
-                                                    onClick={() => setEditRole(role)}
-                                                    className={`py-2 px-3 rounded-xl border text-sm font-medium transition-colors ${
-                                                        editRole === role 
-                                                            ? 'bg-brand-blue/10 border-brand-blue text-brand-blue' 
-                                                            : 'bg-secondary border-brand-blue/15 text-text-secondary hover:bg-slate-50 dark:hover:bg-slate-800'
-                                                    }`}
-                                                >
-                                                    {role}
-                                                </button>
-                                            ))}
-                                        </div>
-                                        {errors.role && <p className="text-red-500 text-xs mt-1">{errors.role}</p>}
-                                    </div>
-
-                                    <div className="pt-2 border-t border-gray-100 dark:border-gray-800 space-y-2">
-                                        <label className="flex items-center gap-3 p-3 bg-secondary rounded-xl border border-brand-blue/10 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-                                            <input 
-                                                type="checkbox" 
-                                                checked={editIsCaptain}
-                                                onChange={(e) => {
-                                                    setEditIsCaptain(e.target.checked);
-                                                    if (e.target.checked) setEditIsViceCaptain(false);
-                                                }}
-                                                className="w-5 h-5 rounded border-gray-300 text-brand-blue focus:ring-brand-blue"
-                                            />
-                                            <span className="text-text-primary font-medium">Captain</span>
-                                        </label>
-                                        
-                                        <label className="flex items-center gap-3 p-3 bg-secondary rounded-xl border border-brand-blue/10 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-                                            <input 
-                                                type="checkbox" 
-                                                checked={editIsViceCaptain}
-                                                onChange={(e) => {
-                                                    setEditIsViceCaptain(e.target.checked);
-                                                    if (e.target.checked) setEditIsCaptain(false);
-                                                }}
-                                                className="w-5 h-5 rounded border-gray-300 text-brand-blue focus:ring-brand-blue"
-                                            />
-                                            <span className="text-text-primary font-medium">Vice Captain</span>
-                                        </label>
-                                    </div>
-                                </>
-                            )}
-                        </div>
-                        
-                        <div className="flex-shrink-0 p-4 pt-2">
-                            <div className="flex gap-3">
-                                <button
-                                    onClick={() => setIsEditModalOpen(false)}
-                                    className="flex-1 py-3 px-4 rounded-xl font-bold bg-secondary text-text-primary border border-gray-200 dark:border-gray-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                                >
-                                    {isEditingLocked ? 'Close' : 'Cancel'}
-                                </button>
-                                {!isEditingLocked && (
-                                    <button
-                                        onClick={handleSaveEdit}
-                                        className="flex-1 py-3 px-4 rounded-xl font-bold bg-brand-blue text-white hover:bg-blue-600 transition-colors shadow-md shadow-blue-500/20"
-                                    >
-                                        Save Changes
-                                    </button>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
     );
+};
+
+const PlayerDetailsForm: React.FC<PlayerDetailsPageProps> = ({
+    player,
+    team,
+    match,
+    tournament,
+    tournamentId,
+    isMatchLive = false,
+    updateTeam,
+    updateMatch,
+    onBack,
+    mode
+}) => {
+    const { showNotification } = useNotification();
+    
+    const { isLocked } = useTeamLock(team.id, match ? [match] : [], tournamentId, isMatchLive); 
+    const isAdding = mode === 'add';
+
+    const maxPlayers = useMemo(() => {
+        return getMaxPlayers(match, tournament);
+    }, [match, tournament]);
+
+    const [editName, setEditName] = useState(player?.name || '');
+    const [editNumber, setEditNumber] = useState<number | string>(player?.number !== undefined ? player.number : '');
+    const [editRole, setEditRole] = useState(player?.role || 'Batsman');
+    const [editIsCaptain, setEditIsCaptain] = useState(player ? player.id === team.captainId : false);
+    const [editIsViceCaptain, setEditIsViceCaptain] = useState(player ? player.id === team.viceCaptainId : false);
+    const [errors, setErrors] = useState<{name: string | null, number: string | null, role: string | null}>({name: null, number: null, role: null});
+
+    const handleSave = () => {
+        if (isLocked) {
+             showNotification('Team roster is locked.', 'error');
+             return;
+        }
+
+        const filteredPlayers = isAdding ? team.players : team.players.filter(p => p.id !== player?.id);
+        const validation = validatePlayer(editName, editNumber, editRole, filteredPlayers);
+        
+        if (!validation.valid) {
+            setErrors(validation.errors as {name: string | null, number: string | null, role: string | null});
+            showNotification('Please fix errors before saving.', 'error');
+            return;
+        }
+        
+        const newPlayerId = isAdding ? crypto.randomUUID() : player!.id;
+        const newPlayer: Player = {
+            id: newPlayerId,
+            name: editName.trim(),
+            number: Number(editNumber),
+            role: editRole as PlayerRole,
+            globalPlayerId: isAdding ? newPlayerId : player?.globalPlayerId
+        };
+
+        const updatedTeam = { ...team };
+        if (isAdding) {
+             updatedTeam.players = [...team.players, newPlayer];
+        } else {
+             updatedTeam.players = team.players.map(p => p.id === newPlayerId ? newPlayer : p);
+        }
+
+        if (editIsCaptain) {
+            if (updatedTeam.viceCaptainId === newPlayerId) updatedTeam.viceCaptainId = null;
+            updatedTeam.captainId = newPlayerId;
+        } else if (updatedTeam.captainId === newPlayerId) {
+            updatedTeam.captainId = null;
+        }
+
+        if (editIsViceCaptain) {
+            if (updatedTeam.captainId === newPlayerId) updatedTeam.captainId = null;
+            updatedTeam.viceCaptainId = newPlayerId;
+        } else if (updatedTeam.viceCaptainId === newPlayerId) {
+            updatedTeam.viceCaptainId = null;
+        }
+        
+        if (updateTeam) updateTeam(updatedTeam);
+
+        // If Adding new player during a Match setup, automatically add to the match squad if there is space
+        if (isAdding && match && updateMatch) {
+            const isTeam1 = match.team1Id === team.id;
+            const currentSquadIds = isTeam1 ? (match.team1SquadIds || []) : (match.team2SquadIds || []);
+            
+            if (currentSquadIds.length < maxPlayers) {
+                updateMatch(match.id, {
+                    [isTeam1 ? 'team1SquadIds' : 'team2SquadIds']: [...currentSquadIds, newPlayerId]
+                });
+            }
+        }
+        
+        showNotification(isAdding ? 'Player added successfully.' : 'Player updated successfully.', 'success');
+        onBack();
+    };
+
+    return (
+        <div className="relative w-full h-full bg-secondary flex flex-col select-none safe-pad-t safe-pad-r safe-pad-l">
+            <div className="flex items-center justify-between p-4 bg-primary text-text-primary border-b border-brand-blue/15 relative">
+                <button onClick={onBack} className="p-2 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-full transition-colors z-10 text-text-secondary active:scale-95 touch-manipulation">
+                    <X size={24} />
+                </button>
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <span className="font-bold text-lg text-text-primary">{isAdding ? 'Add Player' : 'Edit Player'}</span>
+                </div>
+                <div className="w-10"></div>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto w-full max-w-3xl mx-auto p-4 space-y-6 pb-28">
+                 {isLocked && (
+                    <div className="p-4 bg-yellow-50 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-200 rounded-xl text-sm border border-yellow-200 dark:border-yellow-800/50">
+                        Roster editing is locked because the match has started or toss has been completed.
+                    </div>
+                 )}
+                 
+                 <div>
+                    <label className="block text-sm font-medium text-text-secondary mb-2">Name</label>
+                    <input 
+                        type="text" 
+                        value={editName} 
+                        onChange={(e) => setEditName(e.target.value)} 
+                        disabled={isLocked} 
+                        className="w-full bg-primary border border-brand-blue/15 rounded-xl px-4 py-3 text-text-primary outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue transition-all" 
+                        placeholder="Player Name" 
+                    />
+                    {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
+                </div>
+                
+                <div>
+                    <label className="block text-sm font-medium text-text-secondary mb-2">Jersey Number</label>
+                    <input 
+                        type="number" 
+                        value={editNumber} 
+                        onChange={(e) => setEditNumber(e.target.value)} 
+                        disabled={isLocked} 
+                        className="w-full bg-primary border border-brand-blue/15 rounded-xl px-4 py-3 text-text-primary outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue transition-all" 
+                        placeholder="Jersey #" 
+                    />
+                    {errors.number && <p className="text-red-500 text-xs mt-1">{errors.number}</p>}
+                </div>
+                
+                <div>
+                    <label className="block text-sm font-medium text-text-secondary mb-2">Role</label>
+                    <div className="grid grid-cols-2 gap-3">
+                        {PLAYER_ROLES.map(role => (
+                            <button 
+                                key={role} 
+                                disabled={isLocked} 
+                                onClick={() => setEditRole(role)} 
+                                className={`py-3 px-3 rounded-xl border text-sm font-bold transition-colors ${editRole === role ? 'bg-brand-blue/10 border-brand-blue text-brand-blue shadow-sm' : 'bg-primary border-brand-blue/15 text-text-secondary hover:bg-slate-50 dark:hover:bg-slate-800'}`}
+                            >
+                                {role}
+                            </button>
+                        ))}
+                    </div>
+                    {errors.role && <p className="text-red-500 text-xs mt-1">{errors.role}</p>}
+                </div>
+
+                <div className="pt-4 border-t border-gray-100 dark:border-gray-800 space-y-3">
+                    <label className={`flex items-center gap-3 p-4 bg-primary rounded-xl border transition-colors ${editIsCaptain ? 'border-brand-blue/40 bg-brand-blue/5' : 'border-brand-blue/10 hover:bg-slate-50 dark:hover:bg-slate-800'} ${isLocked ? 'opacity-70' : 'cursor-pointer'}`}>
+                        <input type="checkbox" disabled={isLocked} checked={editIsCaptain} onChange={(e) => { setEditIsCaptain(e.target.checked); if (e.target.checked) setEditIsViceCaptain(false); }} className="w-5 h-5 rounded border-gray-300 text-brand-blue focus:ring-brand-blue"/>
+                        <span className="text-text-primary font-bold">Captain</span>
+                    </label>
+                    <label className={`flex items-center gap-3 p-4 bg-primary rounded-xl border transition-colors ${editIsViceCaptain ? 'border-brand-blue/40 bg-brand-blue/5' : 'border-brand-blue/10 hover:bg-slate-50 dark:hover:bg-slate-800'} ${isLocked ? 'opacity-70' : 'cursor-pointer'}`}>
+                        <input type="checkbox" disabled={isLocked} checked={editIsViceCaptain} onChange={(e) => { setEditIsViceCaptain(e.target.checked); if (e.target.checked) setEditIsCaptain(false); }} className="w-5 h-5 rounded border-gray-300 text-brand-blue focus:ring-brand-blue"/>
+                        <span className="text-text-primary font-bold">Vice Captain</span>
+                    </label>
+                </div>
+            </div>
+            
+            <div className="absolute bottom-0 left-0 right-0 p-4 bg-primary/80 backdrop-blur-md border-t border-brand-blue/15 safe-pad-b z-10 shadow-[0_-10px_20px_-10px_rgba(0,0,0,0.1)]">
+                <div className="max-w-3xl mx-auto flex gap-3">
+                    <button onClick={onBack} className="flex-1 py-4 font-bold rounded-xl bg-secondary text-text-primary border border-gray-200 dark:border-gray-700 hover:bg-slate-100 dark:hover:bg-slate-800 active:scale-95 transition-all text-sm">Cancel</button>
+                    {!isLocked && <button onClick={handleSave} className="flex-1 py-4 font-bold rounded-xl bg-brand-blue text-white hover:bg-blue-600 active:scale-95 transition-all text-sm shadow-md shadow-brand-blue/20">Save Player</button>}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const PlayerDetailsPage: React.FC<PlayerDetailsPageProps> = (props) => {
+    const isFormMode = props.mode === 'add' || props.mode === 'edit';
+    
+    if (isFormMode) {
+        return <PlayerDetailsForm {...props} />;
+    }
+    
+    if (!props.player) return null; // Safety catch
+    
+    return <PlayerDetailsView {...props} />;
 };
 
 export default PlayerDetailsPage;

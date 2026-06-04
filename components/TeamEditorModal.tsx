@@ -1,15 +1,16 @@
-import { Table, Thead, Tbody, Tr, Th, Td } from './CrickIQTable';
 import React, { useState, useMemo } from 'react';
 import type { Team, Player } from '../types';
 import { PlayerRole } from '../types';
-import { validatePlayer } from '../utils/validation';
-import { PLAYER_ROLES, PlusIcon, TrashIcon, getRoleEmoji, getShortRoleName } from '../constants';
+import { validateTeamRoster } from '../utils/validation';
+import { useTeamLock } from '../hooks/useTeamLock';
+import { PlusIcon, getRoleEmoji, getShortRoleName } from '../constants';
 import type { UseCrickIQStateReturn } from '../hooks/useCrickIQState';
 import ConfirmationModal from './ConfirmationModal';
 import { useNotification } from '../hooks/useNotification';
-import { calculatePlayerCareerStats } from '../utils/cricketLogic';
 import { localStorageAdapter } from '../storage/localStorageAdapter';
 import ImpactPlayerModal from './ImpactPlayerModal';
+import { usePlayerNavigation } from '../contexts/PlayerNavigationContext';
+import { getRequiredSquadSize } from '../utils/matchConfig';
 
 const Button: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'primary' | 'secondary' | 'blue' }> = ({ children, className, variant = 'primary', ...props }) => {
     const baseClasses = 'px-4 py-2 rounded-2xl text-button transition-all duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-md';
@@ -28,164 +29,111 @@ interface TeamEditorModalProps extends Pick<UseCrickIQStateReturn, 'updateTeam' 
     onDone?: (teamId: string) => void;
     isMatchLive: boolean;
     addPlayerReplacement?: UseCrickIQStateReturn['addPlayerReplacement'];
+    match?: Match;
+    updateMatch?: (matchId: string, updates: Partial<Match>) => void;
 }
 
 export const TeamEditorModal: React.FC<TeamEditorModalProps> = (props) => {
-    const { team, onClose, onDone, isMatchLive, updateTeam, getTournamentById, matches, tournamentId, addPlayerReplacement } = props;
+    const { team, onClose, onDone, isMatchLive, updateTeam, getTournamentById, matches, tournamentId, addPlayerReplacement, match, updateMatch } = props;
     const { showNotification } = useNotification();
-    const [editedTeam, setEditedTeam] = useState<Team>(() => JSON.parse(JSON.stringify(team)));
     
-    const [newPlayerNumber, setNewPlayerNumber] = useState<number | ''>('');
-    const [newPlayerName, setNewPlayerName] = useState('');
-    const [newPlayerRole, setNewPlayerRole] = useState<PlayerRole | ''>('');
-    const [playerFormErrors, setPlayerFormErrors] = useState<{ number: string | null; name: string | null; role: string | null }>({ number: null, name: null, role: null });
-    const rowErrors = useMemo(() => {
-        const errors: Record<string, string> = {};
-        const numberCounts = editedTeam.players.reduce((acc, p) => {
-            acc[p.number] = (acc[p.number] || 0) + 1;
-            return acc;
-        }, {} as Record<number, number>);
+    // Instead of deep copy, we edit team name/logo by directly calling updateTeam.
+    // Or we keep local state for name/logo to avoid key press lag, but sync players from props.
+    const [teamName, setTeamName] = useState(team.name);
+    const [teamLogo, setTeamLogo] = useState(team.logo);
+    const [searchQuery, setSearchQuery] = useState('');
 
-        for (const player of editedTeam.players) {
-            if (!player.name.trim()) {
-                 errors[player.id] = 'Name is required';
-            } else if (!Number.isInteger(player.number) || player.number <= 0) {
-                errors[player.id] = 'Invalid #';
-            } else if (numberCounts[player.number] > 1) {
-                if (!errors[player.id]) errors[player.id] = 'In use';
-            }
+    const isTeam1 = match?.team1Id === team.id;
+    const currentSquadIds = useMemo(() => isTeam1 ? (match?.team1SquadIds || []) : (match?.team2SquadIds || []), [isTeam1, match?.team1SquadIds, match?.team2SquadIds]);
+
+    const handleTeamInfoBlur = () => {
+        if (teamName !== team.name || teamLogo !== team.logo) {
+            updateTeam({ ...team, name: teamName.trim() || team.name, logo: teamLogo });
         }
-        return errors;
-    }, [editedTeam.players]);
-
+    };
+    
     const [confirmDeletePlayer, setConfirmDeletePlayer] = useState<Player | null>(null);
+    const [confirmDone, setConfirmDone] = useState(false);
     const [dontAskAgain, setDontAskAgain] = useState(() => localStorageAdapter.load('dontAskDeletePlayer') === 'true');
 
     const tournament = useMemo(() => getTournamentById(tournamentId), [tournamentId, getTournamentById]);
-    const maxPlayers = useMemo(() => tournament?.numberOfPlayers || 11, [tournament]);
-
-    const activeMatchForLock = useMemo(() => {
-        if (isMatchLive) {
-            return matches.find(m => m.status === 'live');
+    const maxPlayers = useMemo(() => {
+        if (match) {
+            return getRequiredSquadSize(match, tournament);
         }
-        return matches.find(m => 
-            m.tournamentId === tournamentId && 
-            (m.team1Id === team.id || m.team2Id === team.id) &&
-            (
-                m.status === 'live' || 
-                m.status === 'completed' || 
-                m.wasAbandoned === true || 
-                m.toss !== undefined ||
-                (m.innings1 !== undefined && m.innings1.overs && m.innings1.overs.length > 0)
-            )
-        );
-    }, [matches, tournamentId, team.id, isMatchLive]);
+        const foundMatch = matches.find(m => m.tournamentId === tournamentId && (m.team1Id === team.id || m.team2Id === team.id));
+        return getRequiredSquadSize(foundMatch, tournament);
+    }, [match, tournament, matches, tournamentId, team.id]);
 
-    const isTeamLocked = !!activeMatchForLock;
+    const { openPlayerDetails } = usePlayerNavigation();
+
+    const { isLocked: isTeamLocked, activeMatch: activeMatchForLock } = useTeamLock(team.id, match ? [match] : matches, tournamentId, isMatchLive);
 
     const [isImpactPlayerModalOpen, setIsImpactPlayerModalOpen] = useState(false);
 
-    const isTeamFull = editedTeam.players.length >= maxPlayers;
-
-    const isKeeperMissing = useMemo(() => {
-        return editedTeam.players.length === maxPlayers && !editedTeam.players.some(p => p.role === PlayerRole.WICKET_KEEPER);
-    }, [editedTeam.players, maxPlayers]);
-
-    const isCaptainMissing = useMemo(() => {
-        // A Captain is required if the team has any players
-        return editedTeam.players.length > 0 && !editedTeam.captainId;
-    }, [editedTeam.players, editedTeam.captainId]);
-
-    const isViceCaptainMissing = useMemo(() => {
-        // A Vice-Captain is required if the team has any players
-        return editedTeam.players.length > 0 && !editedTeam.viceCaptainId;
-    }, [editedTeam.players, editedTeam.viceCaptainId]);
-
-    const handleTeamInfoChange = (field: 'name' | 'logo', value: string) => {
-        setEditedTeam(prev => ({ ...prev, [field]: value }));
-    };
-
-    const handlePlayerChange = (playerId: string, field: keyof Player, value: string | number) => {
-        setEditedTeam(prev => ({
-            ...prev,
-            players: prev.players.map(p => p.id === playerId ? { ...p, [field]: value } : p)
-        }));
-    };
-    
-    const handleCaptainChange = (playerId: string, isVice: boolean) => {
-        setEditedTeam(prev => {
-            const field = isVice ? 'viceCaptainId' : 'captainId';
-            const otherField = isVice ? 'captainId' : 'viceCaptainId';
-            const updatedTeam = { ...prev, [field]: playerId };
-            if (updatedTeam[field] && updatedTeam[field] === updatedTeam[otherField]) {
-                updatedTeam[otherField] = null;
-            }
-            return updatedTeam;
-        });
-        const playerName = editedTeam.players.find(p => p.id === playerId)?.name || '';
-        showNotification(`${isVice ? 'Vice-Captain' : 'Captain'} set to ${playerName}`, 'info');
-    };
-
-    const [isSubmittingPlayer, setIsSubmittingPlayer] = useState(false);
-
-    const handleAddPlayerLocal = () => {
-        if (isSubmittingPlayer) return;
-        if (isTeamFull) return;
-        
-        setIsSubmittingPlayer(true);
-        const validation = validatePlayer(newPlayerName, newPlayerNumber, newPlayerRole, editedTeam.players);
-        setPlayerFormErrors(validation.errors);
-        
-        if (!validation.valid) {
-            showNotification('Please fix errors to add player', 'error');
-            setTimeout(() => setIsSubmittingPlayer(false), 200);
-            return;
+    const teamToValidate = useMemo(() => {
+        if (match) {
+            return {
+                ...team,
+                players: team.players.filter(p => currentSquadIds.includes(p.id))
+            };
         }
+        return team;
+    }, [team, match, currentSquadIds]);
 
-        const newPlayerId = `p_${Date.now()}`;
-        const newPlayer: Player = {
-            id: newPlayerId,
-            globalPlayerId: `gp_${Date.now()}`,
-            number: Number(newPlayerNumber),
-            name: newPlayerName.trim(),
-            role: newPlayerRole as PlayerRole,
-        };
-        setEditedTeam(prev => ({ ...prev, players: [...prev.players, newPlayer] }));
-        showNotification('Player added', 'success');
+    const handleToggleSquadPlayer = (playerId: string, e?: React.MouseEvent) => {
+        if (e) e.stopPropagation();
+        if (!match || !updateMatch) return;
         
-        setNewPlayerName(''); setNewPlayerNumber(''); setNewPlayerRole('');
-        setPlayerFormErrors({ number: null, name: null, role: null });
+        let newSquadIds = [...currentSquadIds];
+        if (newSquadIds.includes(playerId)) {
+            newSquadIds = newSquadIds.filter(id => id !== playerId);
+        } else {
+            if (newSquadIds.length >= maxPlayers) return;
+            newSquadIds.push(playerId);
+        }
         
-        setTimeout(() => setIsSubmittingPlayer(false), 200);
+        updateMatch(match.id, {
+            [isTeam1 ? 'team1SquadIds' : 'team2SquadIds']: newSquadIds
+        });
     };
+
+    const teamValidation = useMemo(() => validateTeamRoster(teamToValidate, maxPlayers), [teamToValidate, maxPlayers]);
+    const isTeamFull = teamValidation.checks.withinMaxPlayers === false || teamToValidate.players.length === maxPlayers;
+    const isKeeperMissing = !teamValidation.checks.hasWicketKeeper;
+    const isCaptainMissing = !teamValidation.checks.hasCaptain;
+    const isViceCaptainMissing = !teamValidation.checks.hasViceCaptain;
+    const hasEnoughPlayers = teamToValidate.players.length === maxPlayers;
+
+    const searchResults = useMemo(() => {
+        if (!searchQuery.trim()) return [];
+        const query = searchQuery.trim().toLowerCase();
+        return team.players.filter(p => {
+             if (p.name.toLowerCase().includes(query)) return true;
+             
+             const roleMappings: Record<string, string[]> = {
+                 [PlayerRole.BATSMAN]: ['bat', 'bats', 'batsman', 'batter'],
+                 [PlayerRole.BOWLER]: ['bowl', 'bowler'],
+                 [PlayerRole.ALL_ROUNDER]: ['all', 'allrounder', 'all rounder', 'ar', 'al'],
+                 [PlayerRole.WICKET_KEEPER]: ['wk', 'keeper', 'wicket keeper', 'wicketkeeper', 'wik', 'weeket keeper']
+             };
+             
+             for (const [role, keywords] of Object.entries(roleMappings)) {
+                 if (p.role === role && keywords.some(k => k.startsWith(query) || query === k)) {
+                     return true;
+                 }
+             }
+             return false;
+        });
+    }, [team.players, searchQuery]);
 
     const handleDeletePlayerLocal = (playerId: string) => {
-        setEditedTeam(prev => {
-            const updatedPlayers = prev.players.filter(p => p.id !== playerId);
-            const updatedTeam = { ...prev, players: updatedPlayers };
-            if (updatedTeam.captainId === playerId) updatedTeam.captainId = null;
-            if (updatedTeam.viceCaptainId === playerId) updatedTeam.viceCaptainId = null;
-            return updatedTeam;
-        });
+        const updatedPlayers = team.players.filter(p => p.id !== playerId);
+        const updatedTeam = { ...team, players: updatedPlayers };
+        if (updatedTeam.captainId === playerId) updatedTeam.captainId = null;
+        if (updatedTeam.viceCaptainId === playerId) updatedTeam.viceCaptainId = null;
+        updateTeam(updatedTeam);
         showNotification('Player deleted', 'delete');
-    };
-    
-    const requestDeletePlayer = (player: Player) => {
-        // Check if player has played any completed matches in this tournament
-        const tournamentMatches = matches.filter(m => m.tournamentId === tournamentId && m.status === 'completed');
-        if (tournamentMatches.length > 0) {
-            const stats = calculatePlayerCareerStats(player.id, tournamentMatches);
-            if (stats.matches > 0) {
-                showNotification(`${player.name} has stats and cannot be deleted.`, 'error');
-                return;
-            }
-        }
-
-        if (dontAskAgain) {
-            handleDeletePlayerLocal(player.id);
-        } else {
-            setConfirmDeletePlayer(player);
-        }
     };
     
     const handleConfirmDelete = () => {
@@ -195,12 +143,14 @@ export const TeamEditorModal: React.FC<TeamEditorModalProps> = (props) => {
         }
     };
 
-    const isUpdateDisabled = Object.keys(rowErrors).length > 0 || !editedTeam.name.trim();
-    const isSaveDisabled = isTeamLocked || isUpdateDisabled || isKeeperMissing || isCaptainMissing || isViceCaptainMissing;
+    const isSaveDisabled = isTeamLocked || isKeeperMissing || isCaptainMissing || isViceCaptainMissing || !hasEnoughPlayers || !teamName.trim();
     
     const saveButtonTitle = useMemo(() => {
         if (isTeamLocked) {
             return 'Team editing is disabled because this match has already started or toss has been set.';
+        }
+        if (!hasEnoughPlayers) {
+            return `Please add required number of players (${maxPlayers}).`;
         }
         if (isKeeperMissing) {
             return `A team of ${maxPlayers} must have a Wicket Keeper.`;
@@ -211,19 +161,17 @@ export const TeamEditorModal: React.FC<TeamEditorModalProps> = (props) => {
         if (isViceCaptainMissing) {
             return 'Please select a Vice-Captain for the team.';
         }
-        if (isUpdateDisabled) {
+        if (!teamName.trim()) {
             return "Fix errors before saving";
         }
         return "";
-    }, [isTeamLocked, isKeeperMissing, isCaptainMissing, isViceCaptainMissing, isUpdateDisabled, maxPlayers]);
-
-    const [isSavingTeam, setIsSavingTeam] = useState(false);
+    }, [isTeamLocked, hasEnoughPlayers, isKeeperMissing, isCaptainMissing, isViceCaptainMissing, teamName, maxPlayers]);
 
     const handleUpdate = () => {
-        if (isSavingTeam) return;
-
         if (isSaveDisabled) {
-             if (isKeeperMissing) {
+             if (!hasEnoughPlayers) {
+                 showNotification(`Please add required number of players (${maxPlayers}).`, 'error');
+             } else if (isKeeperMissing) {
                 showNotification(`A team of ${maxPlayers} must have a Wicket Keeper.`, 'error');
             } else if (isCaptainMissing) {
                 showNotification('Please select a Captain.', 'error');
@@ -235,19 +183,49 @@ export const TeamEditorModal: React.FC<TeamEditorModalProps> = (props) => {
             return;
         }
 
-        if (editedTeam.name.trim().length > 30) {
+        if (teamName.trim().length > 30) {
             showNotification('Team name is too long (max 30 chars).', 'error');
             return;
         }
+        
+        setConfirmDone(true);
+    };
 
-        setIsSavingTeam(true);
+    const handleConfirmDone = () => {
+        // Apply final changes if blur was missed
+        if (teamName !== team.name || teamLogo !== team.logo) {
+            updateTeam({ ...team, name: teamName.trim() || team.name, logo: teamLogo });
+        }
 
-        updateTeam(editedTeam);
         showNotification('Team updated', 'success');
         if (onDone) onDone(team.id);
+        setConfirmDone(false);
         onClose();
-        
-        setTimeout(() => setIsSavingTeam(false), 500);
+    };
+
+    const handlePlayerClick = (player: Player) => {
+        const contextMatch = match || matches.find(m => m.tournamentId === tournamentId && (m.team1Id === team.id || m.team2Id === team.id));
+        openPlayerDetails({
+            sourceScreen: contextMatch && contextMatch.isQuickMatch ? 'QuickMatchSetup' : 'TournamentTeamSetup',
+            teamId: team.id,
+            playerId: player.id,
+            matchId: contextMatch?.id,
+            tournamentId: tournamentId,
+            returnTo: 'team_editor',
+            mode: isTeamLocked ? 'view' : 'edit'
+        });
+    };
+
+    const handleAddPlayerClick = () => {
+        const contextMatch = match || matches.find(m => m.tournamentId === tournamentId && (m.team1Id === team.id || m.team2Id === team.id));
+        openPlayerDetails({
+            sourceScreen: contextMatch && contextMatch.isQuickMatch ? 'QuickMatchSetup' : 'TournamentTeamSetup',
+            teamId: team.id,
+            matchId: contextMatch?.id,
+            tournamentId: tournamentId,
+            returnTo: 'team_editor',
+            mode: 'add'
+        });
     };
 
     const deleteConfirmationMessage = (
@@ -268,33 +246,34 @@ export const TeamEditorModal: React.FC<TeamEditorModalProps> = (props) => {
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-70 backdrop-blur-sm flex justify-center items-center z-50 md:p-4">
-            <div className="bg-secondary w-full h-full md:max-w-4xl md:max-h-[90vh] flex flex-col md:rounded-2xl shadow-xl">
+            <div className="bg-secondary w-full h-full md:max-w-4xl md:max-h-[85vh] flex flex-col md:rounded-2xl shadow-xl">
                 <div className="relative p-4 md:p-6 text-center border-b border-gray-300 dark:border-gray-700">
                     <div className="flex items-center justify-center gap-4">
                          <div className="relative w-12 h-12 flex-shrink-0">
                             <div
                                 className="w-full h-full flex items-center justify-center rounded-lg text-button text-white text-h3"
-                                style={{ backgroundColor: editedTeam.logo }}
+                                style={{ backgroundColor: teamLogo }}
                             >
-                                {editedTeam.name.substring(0, 2).toUpperCase()}
+                                {teamName.substring(0, 2).toUpperCase()}
                             </div>
                             {!isTeamLocked && (
                                 <input
                                     type="color"
-                                    value={editedTeam.logo}
-                                    onChange={e => handleTeamInfoChange('logo', e.target.value)}
+                                    value={teamLogo}
+                                    onBlur={handleTeamInfoBlur}
+                                    onChange={e => setTeamLogo(e.target.value)}
                                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                                     title="Change team color"
                                 />
                             )}
                         </div>
-                        <input disabled={isTeamLocked} value={editedTeam.name} onChange={e => handleTeamInfoChange('name', e.target.value)} className={`w-full max-w-xs text-h2 font-bold text-center text-text-primary bg-primary/50 p-1.5 rounded-lg focus:outline-none border-2 transition-colors ${!editedTeam.name.trim() ? 'border-highlight focus:border-highlight' : 'border-brand-blue/15 focus:border-brand-blue'} ${isTeamLocked ? 'opacity-90' : ''}`} placeholder="Team Name" />
+                        <input disabled={isTeamLocked} value={teamName} onBlur={handleTeamInfoBlur} onChange={e => setTeamName(e.target.value)} className={`w-full max-w-xs text-h2 font-bold text-center text-text-primary bg-primary/50 p-1.5 rounded-lg focus:outline-none border-2 transition-colors ${!teamName.trim() ? 'border-highlight focus:border-highlight' : 'border-brand-blue/15 focus:border-brand-blue'} ${isTeamLocked ? 'opacity-90' : ''}`} placeholder="Team Name" />
                     </div>
                     <button onClick={onClose} className="absolute text-h1 leading-none transform -translate-y-1/2 top-1/2 right-4 md:right-6 text-text-secondary hover:text-text-primary">&times;</button>
                 </div>
-                <div className="flex-grow p-4 md:p-6 overflow-y-auto no-scrollbar">
-                    {isTeamLocked ? (
-                        <div className="p-3 mb-4 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800 text-sm font-bold rounded-lg flex flex-col md:flex-row items-center justify-between gap-4 text-center text-balance">
+                <div className="flex-grow px-4 py-4 md:px-6 md:py-6 pb-32 md:pb-32 overflow-y-auto no-scrollbar relative min-h-0">
+                    {isTeamLocked && (
+                        <div className="p-3 mb-6 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800 text-sm font-bold rounded-lg flex flex-col md:flex-row items-center justify-between gap-4 text-center text-balance">
                             <div className="flex items-center justify-center gap-2">
                                 <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
                                 <span>Lineup locked after toss or match start.</span>
@@ -308,146 +287,195 @@ export const TeamEditorModal: React.FC<TeamEditorModalProps> = (props) => {
                                 </button>
                             )}
                         </div>
-                    ) : (
-                        <p className="text-sm text-center text-text-secondary mb-4 -mt-2">Edit player details directly in the table, or add a new player below.</p>
                     )}
-                    {isKeeperMissing && !isTeamLocked && (
-                        <div className="p-2 mb-4 bg-warning/20 dark:bg-warning/20 text-yellow-800 dark:text-yellow-300 text-body font-semibold rounded-md text-center">
-                            A team of {maxPlayers} must have one designated Wicket Keeper.
-                        </div>
-                    )}
-                    {(isCaptainMissing || isViceCaptainMissing) && (
-                        <div className="p-2 mb-4 bg-warning/20 dark:bg-warning/20 text-yellow-800 dark:text-yellow-300 text-body font-semibold rounded-md text-center">
-                            {isCaptainMissing && isViceCaptainMissing ? "A Captain and Vice-Captain must be selected." : (isCaptainMissing ? "A Captain must be selected." : "A Vice-Captain must be selected.")}
-                        </div>
-                    )}
-                     <Table >
-                            <Thead className="sticky top-0 bg-secondary z-10">
-                                <Tr className="border-b border-gray-300 dark:border-gray-700 bg-gray-200 dark:bg-gray-900/75">
-                                    <Th className="w-16 text-center tracking-wider">#</Th>
-                                    <Th className="w-full tracking-wider">Name</Th>
-                                    <Th className="tracking-wider">Role</Th>
-                                    <Th className="text-center tracking-wider">C</Th>
-                                    <Th className="text-center tracking-wider">VC</Th>
-                                    <Th className="w-16 text-center tracking-wider">Del</Th>
-                                </Tr>
-                            </Thead>
-                            <Tbody className="divide-gray-200 dark:divide-gray-700">
-                                {editedTeam.players.map(player => (
-                                    <Tr key={player.id} className={`${rowErrors[player.id] ? 'bg-highlight/20' : ''}`}>
-                                        <Td className="p-1">
-                                            <input
-                                                type="number"
-                                                disabled={isTeamLocked}
-                                                value={player.number}
-                                                onChange={e => handlePlayerChange(player.id, 'number', e.target.value === '' ? '' : parseInt(e.target.value, 10))}
-                                                className={`w-full text-center bg-primary p-1 rounded-md focus:outline-none focus:ring-2 ${rowErrors[player.id] ? 'ring-highlight' : 'ring-brand-blue'} ${isTeamLocked ? 'opacity-80' : ''}`}
-                                                min="1"
-                                            />
-                                        </Td>
-                                        <Td className="p-1">
-                                            <input
-                                                type="text"
-                                                disabled={isTeamLocked}
-                                                value={player.name}
-                                                onChange={e => handlePlayerChange(player.id, 'name', e.target.value)}
-                                                className={`w-full bg-primary p-1 rounded-md focus:outline-none focus:ring-2 ${rowErrors[player.id] ? 'ring-highlight' : 'ring-brand-blue'} ${isTeamLocked ? 'opacity-80' : ''}`}
-                                            />
-                                        </Td>
-                                        <Td className="p-1">
-                                            <select
-                                                disabled={isTeamLocked}
-                                                value={player.role}
-                                                onChange={e => handlePlayerChange(player.id, 'role', e.target.value)}
-                                                className={`w-full bg-primary p-1 rounded-md focus:outline-none focus:ring-2 ring-brand-blue appearance-none text-center ${isTeamLocked ? 'opacity-80' : ''}`}
-                                            >
-                                                {PLAYER_ROLES.map(role => <option key={role} value={role}>{getRoleEmoji(role)} {getShortRoleName(role)}</option>)}
-                                            </select>
-                                        </Td>
-                                        <Td className="p-1 text-center">
-                                            <input
-                                                type="radio"
-                                                disabled={isTeamLocked}
-                                                name="captain"
-                                                checked={editedTeam.captainId === player.id}
-                                                onChange={() => handleCaptainChange(player.id, false)}
-                                                className="w-5 h-5 accent-brand-blue disabled:opacity-70 disabled:cursor-not-allowed"
-                                                title="Set as Captain"
-                                            />
-                                        </Td>
-                                        <Td className="p-1 text-center">
-                                            <input
-                                                type="radio"
-                                                disabled={isTeamLocked}
-                                                name="vice-captain"
-                                                checked={editedTeam.viceCaptainId === player.id}
-                                                onChange={() => handleCaptainChange(player.id, true)}
-                                                className="w-5 h-5 accent-warning disabled:opacity-70 disabled:cursor-not-allowed"
-                                                title="Set as Vice-Captain"
-                                            />
-                                        </Td>
-                                        <Td className="p-1 text-center">
-                                            <button
-                                                onClick={() => requestDeletePlayer(player)}
-                                                disabled={isTeamLocked}
-                                                className="p-2 rounded-2xl text-text-secondary hover:text-highlight hover:bg-highlight/10 disabled:opacity-40 disabled:cursor-not-allowed"
-                                                title={isTeamLocked ? "Lineup locked" : "Delete Player"}
-                                            >
-                                                <TrashIcon />
-                                            </button>
-                                        </Td>
-                                    </Tr>
-                                ))}
-                            </Tbody>
-                        </Table>
+                    
+                    {match ? (
+                        <div className="space-y-4">
+                            <div className="p-4 bg-brand-blue/5 rounded-xl border border-brand-blue/20">
+                                <h3 className="text-h3 font-bold text-text-primary mb-2">Match Squad Builder</h3>
+                                <p className="text-body text-text-secondary mb-4">Select players from the team pool for this specific match.</p>
+                                <div className="flex justify-between items-center text-sm font-semibold text-text-secondary mb-2">
+                                    <span>Selected Squad:</span>
+                                    <span>{currentSquadIds.length} / {maxPlayers}</span>
+                                </div>
+                                {team.players.length < maxPlayers && (
+                                    <div className="mt-2 text-xs text-red-600 dark:text-red-400 font-bold p-2.5 bg-red-100/30 dark:bg-red-900/20 rounded-lg">
+                                        Only {team.players.length} saved players available. Add {maxPlayers - team.players.length} more players or reduce match player count.
+                                    </div>
+                                )}
+                                <input 
+                                    type="text" 
+                                    placeholder="Search saved players..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="w-full text-body font-semibold text-text-primary bg-primary/50 p-2.5 rounded-lg focus:outline-none border-2 border-brand-blue/15 focus:border-brand-blue transition-colors mb-4"
+                                />
+                            </div>
 
-                    {!isTeamLocked && !isTeamFull && (
-                        <div className="mt-4 pt-4 border-t border-gray-300 dark:border-gray-700">
-                            <h4 className="font-bold text-text-primary mb-2 text-center">Add New Player</h4>
-                            <div className="grid grid-cols-1 sm:grid-cols-[1fr_2fr_1fr_auto] gap-2 items-start">
-                                <div>
-                                    <input
-                                        type="number"
-                                        placeholder="#"
-                                        value={newPlayerNumber}
-                                        onChange={e => setNewPlayerNumber(e.target.value === '' ? '' : parseInt(e.target.value, 10))}
-                                        className={`w-full text-center bg-primary p-2 rounded-lg focus:outline-none border-2 ${playerFormErrors.number ? 'border-highlight focus:border-highlight' : 'border-brand-blue/15 focus:border-brand-blue'}`}
-                                    />
-                                    {playerFormErrors.number && <p className="text-xs text-highlight mt-1">{playerFormErrors.number}</p>}
+                            {searchQuery.trim() ? (
+                                <div className="space-y-3 mb-6">
+                                    <h4 className="text-sm font-bold text-text-secondary uppercase tracking-wider">Search Results</h4>
+                                    {searchResults.length > 0 ? searchResults.map(player => {
+                                        const isSelected = currentSquadIds.includes(player.id);
+                                        const canAdd = currentSquadIds.length < maxPlayers;
+                                        return (
+                                            <div key={player.id} className="flex items-center justify-between p-3 bg-primary rounded-xl shadow-sm border border-brand-blue/20">
+                                                <div className="flex flex-col">
+                                                    <span className="font-bold text-text-primary text-body">{player.name}</span>
+                                                    <span className="text-xs text-text-secondary flex items-center gap-1 mt-1">
+                                                        {getRoleEmoji(player.role)} {getShortRoleName(player.role)}
+                                                    </span>
+                                                </div>
+                                                <button 
+                                                    disabled={isSelected || (!isSelected && !canAdd)}
+                                                    onClick={() => handleToggleSquadPlayer(player.id)}
+                                                    className={`px-4 py-1.5 text-sm font-bold rounded-lg transition-colors ${isSelected ? 'bg-gray-200 text-gray-500 cursor-not-allowed dark:bg-gray-700 dark:text-gray-400' : (canAdd ? 'bg-brand-blue text-white hover:bg-brand-blue/90' : 'bg-gray-200 text-gray-400 cursor-not-allowed')}`}
+                                                >
+                                                    {isSelected ? 'Already Selected' : '+ Add to Squad'}
+                                                </button>
+                                            </div>
+                                        )
+                                    }) : (
+                                        <div className="p-4 text-center text-text-secondary bg-primary/50 text-sm font-bold rounded-xl border border-brand-blue/10">
+                                            Player not found. Please add your player.
+                                        </div>
+                                    )}
                                 </div>
-                                <div>
-                                    <input
-                                        type="text"
-                                        placeholder="Player Name"
-                                        value={newPlayerName}
-                                        onChange={e => setNewPlayerName(e.target.value)}
-                                        className={`w-full bg-primary p-2 rounded-lg focus:outline-none border-2 ${playerFormErrors.name ? 'border-highlight focus:border-highlight' : 'border-brand-blue/15 focus:border-brand-blue'}`}
-                                    />
-                                    {playerFormErrors.name && <p className="text-xs text-highlight mt-1">{playerFormErrors.name}</p>}
+                            ) : null}
+
+                            {!isTeamLocked && isKeeperMissing && currentSquadIds.length > 0 && (
+                                <div className="p-2 mb-4 bg-warning/20 dark:bg-warning/20 text-yellow-800 dark:text-yellow-300 text-body font-semibold rounded-md text-center">
+                                    A team of {maxPlayers} must have one designated Wicket Keeper.
                                 </div>
-                                <div>
-                                    <select
-                                        value={newPlayerRole}
-                                        onChange={e => setNewPlayerRole(e.target.value as PlayerRole)}
-                                        className={`w-full bg-primary p-2 rounded-lg focus:outline-none border-2 ${playerFormErrors.role ? 'border-highlight focus:border-highlight' : 'border-brand-blue/15 focus:border-brand-blue'}`}
-                                    >
-                                        <option value="">Role</option>
-                                        {PLAYER_ROLES.map(role => <option key={role} value={role}>{getRoleEmoji(role)} {getShortRoleName(role)}</option>)}
-                                    </select>
-                                    {playerFormErrors.role && <p className="text-xs text-highlight mt-1">{playerFormErrors.role}</p>}
+                            )}
+                            {!isTeamLocked && (isCaptainMissing || isViceCaptainMissing) && currentSquadIds.length > 0 && (
+                                <div className="p-2 mb-4 bg-warning/20 dark:bg-warning/20 text-yellow-800 dark:text-yellow-300 text-body font-semibold rounded-md text-center">
+                                    {isCaptainMissing && isViceCaptainMissing ? "A Captain and Vice-Captain must be selected." : (isCaptainMissing ? "A Captain must be selected." : "A Vice-Captain must be selected.")}
                                 </div>
-                                <Button onClick={handleAddPlayerLocal} variant="primary" className="!h-11">
-                                    <PlusIcon />
-                                </Button>
+                            )}
+
+                            <div>
+                                <h4 className="text-sm font-bold text-text-secondary uppercase tracking-wider mb-3">Selected Squad</h4>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    {teamToValidate.players.map(player => (
+                                        <div 
+                                            key={player.id} 
+                                            onClick={() => handlePlayerClick(player)}
+                                            className="flex items-center justify-between p-3 bg-primary rounded-xl shadow-sm border border-brand-blue/10 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+                                        >
+                                            <div className="flex items-center gap-3 truncate">
+                                                <div className="w-10 h-10 flex flex-shrink-0 items-center justify-center rounded-lg bg-secondary text-text-primary overflow-hidden shadow-inner font-bold text-h3">
+                                                    {player.number}
+                                                </div>
+                                                <div className="truncate">
+                                                    <div className="font-bold text-text-primary text-body flex flex-wrap items-center gap-1">
+                                                        <span className="truncate">{player.name}</span>
+                                                        {team.captainId === player.id && <span className="text-[10px] bg-brand-blue/20 text-brand-blue px-1.5 py-0.5 rounded-full font-bold">C</span>}
+                                                        {team.viceCaptainId === player.id && <span className="text-[10px] bg-warning/20 text-yellow-700 dark:text-yellow-400 px-1.5 py-0.5 rounded-full font-bold">VC</span>}
+                                                        {player.role === PlayerRole.WICKET_KEEPER && <span className="text-[10px] bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 px-1.5 py-0.5 rounded-full font-bold">WK</span>}
+                                                    </div>
+                                                    <div className="text-xs text-text-secondary flex items-center gap-1 mt-0.5">
+                                                        {getRoleEmoji(player.role)} {getShortRoleName(player.role)}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="flex flex-shrink-0 ml-2">
+                                                <button 
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleToggleSquadPlayer(player.id, e);
+                                                    }}
+                                                    className="p-1.5 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg text-xs font-bold transition-colors dark:bg-red-900/30 dark:hover:bg-red-900/50 dark:text-red-400"
+                                                >
+                                                    Remove
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    {teamToValidate.players.length === 0 && (
+                                        <div className="col-span-full p-6 text-center text-text-secondary text-sm bg-primary/30 rounded-xl border border-dashed border-brand-blue/30">
+                                            No players selected. Search and add players above.
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
+                    ) : (
+                        <>
+                            {!isTeamLocked && isKeeperMissing && team.players.length > 0 && (
+                                <div className="p-2 mb-4 bg-warning/20 dark:bg-warning/20 text-yellow-800 dark:text-yellow-300 text-body font-semibold rounded-md text-center">
+                                    A team of {maxPlayers} must have one designated Wicket Keeper.
+                                </div>
+                            )}
+                            {!isTeamLocked && (isCaptainMissing || isViceCaptainMissing) && team.players.length > 0 && (
+                                <div className="p-2 mb-4 bg-warning/20 dark:bg-warning/20 text-yellow-800 dark:text-yellow-300 text-body font-semibold rounded-md text-center">
+                                    {isCaptainMissing && isViceCaptainMissing ? "A Captain and Vice-Captain must be selected." : (isCaptainMissing ? "A Captain must be selected." : "A Vice-Captain must be selected.")}
+                                </div>
+                            )}
+
+                            {team.players.length === 0 ? (
+                                <div className="flex flex-col items-center justify-center p-8 text-center text-balance space-y-4">
+                                    <h4 className="text-h3 font-bold text-text-primary">No Players Added Yet</h4>
+                                    <p className="text-body text-text-secondary">Build your team before the toss.</p>
+                                    {!isTeamLocked && (
+                                        <Button onClick={handleAddPlayerClick} variant="blue" className="mt-4">
+                                            <PlusIcon /> Add Player
+                                        </Button>
+                                    )}
+                                </div>
+                            ) : (
+                                <div className="space-y-4">
+                                    <div className="flex justify-between items-center text-sm font-semibold text-text-secondary px-2">
+                                        <span>Team Players</span>
+                                        <span>{team.players.length} / {maxPlayers} Players Added</span>
+                                    </div>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                        {team.players.map(player => (
+                                            <div 
+                                                key={player.id} 
+                                                onClick={() => handlePlayerClick(player)}
+                                                className="flex items-center justify-between p-3 bg-primary rounded-xl shadow-sm border border-brand-blue/10 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+                                            >
+                                                <div className="flex items-center gap-3 truncate">
+                                                    <div className="w-10 h-10 flex flex-shrink-0 items-center justify-center rounded-lg bg-secondary text-text-primary overflow-hidden shadow-inner font-bold text-h3">
+                                                        {player.number}
+                                                    </div>
+                                                    <div className="truncate">
+                                                        <div className="font-bold text-text-primary text-body flex flex-wrap items-center gap-1">
+                                                            <span className="truncate">{player.name}</span>
+                                                            {team.captainId === player.id && <span className="text-[10px] bg-brand-blue/20 text-brand-blue px-1.5 py-0.5 rounded-full font-bold">C</span>}
+                                                            {team.viceCaptainId === player.id && <span className="text-[10px] bg-warning/20 text-yellow-700 dark:text-yellow-400 px-1.5 py-0.5 rounded-full font-bold">VC</span>}
+                                                            {player.role === PlayerRole.WICKET_KEEPER && <span className="text-[10px] bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 px-1.5 py-0.5 rounded-full font-bold">WK</span>}
+                                                        </div>
+                                                        <div className="text-xs text-text-secondary flex items-center gap-1 mt-0.5">
+                                                            {getRoleEmoji(player.role)} {getShortRoleName(player.role)}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center flex-shrink-0">
+                                                    {/* Delete button removed as requested for now */}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    {/* Add player button moved to floating footer */}
+                                </div>
+                            )}
+                        </>
                     )}
                 </div>
-                <div className="p-4 md:p-6 border-t border-gray-300 dark:border-gray-700 flex justify-end items-center gap-4">
-                    <button onClick={onClose} className="py-2 px-4 rounded-2xl font-semibold text-body bg-primary/80 border border-brand-blue/15 hover:bg-primary">Cancel</button>
-                    <Button onClick={handleUpdate} disabled={isSaveDisabled} title={saveButtonTitle}>
-                        {onDone ? 'Save & Set Ready' : 'Save Changes'}
-                    </Button>
+                <div className="p-4 md:p-6 border-t border-gray-300 dark:border-gray-700 flex justify-between items-center gap-4 bg-primary/80 backdrop-blur-md rounded-b-2xl safe-pad-b">
+                    <div className="flex-1 flex gap-2">
+                         {/* Add player button moved to floating action button */}
+                    </div>
+                    <div className="flex gap-2">
+                        <button onClick={onClose} className="py-2 px-4 rounded-2xl font-semibold text-body bg-primary/80 border border-brand-blue/15 hover:bg-primary">Cancel</button>
+                        {onDone && (
+                            <Button onClick={handleUpdate} disabled={isSaveDisabled} title={saveButtonTitle}>
+                                Done
+                            </Button>
+                        )}
+                    </div>
                 </div>
 
                 {confirmDeletePlayer && (
@@ -458,18 +486,41 @@ export const TeamEditorModal: React.FC<TeamEditorModalProps> = (props) => {
                         onConfirm={handleConfirmDelete}
                     />
                 )}
+                {confirmDone && (
+                    <ConfirmationModal
+                        title="Confirm Team Players?"
+                        message={
+                            <div>
+                                <p className="mb-2">You have added {match ? currentSquadIds.length : team.players.length} / {maxPlayers} players.</p>
+                                <p>Captain, Vice-Captain, and Wicket Keeper are selected.</p>
+                            </div>
+                        }
+                        onClose={() => setConfirmDone(false)}
+                        onConfirm={handleConfirmDone}
+                        confirmText="Confirm & Save"
+                        confirmVariant="primary"
+                    />
+                )}
                 {activeMatchForLock && addPlayerReplacement && (
                     <ImpactPlayerModal
                         isOpen={isImpactPlayerModalOpen}
                         onClose={() => setIsImpactPlayerModalOpen(false)}
                         match={activeMatchForLock}
-                        team={editedTeam}
-                        updateTeam={(t) => {
-                            setEditedTeam(t);
-                            updateTeam(t);
-                        }}
+                        team={team}
+                        updateTeam={updateTeam}
                         addPlayerReplacement={addPlayerReplacement}
                     />
+                )}
+                
+                {/* Floating Add Player Button */}
+                {!isTeamLocked && (match ? currentSquadIds.length < maxPlayers : !isTeamFull) && (
+                    <button
+                        onClick={handleAddPlayerClick}
+                        style={{ bottom: 'calc(5rem + env(safe-area-inset-bottom))' }}
+                        className="fixed right-6 px-6 py-3 bg-brand-blue text-white rounded-xl shadow-2xl font-bold border-2 border-white dark:border-transparent flex items-center gap-2 hover:bg-brand-blue/90 transform hover:-translate-y-1 transition-all z-[60] text-body"
+                    >
+                        <PlusIcon /> Add Player
+                    </button>
                 )}
             </div>
         </div>

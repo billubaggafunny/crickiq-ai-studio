@@ -149,3 +149,96 @@ export function validatePlayer(
         errors
     };
 }
+
+export function validatePlayerData(player: { id?: string; name: string; number: string | number; role: string }, teamPlayers: { name: string; number: number; id?: string }[]) {
+    return validatePlayer(player.name, player.number, player.role, teamPlayers, player.id);
+}
+
+import type { Team } from '../types';
+
+export function validateTeamRoster(team: Team, maxPlayers: number) {
+    const minPlayersRequired = 2;
+    const errors: string[] = [];
+    const warnings: string[] = [];
+
+    const hasMinimumPlayers = team.players.length >= minPlayersRequired;
+    const withinMaxPlayers = team.players.length <= maxPlayers;
+    const hasCaptain = !!team.captainId && team.players.some(p => p.id === team.captainId);
+    const hasViceCaptain = !!team.viceCaptainId && team.players.some(p => p.id === team.viceCaptainId);
+    const hasWicketKeeper = team.players.some(p => p.role === 'Wicket Keeper');
+
+    const numbers = new Set<number>();
+    const names = new Set<string>();
+    let noDuplicateNumbers = true;
+    let noDuplicateNames = true;
+
+    team.players.forEach(player => {
+        if (!player.name || !player.name.trim()) errors.push(`Player without a name found.`);
+        if (!player.role) errors.push(`Player ${player.name} is missing a role.`);
+        
+        if (numbers.has(player.number)) {
+            noDuplicateNumbers = false;
+        }
+        numbers.add(player.number);
+
+        const lowerName = player.name.trim().toLowerCase();
+        if (names.has(lowerName)) {
+            noDuplicateNames = false;
+        }
+        names.add(lowerName);
+    });
+
+    if (!noDuplicateNumbers) errors.push('Duplicate jersey numbers found.');
+    if (!noDuplicateNames) errors.push('Duplicate player names found.');
+
+    if (!hasCaptain && team.players.length > 0) errors.push('A team must have a captain.');
+    if (!hasViceCaptain && team.players.length > 0) errors.push('A team must have a vice-captain.');
+    
+    // According to existing logic, if it's full it MUST have a keeper
+    if (team.players.length === maxPlayers && !hasWicketKeeper) {
+        errors.push(`A team of ${maxPlayers} must have one designated Wicket Keeper.`);
+    }
+
+    if (team.captainId && team.captainId === team.viceCaptainId) {
+        errors.push('Captain and Vice-Captain cannot be the same player.');
+    }
+
+    return {
+        isValid: errors.length === 0,
+        errors,
+        warnings,
+        checks: {
+            hasMinimumPlayers,
+            withinMaxPlayers,
+            hasCaptain,
+            hasViceCaptain,
+            hasWicketKeeper,
+            noDuplicateNumbers,
+            noDuplicateNames
+        }
+    };
+}
+
+export function canEnableSetToss(team1: Team | undefined, team2: Team | undefined, defaultOvers: number | string, maxPlayersA: number = 11, maxPlayersB: number = 11) {
+    if (!team1 || !team2) return { canEnable: false, teamAValid: false, teamBValid: false, teamAErrors: [], teamBErrors: [] };
+
+    const t1Val = validateTeamRoster(team1, maxPlayersA);
+    const t2Val = validateTeamRoster(team2, maxPlayersB);
+
+    const hasEqualPlayers = team1.players.length === team2.players.length;
+    
+    const oversVal = validatePositiveInteger(defaultOvers, 'match');
+    
+    // Note: To match existing QuickMatchSetup code closely, we verify if they have equal players and equal to maxPlayers
+    const teamAHasEnough = team1.players.length === maxPlayersA;
+    const teamBHasEnough = team2.players.length === maxPlayersB;
+    const canEnable = t1Val.isValid && t2Val.isValid && teamAHasEnough && teamBHasEnough && hasEqualPlayers && oversVal.valid;
+
+    return {
+        canEnable,
+        teamAValid: t1Val.isValid,
+        teamBValid: t2Val.isValid,
+        teamAErrors: t1Val.errors,
+        teamBErrors: t2Val.errors
+    };
+}
