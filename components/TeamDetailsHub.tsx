@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { 
     ChevronLeft, Users, Trophy, Activity, Award, Settings, 
     Layers, MapPin, ShieldAlert, Sparkles, AlertTriangle, Calendar,
-    Search, ChevronRight
+    Search, ChevronRight, CheckCircle2, GitMerge, Archive, Info, Lock
 } from 'lucide-react';
 import CrickIQCard from './CrickIQCard';
 import type { Team, Match, Tournament, Player } from '../types';
@@ -24,12 +24,27 @@ export interface TeamDetailsHubProps {
     tournaments: Tournament[];
     onBack: () => void;
     onOpenMatchHub?: (matchId: string, returnLocation?: Record<string, unknown>) => void;
-    onViewTournament?: (tournamentId: string) => void;
+    onViewTournament?: (
+        tournamentId: string,
+        returnContext?: {
+            source: 'team_details';
+            teamId: string;
+            teamDetailsTab: 'tournaments';
+            tournamentSearchQuery?: string;
+            tournamentSelectedFilter?: string;
+            tournamentSortOrder?: 'recent' | 'name' | 'status' | 'matches';
+            visibleTournamentCount?: number;
+        }
+    ) => void;
     initialTab?: string;
     initialMatchSearchQuery?: string;
     initialMatchSelectedFilter?: string;
     initialMatchSortOrder?: 'recent' | 'oldest' | 'status';
     initialVisibleMatchCount?: number;
+    initialTournamentSearchQuery?: string;
+    initialTournamentSelectedFilter?: string;
+    initialTournamentSortOrder?: 'recent' | 'name' | 'status' | 'matches';
+    initialVisibleTournamentCount?: number;
 }
 
 const TABS = [
@@ -98,7 +113,11 @@ const TeamDetailsHub: React.FC<TeamDetailsHubProps> = ({
     initialMatchSearchQuery,
     initialMatchSelectedFilter,
     initialMatchSortOrder,
-    initialVisibleMatchCount
+    initialVisibleMatchCount,
+    initialTournamentSearchQuery,
+    initialTournamentSelectedFilter,
+    initialTournamentSortOrder,
+    initialVisibleTournamentCount
 }) => {
     const [activeTab, setActiveTab] = useState(initialTab || 'overview');
     const [playerSearchQuery, setPlayerSearchQuery] = useState('');
@@ -111,10 +130,14 @@ const TeamDetailsHub: React.FC<TeamDetailsHubProps> = ({
     const [visibleMatchCount, setVisibleMatchCount] = useState(initialVisibleMatchCount ?? 25);
 
     // Tournaments Tab State
-    const [tournamentSearchQuery, setTournamentSearchQuery] = useState('');
-    const [tournamentSelectedFilter, setTournamentSelectedFilter] = useState('all');
-    const [tournamentSortOrder, setTournamentSortOrder] = useState<'recent' | 'name' | 'status' | 'matches'>('recent');
-    const [visibleTournamentCount, setVisibleTournamentCount] = useState(20);
+    const [tournamentSearchQuery, setTournamentSearchQuery] = useState(initialTournamentSearchQuery || '');
+    const [tournamentSelectedFilter, setTournamentSelectedFilter] = useState(initialTournamentSelectedFilter || 'all');
+    const [tournamentSortOrder, setTournamentSortOrder] = useState<'recent' | 'name' | 'status' | 'matches'>(initialTournamentSortOrder || 'recent');
+    const [visibleTournamentCount, setVisibleTournamentCount] = useState(initialVisibleTournamentCount ?? 20);
+    
+    // Team Settings Toast/Notice States
+    const [settingsNotice, setSettingsNotice] = useState<string | null>(null);
+    const [settingsNoticeType, setSettingsNoticeType] = useState<'info' | 'warning' | 'success'>('info');
     
     // Resolve global player navigation context
     const { openPlayerDetails } = usePlayerNavigation();
@@ -552,6 +575,212 @@ const TeamDetailsHub: React.FC<TeamDetailsHubProps> = ({
     const paginatedMatches = useMemo(() => {
         return sortedMatches.slice(0, visibleMatchCount);
     }, [sortedMatches, visibleMatchCount]);
+
+    // Derived counts for Team Settings view
+    const completedMatchesCount = useMemo(() => {
+        if (!teamId) return 0;
+        return matches.filter(m => 
+            (m.status === 'completed' || m.status === 'live') && 
+            (m.team1Id === teamId || m.team2Id === teamId)
+        ).length;
+    }, [matches, teamId]);
+
+    const tournamentCount = useMemo(() => {
+        return participatedTournaments.length;
+    }, [participatedTournaments]);
+
+    const teamPlayersCount = useMemo(() => {
+        return team?.players?.length || 0;
+    }, [team]);
+
+    // Derived statistical data for Team Stats tab (Phase 8)
+    const teamMatches = useMemo(() => {
+        if (!teamId) return [];
+        return matches.filter(m => m.team1Id === teamId || m.team2Id === teamId);
+    }, [matches, teamId]);
+
+    const teamOverviewStats = useMemo(() => {
+        let matchesPlayed = 0;
+        let matchesWon = 0;
+        let matchesLost = 0;
+        let matchesTied = 0;
+        let noResultCount = 0;
+
+        teamMatches.forEach(m => {
+            if (m.wasAbandoned) {
+                noResultCount++;
+                matchesPlayed++;
+            } else if (m.status === 'live') {
+                matchesPlayed++;
+            } else if (m.status === 'completed') {
+                matchesPlayed++;
+                if (m.winnerId === teamId) {
+                    matchesWon++;
+                } else if (m.winnerId === 'draw' || m.winnerId === 'tie') {
+                    matchesTied++;
+                } else if (m.winnerId && m.winnerId !== 'draw' && m.winnerId !== 'tie') {
+                    matchesLost++;
+                } else {
+                    noResultCount++;
+                }
+            }
+        });
+
+        const decisiveMatches = matchesWon + matchesLost;
+        const winPercentage = decisiveMatches > 0 ? Math.round((matchesWon / decisiveMatches) * 100) : 0;
+
+        return {
+            matchesPlayed,
+            matchesWon,
+            matchesLost,
+            matchesTied,
+            noResultCount,
+            winPercentage,
+            hasDecisive: decisiveMatches > 0
+        };
+    }, [teamMatches, teamId]);
+
+    const teamBattingStats = useMemo(() => {
+        const battingInningsList: { score: number; wickets: number; overs: number }[] = [];
+        let count100Plus = 0;
+        let count150Plus = 0;
+        let count200Plus = 0;
+        let totalRuns = 0;
+
+        teamMatches.forEach(m => {
+            if (m.status === 'live' || m.status === 'completed') {
+                if (m.innings1 && m.innings1.battingTeamId === teamId && typeof m.innings1.score === 'number' && !m.wasAbandoned) {
+                    const score = m.innings1.score;
+                    const wickets = typeof m.innings1.wickets === 'number' ? m.innings1.wickets : 0;
+                    const overs = typeof m.innings1.overs === 'number' ? m.innings1.overs : 0;
+                    battingInningsList.push({ score, wickets, overs });
+                    totalRuns += score;
+                    if (score >= 200) count200Plus++;
+                    if (score >= 150) count150Plus++;
+                    if (score >= 100) count100Plus++;
+                }
+                if (m.innings2 && m.innings2.battingTeamId === teamId && typeof m.innings2.score === 'number' && !m.wasAbandoned) {
+                    const score = m.innings2.score;
+                    const wickets = typeof m.innings2.wickets === 'number' ? m.innings2.wickets : 0;
+                    const overs = typeof m.innings2.overs === 'number' ? m.innings2.overs : 0;
+                    battingInningsList.push({ score, wickets, overs });
+                    totalRuns += score;
+                    if (score >= 200) count200Plus++;
+                    if (score >= 150) count150Plus++;
+                    if (score >= 100) count100Plus++;
+                }
+            }
+        });
+
+        const averageScoreValue = battingInningsList.length > 0 
+            ? Math.round(totalRuns / battingInningsList.length) 
+            : 0;
+
+        const sortedBattingList = [...battingInningsList].sort((a, b) => b.score - a.score);
+        const highestScoreObj = sortedBattingList[0];
+        const lowestScoreObj = sortedBattingList[sortedBattingList.length - 1];
+
+        return {
+            totalRuns,
+            highestScore: highestScoreObj ? `${highestScoreObj.score}/${highestScoreObj.wickets}` : '—',
+            lowestScore: lowestScoreObj ? `${lowestScoreObj.score}/${lowestScoreObj.wickets}` : '—',
+            averageScore: battingInningsList.length > 0 ? averageScoreValue.toString() : '—',
+            count100Plus,
+            count150Plus,
+            count200Plus,
+            hasBattingData: battingInningsList.length > 0
+        };
+    }, [teamMatches, teamId]);
+
+    const teamBowlingStats = useMemo(() => {
+        const bowlingInningsList: { score: number; wickets: number; opponentName: string; maxWickets: number }[] = [];
+        let totalWicketsTaken = 0;
+
+        teamMatches.forEach(m => {
+            const matchPlayers = m.numberOfPlayers ?? 11;
+            const maxWicketsAllowed = matchPlayers - 1; // standard wickets for all-out
+            if (m.status === 'live' || m.status === 'completed') {
+                if (m.innings1 && m.innings1.bowlingTeamId === teamId && typeof m.innings1.score === 'number' && !m.wasAbandoned) {
+                    const opponent = teams.find(t => t.id === m.innings1!.battingTeamId);
+                    const wickets = typeof m.innings1.wickets === 'number' ? m.innings1.wickets : 0;
+                    bowlingInningsList.push({
+                        score: m.innings1.score,
+                        wickets,
+                        opponentName: opponent ? opponent.name : 'Opponent',
+                        maxWickets: maxWicketsAllowed
+                    });
+                    totalWicketsTaken += wickets;
+                }
+                if (m.innings2 && m.innings2.bowlingTeamId === teamId && typeof m.innings2.score === 'number' && !m.wasAbandoned) {
+                    const opponent = teams.find(t => t.id === m.innings2!.battingTeamId);
+                    const wickets = typeof m.innings2.wickets === 'number' ? m.innings2.wickets : 0;
+                    bowlingInningsList.push({
+                        score: m.innings2.score,
+                        wickets,
+                        opponentName: opponent ? opponent.name : 'Opponent',
+                        maxWickets: maxWicketsAllowed
+                    });
+                    totalWicketsTaken += wickets;
+                }
+            }
+        });
+
+        const sortedBowlingList = [...bowlingInningsList].sort((a, b) => {
+            if (b.wickets !== a.wickets) {
+                return b.wickets - a.wickets; // descending by wickets
+            }
+            return a.score - b.score; // ascending by score (runs conceded)
+        });
+
+        const bestBowlingMatch = sortedBowlingList[0];
+        const averageWickets = bowlingInningsList.length > 0
+            ? (totalWicketsTaken / bowlingInningsList.length).toFixed(1)
+            : '—';
+
+        const oppositionAllOutCount = bowlingInningsList.filter(x => x.wickets >= x.maxWickets).length;
+
+        return {
+            totalWicketsTaken,
+            bestBowling: bestBowlingMatch ? `${bestBowlingMatch.wickets}/${bestBowlingMatch.score} vs ${bestBowlingMatch.opponentName}` : '—',
+            averageWicketsPerMatch: averageWickets,
+            oppositionAllOutCount,
+            hasBowlingData: bowlingInningsList.length > 0
+        };
+    }, [teamMatches, teamId, teams]);
+
+    const teamFormGuide = useMemo(() => {
+        const relevantMatches = matches.filter(m => {
+            if (m.team1Id !== teamId && m.team2Id !== teamId) return false;
+            return m.status === 'completed' || m.wasAbandoned;
+        });
+
+        // Sort by date descending (most recent first)
+        const sorted = [...relevantMatches].sort((a, b) => {
+            const datetimeA = new Date((a.date || '').replace(/-/g, '/') + ' ' + (a.time || '00:00')).getTime();
+            const datetimeB = new Date((b.date || '').replace(/-/g, '/') + ' ' + (b.time || '00:00')).getTime();
+            return datetimeB - datetimeA;
+        });
+
+        const top10 = sorted.slice(0, 10);
+
+        return top10.map(m => {
+            if (m.wasAbandoned) {
+                return { result: 'NR' as const, date: m.date, info: 'Abandoned / No Result' };
+            }
+            if (m.winnerId === teamId) {
+                const opponentId = m.team1Id === teamId ? m.team2Id : m.team1Id;
+                const opponentName = teams.find(t => t.id === opponentId)?.name || 'Opponent';
+                return { result: 'W' as const, date: m.date, info: `Won against ${opponentName}` };
+            } else if (m.winnerId === 'draw' || m.winnerId === 'tie') {
+                return { result: 'T' as const, date: m.date, info: 'Match Tied' };
+            } else if (m.winnerId && m.winnerId !== 'draw' && m.winnerId !== 'tie') {
+                const opponentId = m.winnerId;
+                const opponentName = teams.find(t => t.id === opponentId)?.name || 'Opponent';
+                return { result: 'L' as const, date: m.date, info: `Lost to ${opponentName}` };
+            }
+            return { result: 'NR' as const, date: m.date, info: 'No Result' };
+        });
+    }, [matches, teamId, teams]);
 
     // Helper to format match score line or status result nicely
     const renderMatchResult = (match: Match) => {
@@ -1454,7 +1683,15 @@ const TeamDetailsHub: React.FC<TeamDetailsHubProps> = ({
                                                     key={t.id}
                                                     onClick={() => {
                                                         if (hasTapAction && onViewTournament) {
-                                                            onViewTournament(t.id);
+                                                            onViewTournament(t.id, {
+                                                                source: 'team_details',
+                                                                teamId: teamId,
+                                                                teamDetailsTab: 'tournaments',
+                                                                tournamentSearchQuery,
+                                                                tournamentSelectedFilter,
+                                                                tournamentSortOrder,
+                                                                visibleTournamentCount
+                                                            });
                                                         }
                                                     }}
                                                     className={`p-5 bg-primary rounded-3xl border border-brand-blue/10 dark:border-brand-blue/20 transition-all ${
@@ -1568,6 +1805,514 @@ const TeamDetailsHub: React.FC<TeamDetailsHubProps> = ({
                                 </div>
                             )}
                         </div>
+                    ) : activeTab === 'settings' ? (
+                        /* Read-Only Settings Tab (Phase 7) */
+                        <div className="space-y-6">
+                            {/* Header Stats */}
+                            <CrickIQCard id="settings-heading-card" className="p-4 border border-brand-blue/10 dark:border-brand-blue/20 bg-primary rounded-3xl shadow-sm">
+                                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                    <div>
+                                        <div className="text-[10px] font-extrabold uppercase tracking-widest text-text-secondary font-mono">Administrative Controls</div>
+                                        <h4 className="text-xl font-extrabold text-brand-blue mt-0.5 font-sans">Team Settings Hub</h4>
+                                        <p className="text-xs text-text-secondary mt-1 max-w-md leading-relaxed">
+                                            Manage your team profile, archive status, safety guarantees, and duplicate squads tools in one secure diagnostic control center.
+                                        </p>
+                                    </div>
+                                </div>
+                            </CrickIQCard>
+
+                            {/* State Notice Notification Banner */}
+                            <div id="settings-notice-container" className="scroll-mt-4">
+                                {settingsNotice && (
+                                    <div className={`p-4 rounded-3xl flex items-start gap-3 border shadow-sm transition-all duration-300 ${
+                                        settingsNoticeType === 'success'
+                                            ? 'bg-emerald-500/10 text-emerald-800 dark:text-emerald-400 border-emerald-500/20'
+                                            : settingsNoticeType === 'warning'
+                                            ? 'bg-amber-500/10 text-amber-800 dark:text-amber-400 border-amber-500/20'
+                                            : 'bg-brand-blue/5 text-text-primary border-brand-blue/10 dark:bg-brand-blue/10 dark:text-white'
+                                    }`}>
+                                        <div className="shrink-0 mt-0.5">
+                                            {settingsNoticeType === 'success' ? (
+                                                <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                                            ) : settingsNoticeType === 'warning' ? (
+                                                <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                                            ) : (
+                                                <Info className="w-5 h-5 text-brand-blue" />
+                                            )}
+                                        </div>
+                                        <div className="flex-1 text-xs font-semibold leading-relaxed">
+                                            {settingsNotice}
+                                        </div>
+                                        <button 
+                                            onClick={() => setSettingsNotice(null)}
+                                            className="text-text-secondary hover:text-text-primary text-xs font-bold leading-none p-1 rounded-md hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer transition-colors"
+                                        >
+                                            Dismiss
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                {/* Left Side: Profile & Status */}
+                                <div className="space-y-6">
+                                    {/* Team Profile Section */}
+                                    <CrickIQCard id="settings-profile-section" className="p-6 border border-brand-blue/10 dark:border-brand-blue/20 bg-primary rounded-3xl shadow-sm space-y-4">
+                                        <div className="flex items-center gap-2 border-b border-brand-blue/5 pb-3">
+                                            <Users className="w-5 h-5 text-brand-blue" />
+                                            <div>
+                                                <h3 className="text-sm font-extrabold uppercase tracking-wider text-text-primary">Team Profile Details</h3>
+                                                <p className="text-[11px] text-text-secondary">Core metadata and location registration parameters</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+                                            <div className="space-y-1">
+                                                <div className="text-[9px] font-extrabold uppercase tracking-wider text-text-secondary">Team Name</div>
+                                                <div className="text-xs font-bold text-text-primary break-words">{team?.name || 'Unnamed Team'}</div>
+                                            </div>
+                                            <div className="space-y-1">
+                                                <div className="text-[9px] font-extrabold uppercase tracking-wider text-text-secondary">Short Name / Initials</div>
+                                                <div className="text-xs font-bold text-text-primary break-words">{team?.shortName || team?.teamInitials || team?.name || 'Not set'}</div>
+                                            </div>
+                                            <div className="space-y-1">
+                                                <div className="text-[9px] font-extrabold uppercase tracking-wider text-text-secondary">Team Type</div>
+                                                <div className="text-xs font-bold text-text-primary uppercase tracking-wide">{team?.teamType || 'custom'}</div>
+                                            </div>
+                                            <div className="space-y-1">
+                                                <div className="text-[9px] font-extrabold uppercase tracking-wider text-text-secondary">Scope</div>
+                                                <div className="text-xs font-bold text-text-primary uppercase tracking-wide">{team?.scope || 'global'}</div>
+                                            </div>
+                                            <div className="space-y-1">
+                                                <div className="text-[9px] font-extrabold uppercase tracking-wider text-text-secondary">Home Ground</div>
+                                                <div className="text-xs font-bold text-text-primary break-words">{team?.homeGround || 'Not set'}</div>
+                                            </div>
+                                            <div className="space-y-1">
+                                                <div className="text-[9px] font-extrabold uppercase tracking-wider text-text-secondary">City</div>
+                                                <div className="text-xs font-bold text-text-primary break-words">{team?.city || 'Not set'}</div>
+                                            </div>
+                                            <div className="space-y-1">
+                                                <div className="text-[9px] font-extrabold uppercase tracking-wider text-text-secondary">State / Province</div>
+                                                <div className="text-xs font-bold text-text-primary break-words">{team?.state || 'Not set'}</div>
+                                            </div>
+                                            <div className="space-y-1">
+                                                <div className="text-[9px] font-extrabold uppercase tracking-wider text-text-secondary">Country</div>
+                                                <div className="text-xs font-bold text-text-primary break-words">{team?.country || 'Not set'}</div>
+                                            </div>
+                                            <div className="space-y-1 col-span-2">
+                                                <div className="text-[9px] font-extrabold uppercase tracking-wider text-text-secondary">Logo Colors & Accent</div>
+                                                <div className="flex items-center gap-1.5 mt-0.5">
+                                                    <span className="w-3.5 h-3.5 rounded-full inline-block border border-black/10 dark:border-white/10" style={{ backgroundColor: team?.logoColor || team?.logo || '#1e3a8a' }} />
+                                                    <span className="text-[10px] font-mono text-text-secondary">{team?.logoColor || team?.logo || 'Default'}</span>
+                                                </div>
+                                            </div>
+                                            <div className="space-y-1">
+                                                <div className="text-[9px] font-extrabold uppercase tracking-wider text-text-secondary font-mono">Created Date</div>
+                                                <div className="text-xs font-bold text-text-primary font-mono">
+                                                    {team?.createdAt 
+                                                        ? new Date(team.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
+                                                        : 'Unknown'}
+                                                </div>
+                                            </div>
+                                            <div className="space-y-1">
+                                                <div className="text-[9px] font-extrabold uppercase tracking-wider text-text-secondary font-mono">Last Updated</div>
+                                                <div className="text-xs font-bold text-text-primary font-mono">
+                                                    {team?.updatedAt 
+                                                        ? new Date(team.updatedAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
+                                                        : 'Unknown'}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="pt-2 border-t border-brand-blue/5">
+                                            <button
+                                                id="settings-edit-profile-btn"
+                                                onClick={() => {
+                                                    setSettingsNotice("Edit Team Info will be added in a future phase.");
+                                                    setSettingsNoticeType('info');
+                                                }}
+                                                className="w-full py-2.5 px-4 rounded-xl text-xs font-bold text-brand-blue bg-brand-blue/5 hover:bg-brand-blue/10 border border-brand-blue/10 hover:border-brand-blue/25 transition-all text-center flex items-center justify-center gap-1.5 uppercase tracking-wide cursor-pointer active:scale-95 touch-manipulation"
+                                            >
+                                                Edit Team Info — Coming Soon
+                                            </button>
+                                        </div>
+                                    </CrickIQCard>
+
+                                    {/* Team Status Section */}
+                                    <CrickIQCard id="settings-status-section" className="p-6 border border-brand-blue/10 dark:border-brand-blue/20 bg-primary rounded-3xl shadow-sm space-y-4">
+                                        <div className="flex items-center gap-2 border-b border-brand-blue/5 pb-3">
+                                            <Archive className="w-5 h-5 text-brand-blue" />
+                                            <div>
+                                                <h3 className="text-sm font-extrabold uppercase tracking-wider text-text-primary">Team Archival Status</h3>
+                                                <p className="text-[11px] text-text-secondary">Deactivate or restore team visibility in list selectors</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-center justify-between p-3 bg-secondary/50 border border-brand-blue/5 rounded-2xl">
+                                            <div>
+                                                <div className="text-[10px] font-extrabold uppercase tracking-wider text-text-secondary">Current State</div>
+                                                <span className={`inline-flex items-center gap-1.5 mt-1 px-3 py-1 rounded-full text-xs font-extrabold border ${
+                                                    team?.isArchived 
+                                                        ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/15'
+                                                        : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/15'
+                                                }`}>
+                                                    <span className={`w-2 h-2 rounded-full ${team?.isArchived ? 'bg-amber-500' : 'bg-emerald-500'}`} />
+                                                    {team?.isArchived ? 'ARCHIVED' : 'ACTIVE'}
+                                                </span>
+                                            </div>
+                                            {team?.isArchived && team?.archivedAt && (
+                                                <div className="text-right">
+                                                    <div className="text-[9px] font-extrabold uppercase tracking-wider text-text-secondary">Archived At</div>
+                                                    <div className="text-xs font-mono font-bold text-text-primary">
+                                                        {new Date(team.archivedAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <p className="text-xs text-text-secondary leading-relaxed">
+                                            Archiving a team hides it from current selector dropdowns and schedules but preserves all historical matches, career statistics, and points table rankings.
+                                        </p>
+
+                                        <div className="pt-2">
+                                            <button
+                                                id="settings-archive-btn"
+                                                onClick={() => {
+                                                    const mode = team?.isArchived ? "Restore Team" : "Archive Team";
+                                                    setSettingsNotice(`${mode} will be added after safety validation.`);
+                                                    setSettingsNoticeType('info');
+                                                }}
+                                                className="w-full py-2.5 px-4 rounded-xl text-xs font-bold text-text-primary bg-secondary hover:bg-slate-100 dark:hover:bg-slate-800 border border-brand-blue/5 hover:border-brand-blue/15 transition-all text-center flex items-center justify-center gap-1.5 uppercase tracking-wide cursor-pointer active:scale-95 touch-manipulation"
+                                            >
+                                                {team?.isArchived ? 'Restore Team' : 'Archive Team'} — Coming Soon
+                                            </button>
+                                        </div>
+                                    </CrickIQCard>
+                                </div>
+
+                                {/* Right Side: Data Safety, Merge Tools, Danger Zone */}
+                                <div className="space-y-6">
+                                    {/* Data Safety Section */}
+                                    <CrickIQCard id="settings-data-safety-section" className="p-6 border border-emerald-500/10 dark:border-emerald-500/20 bg-primary rounded-3xl shadow-sm space-y-4">
+                                        <div className="flex items-center gap-2 border-b border-brand-blue/5 pb-3">
+                                            <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                                            <div>
+                                                <h3 className="text-sm font-extrabold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Core Data Safety Guarantees</h3>
+                                                <p className="text-[11px] text-text-secondary">Protected relationships & database referential rules</p>
+                                            </div>
+                                        </div>
+
+                                        <p className="text-xs text-text-secondary leading-relaxed bg-emerald-500/5 dark:bg-emerald-500/10 p-3 rounded-2xl border border-emerald-500/10">
+                                            <strong>Trust-Building Notice:</strong> Editing a team profile in future will not modify completed scorecards, match history, innings data, or tournament results.
+                                        </p>
+
+                                        <div className="space-y-3">
+                                            <div className="text-[10px] font-extrabold uppercase tracking-wider text-text-secondary">Protected Records Directory</div>
+                                            <div className="grid grid-cols-3 gap-2 text-center">
+                                                <div className="p-2.5 bg-secondary/40 border border-emerald-500/5 rounded-2xl">
+                                                    <div className="text-[18px] font-extrabold text-emerald-600 dark:text-emerald-400 font-mono">{completedMatchesCount}</div>
+                                                    <div className="text-[9px] font-extrabold text-text-secondary uppercase">Matches Secure</div>
+                                                </div>
+                                                <div className="p-2.5 bg-secondary/40 border border-emerald-500/5 rounded-2xl">
+                                                    <div className="text-[18px] font-extrabold text-emerald-600 dark:text-emerald-400 font-mono">{tournamentCount}</div>
+                                                    <div className="text-[9px] font-extrabold text-text-secondary uppercase">Leagues Linked</div>
+                                                </div>
+                                                <div className="p-2.5 bg-secondary/40 border border-emerald-500/5 rounded-2xl">
+                                                    <div className="text-[18px] font-extrabold text-emerald-600 dark:text-emerald-400 font-mono">{teamPlayersCount}</div>
+                                                    <div className="text-[9px] font-extrabold text-text-secondary uppercase font-mono">Players Bound</div>
+                                                </div>
+                                            </div>
+                                            <ul className="text-[11px] text-text-secondary space-y-1.5 pl-1">
+                                                <li className="flex items-center gap-1.5 text-text-secondary">
+                                                    <Lock className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                                                    <span>Completed scorecards remain cryptographically protected</span>
+                                                </li>
+                                                <li className="flex items-center gap-1.5 text-text-secondary">
+                                                    <Lock className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                                                    <span>Player career stats remain linked to their original team profile</span>
+                                                </li>
+                                                <li className="flex items-center gap-1.5 text-text-secondary">
+                                                    <Lock className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                                                    <span>Tournament stand-ins are historic and locked against alteration</span>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </CrickIQCard>
+
+                                    {/* Duplicate / Merge Tools Section */}
+                                    <CrickIQCard id="settings-duplicate-merge-section" className="p-6 border border-brand-blue/10 dark:border-brand-blue/20 bg-primary rounded-3xl shadow-sm space-y-4">
+                                        <div className="flex items-center gap-2 border-b border-brand-blue/5 pb-3">
+                                            <GitMerge className="w-5 h-5 text-brand-blue" />
+                                            <div>
+                                                <h3 className="text-sm font-extrabold uppercase tracking-wider text-text-primary font-sans">Duplicate / Merge Tools</h3>
+                                                <p className="text-[11px] text-text-secondary">Clean up double-entries and merge squad ledgers safely</p>
+                                            </div>
+                                        </div>
+
+                                        <p className="text-xs text-text-secondary leading-relaxed">
+                                            Use this later to safely merge duplicate teams like <em>India</em>, <em>India XI</em>, or <em>India Team</em> without losing match history. Players and records will be automatically reconciled.
+                                        </p>
+
+                                        <div className="pt-2">
+                                            <button
+                                                id="settings-merge-btn"
+                                                onClick={() => {
+                                                    setSettingsNotice("Merge tools will be added after duplicate protection is complete.");
+                                                    setSettingsNoticeType('warning');
+                                                }}
+                                                className="w-full py-2.5 px-4 rounded-xl text-xs font-bold text-white bg-brand-blue hover:bg-brand-blue/90 transition-all text-center flex items-center justify-center gap-1.5 uppercase tracking-wide cursor-pointer active:scale-95 touch-manipulation font-sans"
+                                            >
+                                                Merge Duplicate Teams — Coming Soon
+                                            </button>
+                                        </div>
+                                    </CrickIQCard>
+
+                                    {/* Danger Zone Section */}
+                                    <CrickIQCard id="settings-danger-zone-section" className="p-6 border border-rose-500/20 bg-rose-500/5 rounded-3xl shadow-sm space-y-4">
+                                        <div className="flex items-center gap-2 border-b border-rose-500/10 pb-3">
+                                            <AlertTriangle className="w-5 h-5 text-rose-500 animate-pulse" />
+                                            <div>
+                                                <h3 className="text-sm font-extrabold uppercase tracking-wider text-rose-600 dark:text-rose-400">Danger Zone</h3>
+                                                <p className="text-[11px] text-rose-500/70">Irreversible administrative actions and protections</p>
+                                            </div>
+                                        </div>
+
+                                        <p className="text-xs text-text-secondary leading-relaxed">
+                                            Deleting a team can affect navigation, history, and references. CrickIQ will prefer Archive Team instead of permanent delete.
+                                        </p>
+
+                                        <div className="bg-primary/50 dark:bg-black/20 p-3 rounded-2xl border border-rose-500/10 text-[11px] text-text-secondary space-y-2">
+                                            <div className="font-extrabold uppercase tracking-wider text-rose-600 dark:text-rose-400">Protections Active:</div>
+                                            <ul className="space-y-1 pl-1">
+                                                <li className="flex items-center gap-2 text-text-secondary">
+                                                    <span className="w-1 h-1 rounded-full bg-rose-500 shrink-0" />
+                                                    <span>Match history will never be deleted automatically.</span>
+                                                </li>
+                                                <li className="flex items-center gap-2 text-text-secondary">
+                                                    <span className="w-1 h-1 rounded-full bg-rose-500 shrink-0" />
+                                                    <span>Players will not be deleted automatically.</span>
+                                                </li>
+                                                <li className="flex items-center gap-2 text-text-secondary">
+                                                    <span className="w-1 h-1 rounded-full bg-rose-500 shrink-0" />
+                                                    <span>Tournaments will not be deleted automatically.</span>
+                                                </li>
+                                                <li className="flex items-center gap-2 text-text-secondary">
+                                                    <span className="w-1 h-1 rounded-full bg-rose-500 shrink-0" />
+                                                    <span>Completed scorecards will remain protected.</span>
+                                                </li>
+                                            </ul>
+                                        </div>
+
+                                        <div className="pt-2">
+                                            <button
+                                                id="settings-delete-btn"
+                                                disabled
+                                                onClick={() => {
+                                                    setSettingsNotice("Permanent delete is disabled for data safety.");
+                                                    setSettingsNoticeType('warning');
+                                                }}
+                                                className="w-full py-2.5 px-4 rounded-xl text-xs font-bold text-rose-600 dark:text-rose-400 bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20 transition-all text-center flex items-center justify-center gap-1.5 uppercase tracking-wide cursor-not-allowed opacity-50"
+                                            >
+                                                Delete Team — Disabled / Coming Later
+                                            </button>
+                                        </div>
+                                    </CrickIQCard>
+                                </div>
+                            </div>
+                        </div>
+                    ) : activeTab === 'stats' ? (
+                        /* Team Stats Tab (Phase 8) - Read-Only Live Analytics Engine */
+                        teamMatches.length === 0 ? (
+                            <div className="py-12 flex flex-col items-center justify-center">
+                                <CrickIQCard id="stats-empty-state" className="p-8 text-center border border-brand-blue/10 dark:border-brand-blue/20 flex flex-col items-center justify-center space-y-4 max-w-sm mx-auto rounded-3xl bg-primary">
+                                    <div className="w-16 h-16 rounded-full bg-brand-blue/5 text-brand-blue flex items-center justify-center">
+                                        <Award className="w-8 h-8" />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <h3 id="stats-empty-title" className="text-lg font-bold text-text-primary">No Team Stats Yet</h3>
+                                        <p id="stats-empty-subtitle" className="text-xs text-text-secondary max-w-xs leading-relaxed">
+                                            Stats will appear here after this team has completed matches.
+                                        </p>
+                                    </div>
+                                    <button
+                                        onClick={() => setActiveTab('overview')}
+                                        className="px-4.5 py-2.5 text-xs font-bold text-white bg-brand-blue hover:bg-brand-blue/90 rounded-2xl shadow-sm transition-all active:scale-95 uppercase tracking-wide cursor-pointer"
+                                    >
+                                        BACK TO OVERVIEW
+                                    </button>
+                                </CrickIQCard>
+                            </div>
+                        ) : (
+                            <div className="space-y-6">
+                                {/* Page Header */}
+                                <CrickIQCard id="stats-header" className="p-4 border border-brand-blue/10 dark:border-brand-blue/20 bg-primary rounded-3xl shadow-sm">
+                                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                        <div>
+                                            <div className="text-[10px] font-extrabold uppercase tracking-widest text-text-secondary font-mono">Performance Analytics</div>
+                                            <h4 className="text-xl font-extrabold text-brand-blue mt-0.5 font-sans">Team Stat Ledger</h4>
+                                            <p className="text-xs text-text-secondary mt-1 max-w-md leading-relaxed">
+                                                Review automated match compilations, batting innings profiles, opponent wickets metrics, and recent form indicators.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </CrickIQCard>
+
+                                {/* Form Guide Section */}
+                                <CrickIQCard id="stats-form-guide" className="p-6 border border-brand-blue/10 dark:border-brand-blue/20 bg-primary rounded-3xl shadow-sm space-y-4">
+                                    <div>
+                                        <h3 className="text-sm font-extrabold uppercase tracking-wider text-text-primary">Recent Form Guide</h3>
+                                        <p className="text-[11px] text-text-secondary">Chronological outcome guide for the last 10 completed engagements</p>
+                                    </div>
+                                    <div className="flex flex-wrap items-center gap-2">
+                                        {teamFormGuide.map((item, index) => {
+                                            const colorClass = 
+                                                item.result === 'W' 
+                                                    ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+                                                    : item.result === 'L'
+                                                    ? 'bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/20'
+                                                    : item.result === 'T'
+                                                    ? 'bg-blue-500/15 text-blue-600 dark:text-blue-400 border-blue-500/20'
+                                                    : 'bg-zinc-500/15 text-zinc-500 dark:text-zinc-400 border-zinc-500/20';
+
+                                            return (
+                                                <div 
+                                                    key={index}
+                                                    title={`${item.info} (${new Date(item.date.replace(/-/g, '/')).toLocaleDateString()})`}
+                                                    className={`w-9 h-9 rounded-xl flex items-center justify-center font-extrabold text-xs border cursor-help hover:scale-105 active:scale-95 transition-all ${colorClass}`}
+                                                >
+                                                    {item.result}
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </CrickIQCard>
+
+                                {/* Grid of Analytics */}
+                                <div className="space-y-6">
+                                    
+                                    {/* Team Overview Section */}
+                                    <CrickIQCard id="stats-overview-section" className="p-6 border border-brand-blue/10 dark:border-brand-blue/20 bg-primary rounded-3xl shadow-sm space-y-4">
+                                        <div className="flex items-center gap-2 border-b border-brand-blue/5 pb-3">
+                                            <Layers className="w-5 h-5 text-brand-blue" />
+                                            <div>
+                                                <h3 className="text-sm font-extrabold uppercase tracking-wider text-text-primary">Team Match Overview</h3>
+                                                <p className="text-[11px] text-text-secondary">Comprehensive results summary of started fixtures</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+                                            <div className="p-4 bg-secondary/40 border border-brand-blue/5 rounded-2xl text-center space-y-1">
+                                                <div className="text-[10px] font-extrabold text-text-secondary uppercase">Matches Played</div>
+                                                <div className="text-2xl font-black text-text-primary font-mono">{teamOverviewStats.matchesPlayed}</div>
+                                            </div>
+                                            <div className="p-4 bg-secondary/40 border border-brand-blue/5 rounded-2xl text-center space-y-1">
+                                                <div className="text-[10px] font-extrabold text-emerald-600 dark:text-emerald-400 uppercase">Matches Won</div>
+                                                <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400 font-mono">{teamOverviewStats.matchesWon}</div>
+                                            </div>
+                                            <div className="p-4 bg-secondary/40 border border-brand-blue/5 rounded-2xl text-center space-y-1">
+                                                <div className="text-[10px] font-extrabold text-rose-500 uppercase">Matches Lost</div>
+                                                <div className="text-2xl font-black text-rose-500 font-mono">{teamOverviewStats.matchesLost}</div>
+                                            </div>
+                                            <div className="p-4 bg-secondary/40 border border-brand-blue/5 rounded-2xl text-center space-y-1">
+                                                <div className="text-[10px] font-extrabold text-blue-500 uppercase">Matches Tied</div>
+                                                <div className="text-2xl font-black text-blue-500 font-mono">{teamOverviewStats.matchesTied}</div>
+                                            </div>
+                                            <div className="p-4 bg-secondary/40 border border-brand-blue/5 rounded-2xl text-center space-y-1">
+                                                <div className="text-[10px] font-extrabold text-zinc-500 dark:text-zinc-400 uppercase">No Result / Abandoned</div>
+                                                <div className="text-2xl font-black text-zinc-500 dark:text-zinc-400 font-mono">{teamOverviewStats.noResultCount}</div>
+                                            </div>
+                                            <div className="p-4 bg-emerald-500/5 dark:bg-emerald-500/10 border border-emerald-500/10 rounded-2xl text-center space-y-1 col-span-2 sm:col-span-1">
+                                                <div className="text-[10px] font-extrabold text-emerald-600 dark:text-emerald-400 uppercase">Victory Rate</div>
+                                                <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400 font-mono">
+                                                    {teamOverviewStats.hasDecisive ? `${teamOverviewStats.winPercentage}%` : '—'}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </CrickIQCard>
+
+                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                        {/* Batting Performance Section */}
+                                        <CrickIQCard id="stats-batting-section" className="p-6 border border-brand-blue/10 dark:border-brand-blue/20 bg-primary rounded-3xl shadow-sm space-y-4">
+                                            <div className="flex items-center gap-2 border-b border-brand-blue/5 pb-3">
+                                                <Activity className="w-5 h-5 text-brand-blue" />
+                                                <div>
+                                                    <h3 className="text-sm font-extrabold uppercase tracking-wider text-text-primary">Batting Performance</h3>
+                                                    <p className="text-[11px] text-text-secondary">Compiled statistics of team batting outings</p>
+                                                </div>
+                                            </div>
+
+                                            <div className="space-y-3.5 pt-1">
+                                                <div className="flex justify-between items-center bg-secondary/15 p-2 rounded-xl">
+                                                    <div className="text-[11px] font-extrabold uppercase text-text-secondary">Total Runs Scored</div>
+                                                    <div className="text-sm font-black text-text-primary font-mono">{teamBattingStats.totalRuns}</div>
+                                                </div>
+                                                <div className="flex justify-between items-center bg-secondary/15 p-2 rounded-xl">
+                                                    <div className="text-[11px] font-extrabold uppercase text-text-secondary">Highest Innings Score</div>
+                                                    <div className="text-sm font-black text-text-primary font-mono">{teamBattingStats.highestScore}</div>
+                                                </div>
+                                                <div className="flex justify-between items-center bg-secondary/15 p-2 rounded-xl">
+                                                    <div className="text-[11px] font-extrabold uppercase text-text-secondary">Lowest Innings Score</div>
+                                                    <div className="text-sm font-black text-text-primary font-mono">{teamBattingStats.lowestScore}</div>
+                                                </div>
+                                                <div className="flex justify-between items-center bg-secondary/15 p-2 rounded-xl">
+                                                    <div className="text-[11px] font-extrabold uppercase text-text-secondary">Average Innings Runs</div>
+                                                    <div className="text-sm font-black text-text-primary font-mono">{teamBattingStats.averageScore}</div>
+                                                </div>
+                                                
+                                                <div className="pt-2 border-t border-brand-blue/5">
+                                                    <div className="text-[10px] font-extrabold uppercase tracking-wider text-text-secondary mb-2 font-semibold">Milestone Scoreboard Innings</div>
+                                                    <div className="grid grid-cols-3 gap-2 text-center text-xs">
+                                                        <div className="p-2.5 bg-secondary/40 border border-brand-blue/5 rounded-2xl">
+                                                            <div className="font-mono font-black text-text-primary">{teamBattingStats.count100Plus}</div>
+                                                            <div className="text-[9px] font-extrabold text-text-secondary uppercase mt-0.5">100+</div>
+                                                        </div>
+                                                        <div className="p-2.5 bg-secondary/40 border border-brand-blue/5 rounded-2xl">
+                                                            <div className="font-mono font-black text-text-primary">{teamBattingStats.count150Plus}</div>
+                                                            <div className="text-[9px] font-extrabold text-text-secondary uppercase mt-0.5">150+</div>
+                                                        </div>
+                                                        <div className="p-2.5 bg-secondary/40 border border-brand-blue/5 rounded-2xl">
+                                                            <div className="font-mono font-black text-text-primary">{teamBattingStats.count200Plus}</div>
+                                                            <div className="text-[9px] font-extrabold text-text-secondary uppercase mt-0.5">200+</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </CrickIQCard>
+
+                                        {/* Bowling Performance Section */}
+                                        <CrickIQCard id="stats-bowling-section" className="p-6 border border-brand-blue/10 dark:border-brand-blue/20 bg-primary rounded-3xl shadow-sm space-y-4">
+                                            <div className="flex items-center gap-2 border-b border-brand-blue/5 pb-3">
+                                                <Trophy className="w-5 h-5 text-brand-blue" />
+                                                <div>
+                                                    <h3 className="text-sm font-extrabold uppercase tracking-wider text-text-primary">Bowling Performance</h3>
+                                                    <p className="text-[11px] text-text-secondary">Compiled statistics of opponent wickets fallen</p>
+                                                </div>
+                                            </div>
+
+                                            <div className="space-y-3.5 pt-1">
+                                                <div className="flex justify-between items-center bg-secondary/15 p-2 rounded-xl">
+                                                    <div className="text-[11px] font-extrabold uppercase text-text-secondary">Total Wickets Taken</div>
+                                                    <div className="text-sm font-black text-text-primary font-mono">{teamBowlingStats.totalWicketsTaken}</div>
+                                                </div>
+                                                <div className="flex justify-between items-center bg-secondary/15 p-2 rounded-xl">
+                                                    <div className="text-[11px] font-extrabold uppercase text-text-secondary">Average Wickets / Match</div>
+                                                    <div className="text-sm font-black text-text-primary font-mono">{teamBowlingStats.averageWicketsPerMatch}</div>
+                                                </div>
+                                                <div className="flex justify-between items-center bg-secondary/15 p-2 rounded-xl">
+                                                    <div className="text-[11px] font-extrabold uppercase text-text-secondary">Opposition All-Outs</div>
+                                                    <div className="text-sm font-black text-text-primary font-mono">{teamBowlingStats.oppositionAllOutCount}</div>
+                                                </div>
+                                                <div className="flex justify-between items-start bg-secondary/15 p-2 rounded-xl flex-col sm:flex-row sm:items-center gap-1">
+                                                    <div className="text-[11px] font-extrabold uppercase text-text-secondary">Best Bowling Innings</div>
+                                                    <div className="text-xs font-black text-text-primary font-sans break-words text-left sm:text-right w-full sm:w-auto">{teamBowlingStats.bestBowling}</div>
+                                                </div>
+                                            </div>
+                                        </CrickIQCard>
+                                    </div>
+
+                                </div>
+                            </div>
+                        )
                     ) : (
                         /* Unified Clean Professional Placeholders for non-overview tabs */
                         <CrickIQCard className="p-8 text-center border border-brand-blue/10 dark:border-brand-blue/20 flex flex-col items-center justify-center space-y-4 max-w-sm mx-auto rounded-3xl bg-primary">
@@ -1583,7 +2328,6 @@ const TeamDetailsHub: React.FC<TeamDetailsHubProps> = ({
                                     {activeTab === 'tournaments' && "Tournament fixture scheduling, points-table history, and league standings will be added later."}
                                     {activeTab === 'stats' && "Advanced visual graphs, career averages, run-rates, strike-rates, and form metrics will be unlocked in later phases."}
                                     {activeTab === 'records' && "Milestone charts, match-defining records, streak trackers, and legacy board logs will be added later."}
-                                    {activeTab === 'settings' && "Advanced configuration, data recovery, team archiving, and squad merge tools will be unlocked in upcoming phases."}
                                 </p>
                             </div>
                             <button

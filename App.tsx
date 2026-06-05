@@ -155,6 +155,19 @@ const AppUI: React.FC = () => {
         matchSelectedFilter?: string;
         matchSortOrder?: 'recent' | 'oldest' | 'status';
         visibleMatchCount?: number;
+        tournamentSearchQuery?: string;
+        tournamentSelectedFilter?: string;
+        tournamentSortOrder?: 'recent' | 'name' | 'status' | 'matches';
+        visibleTournamentCount?: number;
+    } | null>(null);
+    const [tournamentReturnState, setTournamentReturnState] = useState<{
+        source?: 'team_details';
+        teamId?: string;
+        teamDetailsTab?: string;
+        tournamentSearchQuery?: string;
+        tournamentSelectedFilter?: string;
+        tournamentSortOrder?: 'recent' | 'name' | 'status' | 'matches';
+        visibleTournamentCount?: number;
     } | null>(null);
     const [matchHubReturnLocation, setMatchHubReturnLocation] = useState<{
         activeTab: string;
@@ -548,7 +561,23 @@ const AppUI: React.FC = () => {
     };
 
     const handleBackToTournaments = () => {
-        setSelectedTournamentId(null);
+        if (tournamentReturnState && tournamentReturnState.source === 'team_details') {
+            setSelectedTournamentId(null);
+            setActiveTab('teams');
+            if (tournamentReturnState.teamId) {
+                setViewingTeamHubId(tournamentReturnState.teamId);
+            }
+            setTeamHubReturnState({
+                teamDetailsTab: 'tournaments',
+                tournamentSearchQuery: tournamentReturnState.tournamentSearchQuery,
+                tournamentSelectedFilter: tournamentReturnState.tournamentSelectedFilter,
+                tournamentSortOrder: tournamentReturnState.tournamentSortOrder,
+                visibleTournamentCount: tournamentReturnState.visibleTournamentCount
+            });
+            setTournamentReturnState(null);
+        } else {
+            setSelectedTournamentId(null);
+        }
     };
     
     const handleViewScorecard = (matchId: string) => {
@@ -1000,9 +1029,21 @@ const AppUI: React.FC = () => {
                                 setTeamHubReturnState(null);
                             }}
                             onOpenMatchHub={openMatchHub}
-                            onViewTournament={(tournamentId) => {
+                            onViewTournament={(tournamentId, returnContext) => {
+                                if (returnContext?.source === 'team_details') {
+                                    setTournamentReturnState(returnContext);
+                                    setTeamHubReturnState({
+                                        teamDetailsTab: 'tournaments',
+                                        tournamentSearchQuery: returnContext.tournamentSearchQuery,
+                                        tournamentSelectedFilter: returnContext.tournamentSelectedFilter,
+                                        tournamentSortOrder: returnContext.tournamentSortOrder,
+                                        visibleTournamentCount: returnContext.visibleTournamentCount
+                                    });
+                                } else {
+                                    setTournamentReturnState(null);
+                                    setTeamHubReturnState(null);
+                                }
                                 setViewingTeamHubId(null);
-                                setTeamHubReturnState(null);
                                 handleViewTournament(tournamentId);
                             }}
                             initialTab={teamHubReturnState?.teamDetailsTab}
@@ -1010,6 +1051,10 @@ const AppUI: React.FC = () => {
                             initialMatchSelectedFilter={teamHubReturnState?.matchSelectedFilter}
                             initialMatchSortOrder={teamHubReturnState?.matchSortOrder}
                             initialVisibleMatchCount={teamHubReturnState?.visibleMatchCount}
+                            initialTournamentSearchQuery={teamHubReturnState?.tournamentSearchQuery}
+                            initialTournamentSelectedFilter={teamHubReturnState?.tournamentSelectedFilter}
+                            initialTournamentSortOrder={teamHubReturnState?.tournamentSortOrder}
+                            initialVisibleTournamentCount={teamHubReturnState?.visibleTournamentCount}
                         />
                     </ErrorBoundary>
                 )}
