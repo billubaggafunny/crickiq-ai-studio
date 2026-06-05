@@ -103,7 +103,7 @@ const TournamentManager: React.FC<TournamentManagerProps> = (props) => {
 
 
     const quickMatchHistoryTeams = useMemo(() => {
-        const allTeams = teams;
+        const allTeams = teams.filter(t => !t.isArchived);
         const uniqueTeams: Team[] = [];
         const teamNames = new Set<string>();
         [...allTeams].reverse().forEach(team => {

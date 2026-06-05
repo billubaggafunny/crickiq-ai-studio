@@ -800,6 +800,7 @@ const AppUI: React.FC = () => {
                             matches={tournamentState.matches}
                             tournaments={tournamentState.tournaments}
                             onOpenTeamDetails={(teamId) => setViewingTeamHubId(teamId)}
+                            createGlobalTeam={tournamentState.createGlobalTeam}
                         />
                     </ErrorBoundary>
                 );
@@ -1024,6 +1025,11 @@ const AppUI: React.FC = () => {
                             teams={tournamentState.teams}
                             matches={tournamentState.matches}
                             tournaments={tournamentState.tournaments}
+                            updateTeamProfile={tournamentState.updateTeamProfile}
+                            archiveTeam={tournamentState.archiveTeam}
+                            restoreTeam={tournamentState.restoreTeam}
+                            deleteTeamPermanently={tournamentState.deleteTeamPermanently}
+                            getTeamDeleteEligibility={tournamentState.getTeamDeleteEligibility}
                             onBack={() => {
                                 setViewingTeamHubId(null);
                                 setTeamHubReturnState(null);

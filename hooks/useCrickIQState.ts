@@ -1,7 +1,7 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { usePersistence } from './usePersistence';
 import { usePersistenceObserver } from './usePersistenceObserver';
-import { useTeamState } from './useTeamState';
+import { useTeamState, getTeamDeleteEligibility } from './useTeamState';
 import { useTournamentState as useTournamentStateDomain } from './useTournamentState';
 import { useMatchState } from './useMatchState';
 import { getHydrationGeneration, incrementHydrationGeneration } from '../utils/authLifecycleManager';
@@ -150,10 +150,16 @@ export const useCrickIQState = () => {
 
         // Team Domain
         addTeamToTournament: teamDomain.addTeamToTournament,
+        createGlobalTeam: teamDomain.createGlobalTeam,
         updateTeam: teamDomain.updateTeam,
+        updateTeamProfile: teamDomain.updateTeamProfile,
         addPlayer: teamDomain.addPlayer,
         deletePlayer: teamDomain.deletePlayer,
         getTeamById: teamDomain.getTeamById,
+        archiveTeam: teamDomain.archiveTeam,
+        restoreTeam: teamDomain.restoreTeam,
+        deleteTeamPermanently: teamDomain.deleteTeamPermanently,
+        getTeamDeleteEligibility,
 
         // Tournament Domain
         addTournament: tournamentDomain.addTournament,

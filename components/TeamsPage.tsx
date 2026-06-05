@@ -3,6 +3,8 @@ import { Search, Plus, ChevronRight, Users, Trophy, Award, Filter } from 'lucide
 import CrickIQCard from './CrickIQCard';
 import type { Team, Match, Tournament } from '../types';
 import { normalizeTeam } from '../utils/teamNormalization';
+import { CreateTeamSheet } from './CreateTeamSheet';
+import { useNotification } from '../hooks/useNotification';
 
 export interface TeamsPageProps {
     teams: Team[];
@@ -10,6 +12,17 @@ export interface TeamsPageProps {
     tournaments: Tournament[];
     onOpenMatchHub?: (matchId: string) => void;
     onOpenTeamDetails?: (teamId: string) => void;
+    createGlobalTeam?: (input: {
+        name: string;
+        shortName?: string;
+        teamType?: Team["teamType"];
+        logoColor?: string;
+        logoUrl?: string;
+        homeGround?: string;
+        city?: string;
+        state?: string;
+        country?: string;
+    }) => Team | null;
 }
 
 const TEAMS_FILTER_CHIPS = [
@@ -51,12 +64,14 @@ const TeamsSkeleton: React.FC = () => {
     );
 };
 
-const TeamsPage: React.FC<TeamsPageProps> = ({ teams, matches, tournaments, onOpenTeamDetails }) => {
+const TeamsPage: React.FC<TeamsPageProps> = ({ teams, matches, tournaments, onOpenTeamDetails, createGlobalTeam }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [activeFilter, setActiveFilter] = useState('all');
     const [sortBy, setSortBy] = useState<'recent' | 'name' | 'players'>('recent');
     const [alertModal, setAlertModal] = useState<{ title: string; message: string } | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [isCreateOpen, setIsCreateOpen] = useState(false);
+    const { showNotification } = useNotification();
 
     React.useEffect(() => {
         const timer = setTimeout(() => {
@@ -144,10 +159,19 @@ const TeamsPage: React.FC<TeamsPageProps> = ({ teams, matches, tournaments, onOp
     }, [filteredTeams, sortBy]);
 
     const handleAddTeamPlaceholder = () => {
-        setAlertModal({
-            title: 'Add Team Flow',
-            message: 'Creating and customization of squads, logos, types, and home grounds will be fully unlocked in Phase 3. Stay tuned!'
-        });
+        if (createGlobalTeam) {
+            setIsCreateOpen(true);
+        } else {
+            setAlertModal({
+                title: 'Add Team Flow',
+                message: 'Creating and customization of squads, logos, types, and home grounds will be fully unlocked in Phase 3. Stay tuned!'
+            });
+        }
+    };
+
+    const handleCreateSuccess = (newTeam: Team) => {
+        showNotification(`Team "${newTeam.name}" created successfully.`, 'success');
+        setActiveFilter('all');
     };
 
     const handleCardClickPlaceholder = (teamName: string) => {
@@ -368,6 +392,17 @@ const TeamsPage: React.FC<TeamsPageProps> = ({ teams, matches, tournaments, onOp
                         </div>
                     </div>
                 </div>
+            )}
+
+            {createGlobalTeam && isCreateOpen && (
+                <CreateTeamSheet
+                    isOpen={isCreateOpen}
+                    onClose={() => setIsCreateOpen(false)}
+                    teams={teams}
+                    createGlobalTeam={createGlobalTeam}
+                    onOpenTeamDetails={onOpenTeamDetails}
+                    onSuccess={handleCreateSuccess}
+                />
             )}
         </div>
     );

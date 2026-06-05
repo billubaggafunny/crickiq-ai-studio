@@ -2,13 +2,16 @@ import React, { useState, useMemo } from 'react';
 import { 
     ChevronLeft, Users, Trophy, Activity, Award, Settings, 
     Layers, MapPin, ShieldAlert, Sparkles, AlertTriangle, Calendar,
-    Search, ChevronRight, CheckCircle2, GitMerge, Archive, Info, Lock
+    Search, ChevronRight, CheckCircle2, Archive, Info, Lock
 } from 'lucide-react';
 import CrickIQCard from './CrickIQCard';
 import type { Team, Match, Tournament, Player } from '../types';
 import { normalizeTeam } from '../utils/teamNormalization';
 import { usePlayerNavigation } from '../contexts/PlayerNavigationContext';
+import { useNotification } from '../hooks/useNotification';
 import { calculatePointsTable } from '../utils/cricketLogic';
+import { EditTeamSheet } from './EditTeamSheet';
+import type { DeleteEligibility } from '../hooks/useTeamState';
 
 interface ExtendedPlayer extends Player {
     isWicketKeeper?: boolean;
@@ -45,6 +48,24 @@ export interface TeamDetailsHubProps {
     initialTournamentSelectedFilter?: string;
     initialTournamentSortOrder?: 'recent' | 'name' | 'status' | 'matches';
     initialVisibleTournamentCount?: number;
+    updateTeamProfile?: (
+        teamId: string,
+        updates: {
+            name: string;
+            shortName?: string;
+            teamType?: Team["teamType"];
+            logoColor?: string;
+            logoUrl?: string;
+            homeGround?: string;
+            city?: string;
+            state?: string;
+            country?: string;
+        }
+    ) => Team | null;
+    archiveTeam?: (teamId: string) => void;
+    restoreTeam?: (teamId: string) => void;
+    deleteTeamPermanently?: (teamId: string, eligibility: DeleteEligibility) => boolean;
+    getTeamDeleteEligibility?: (teamId: string, teams: Team[], matches: Match[], tournaments: Tournament[]) => DeleteEligibility;
 }
 
 const TABS = [
@@ -117,9 +138,20 @@ const TeamDetailsHub: React.FC<TeamDetailsHubProps> = ({
     initialTournamentSearchQuery,
     initialTournamentSelectedFilter,
     initialTournamentSortOrder,
-    initialVisibleTournamentCount
+    initialVisibleTournamentCount,
+    updateTeamProfile,
+    archiveTeam,
+    restoreTeam,
+    deleteTeamPermanently,
+    getTeamDeleteEligibility
 }) => {
+    const { showNotification } = useNotification();
     const [activeTab, setActiveTab] = useState(initialTab || 'overview');
+    const [isEditTeamOpen, setIsEditTeamOpen] = useState(false);
+    const [isArchiveConfirmOpen, setIsArchiveConfirmOpen] = useState(false);
+    const [isRestoreConfirmOpen, setIsRestoreConfirmOpen] = useState(false);
+    const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+    const [deleteConfirmTyped, setDeleteConfirmTyped] = useState('');
     const [playerSearchQuery, setPlayerSearchQuery] = useState('');
     const [selectedRoleFilter, setSelectedRoleFilter] = useState('all');
     
@@ -138,6 +170,40 @@ const TeamDetailsHub: React.FC<TeamDetailsHubProps> = ({
     // Team Settings Toast/Notice States
     const [settingsNotice, setSettingsNotice] = useState<string | null>(null);
     const [settingsNoticeType, setSettingsNoticeType] = useState<'info' | 'warning' | 'success'>('info');
+
+    const handleConfirmArchive = () => {
+        if (archiveTeam && teamId) {
+            archiveTeam(teamId);
+            setSettingsNotice("Team archived successfully.");
+            setSettingsNoticeType('success');
+            setIsArchiveConfirmOpen(false);
+            
+            // Scroll to success notice
+            setTimeout(() => {
+                const elem = document.getElementById("settings-notice-container");
+                if (elem) {
+                    elem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            }, 100);
+        }
+    };
+
+    const handleConfirmRestore = () => {
+        if (restoreTeam && teamId) {
+            restoreTeam(teamId);
+            setSettingsNotice("Team restored successfully.");
+            setSettingsNoticeType('success');
+            setIsRestoreConfirmOpen(false);
+            
+            // Scroll to success notice
+            setTimeout(() => {
+                const elem = document.getElementById("settings-notice-container");
+                if (elem) {
+                    elem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            }, 100);
+        }
+    };
     
     // Resolve global player navigation context
     const { openPlayerDetails } = usePlayerNavigation();
@@ -151,6 +217,37 @@ const TeamDetailsHub: React.FC<TeamDetailsHubProps> = ({
     const team = useMemo(() => {
         return teamRaw ? normalizeTeam(teamRaw) : null;
     }, [teamRaw]);
+
+    const eligibility = useMemo(() => {
+        if (getTeamDeleteEligibility && teamId && teams && matches && tournaments) {
+            return getTeamDeleteEligibility(teamId, teams, matches, tournaments);
+        }
+        return {
+            canDelete: false,
+            matchesCount: 0,
+            tournamentsCount: 0,
+            playersCount: 0,
+            referencesCount: 0,
+            reasons: ["Loading eligibility checks..."]
+        };
+    }, [getTeamDeleteEligibility, teamId, teams, matches, tournaments]);
+
+    const handleConfirmDelete = () => {
+        if (!eligibility || !eligibility.canDelete || deleteConfirmTyped !== 'DELETE') {
+            return;
+        }
+        if (deleteTeamPermanently && teamId) {
+            const success = deleteTeamPermanently(teamId, eligibility);
+            if (success) {
+                showNotification("Team permanently deleted.", "success");
+                setIsDeleteConfirmOpen(false);
+                setDeleteConfirmTyped('');
+                onBack();
+            } else {
+                showNotification("Failed to delete team.", "error");
+            }
+        }
+    };
 
     // Gather participated tournaments safely
     const participatedTournaments = useMemo(() => {
@@ -1928,12 +2025,16 @@ const TeamDetailsHub: React.FC<TeamDetailsHubProps> = ({
                                             <button
                                                 id="settings-edit-profile-btn"
                                                 onClick={() => {
-                                                    setSettingsNotice("Edit Team Info will be added in a future phase.");
-                                                    setSettingsNoticeType('info');
+                                                    if (updateTeamProfile) {
+                                                        setIsEditTeamOpen(true);
+                                                    } else {
+                                                        setSettingsNotice("Team profile editing is temporarily unavailable.");
+                                                        setSettingsNoticeType('warning');
+                                                    }
                                                 }}
                                                 className="w-full py-2.5 px-4 rounded-xl text-xs font-bold text-brand-blue bg-brand-blue/5 hover:bg-brand-blue/10 border border-brand-blue/10 hover:border-brand-blue/25 transition-all text-center flex items-center justify-center gap-1.5 uppercase tracking-wide cursor-pointer active:scale-95 touch-manipulation"
                                             >
-                                                Edit Team Info — Coming Soon
+                                                Edit Team Info
                                             </button>
                                         </div>
                                     </CrickIQCard>
@@ -1975,17 +2076,25 @@ const TeamDetailsHub: React.FC<TeamDetailsHubProps> = ({
                                         </p>
 
                                         <div className="pt-2">
-                                            <button
-                                                id="settings-archive-btn"
-                                                onClick={() => {
-                                                    const mode = team?.isArchived ? "Restore Team" : "Archive Team";
-                                                    setSettingsNotice(`${mode} will be added after safety validation.`);
-                                                    setSettingsNoticeType('info');
-                                                }}
-                                                className="w-full py-2.5 px-4 rounded-xl text-xs font-bold text-text-primary bg-secondary hover:bg-slate-100 dark:hover:bg-slate-800 border border-brand-blue/5 hover:border-brand-blue/15 transition-all text-center flex items-center justify-center gap-1.5 uppercase tracking-wide cursor-pointer active:scale-95 touch-manipulation"
-                                            >
-                                                {team?.isArchived ? 'Restore Team' : 'Archive Team'} — Coming Soon
-                                            </button>
+                                            {team?.isArchived ? (
+                                                <button
+                                                    id="settings-restore-btn"
+                                                    onClick={() => setIsRestoreConfirmOpen(true)}
+                                                    className="w-full py-2.5 px-4 rounded-xl text-xs font-bold text-emerald-700 bg-emerald-500/10 hover:bg-emerald-500/20 dark:text-emerald-400 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/20 border border-emerald-500/20 transition-all text-center flex items-center justify-center gap-1.5 uppercase tracking-wide cursor-pointer active:scale-95 touch-manipulation font-sans"
+                                                >
+                                                    Restore Team
+                                                </button>
+                                            ) : (
+                                                <button
+                                                    id="settings-archive-btn"
+                                                    onClick={() => {
+                                                        setIsArchiveConfirmOpen(true);
+                                                    }}
+                                                    className="w-full py-2.5 px-4 rounded-xl text-xs font-bold text-amber-700 bg-amber-500/10 hover:bg-amber-500/20 dark:text-amber-400 dark:bg-amber-500/10 dark:hover:bg-amber-500/20 border border-amber-500/20 transition-all text-center flex items-center justify-center gap-1.5 uppercase tracking-wide cursor-pointer active:scale-95 touch-manipulation font-sans"
+                                                >
+                                                    Archive Team
+                                                </button>
+                                            )}
                                         </div>
                                     </CrickIQCard>
                                 </div>
@@ -2039,34 +2148,6 @@ const TeamDetailsHub: React.FC<TeamDetailsHubProps> = ({
                                         </div>
                                     </CrickIQCard>
 
-                                    {/* Duplicate / Merge Tools Section */}
-                                    <CrickIQCard id="settings-duplicate-merge-section" className="p-6 border border-brand-blue/10 dark:border-brand-blue/20 bg-primary rounded-3xl shadow-sm space-y-4">
-                                        <div className="flex items-center gap-2 border-b border-brand-blue/5 pb-3">
-                                            <GitMerge className="w-5 h-5 text-brand-blue" />
-                                            <div>
-                                                <h3 className="text-sm font-extrabold uppercase tracking-wider text-text-primary font-sans">Duplicate / Merge Tools</h3>
-                                                <p className="text-[11px] text-text-secondary">Clean up double-entries and merge squad ledgers safely</p>
-                                            </div>
-                                        </div>
-
-                                        <p className="text-xs text-text-secondary leading-relaxed">
-                                            Use this later to safely merge duplicate teams like <em>India</em>, <em>India XI</em>, or <em>India Team</em> without losing match history. Players and records will be automatically reconciled.
-                                        </p>
-
-                                        <div className="pt-2">
-                                            <button
-                                                id="settings-merge-btn"
-                                                onClick={() => {
-                                                    setSettingsNotice("Merge tools will be added after duplicate protection is complete.");
-                                                    setSettingsNoticeType('warning');
-                                                }}
-                                                className="w-full py-2.5 px-4 rounded-xl text-xs font-bold text-white bg-brand-blue hover:bg-brand-blue/90 transition-all text-center flex items-center justify-center gap-1.5 uppercase tracking-wide cursor-pointer active:scale-95 touch-manipulation font-sans"
-                                            >
-                                                Merge Duplicate Teams — Coming Soon
-                                            </button>
-                                        </div>
-                                    </CrickIQCard>
-
                                     {/* Danger Zone Section */}
                                     <CrickIQCard id="settings-danger-zone-section" className="p-6 border border-rose-500/20 bg-rose-500/5 rounded-3xl shadow-sm space-y-4">
                                         <div className="flex items-center gap-2 border-b border-rose-500/10 pb-3">
@@ -2078,42 +2159,61 @@ const TeamDetailsHub: React.FC<TeamDetailsHubProps> = ({
                                         </div>
 
                                         <p className="text-xs text-text-secondary leading-relaxed">
-                                            Deleting a team can affect navigation, history, and references. CrickIQ will prefer Archive Team instead of permanent delete.
+                                            Archive Team remains the preferred safe method to hide unused teams while protecting match records. Permanent deletion is allowed only for unused teams with zero references.
                                         </p>
 
-                                        <div className="bg-primary/50 dark:bg-black/20 p-3 rounded-2xl border border-rose-500/10 text-[11px] text-text-secondary space-y-2">
-                                            <div className="font-extrabold uppercase tracking-wider text-rose-600 dark:text-rose-400">Protections Active:</div>
-                                            <ul className="space-y-1 pl-1">
-                                                <li className="flex items-center gap-2 text-text-secondary">
-                                                    <span className="w-1 h-1 rounded-full bg-rose-500 shrink-0" />
-                                                    <span>Match history will never be deleted automatically.</span>
-                                                </li>
-                                                <li className="flex items-center gap-2 text-text-secondary">
-                                                    <span className="w-1 h-1 rounded-full bg-rose-500 shrink-0" />
-                                                    <span>Players will not be deleted automatically.</span>
-                                                </li>
-                                                <li className="flex items-center gap-2 text-text-secondary">
-                                                    <span className="w-1 h-1 rounded-full bg-rose-500 shrink-0" />
-                                                    <span>Tournaments will not be deleted automatically.</span>
-                                                </li>
-                                                <li className="flex items-center gap-2 text-text-secondary">
-                                                    <span className="w-1 h-1 rounded-full bg-rose-500 shrink-0" />
-                                                    <span>Completed scorecards will remain protected.</span>
-                                                </li>
-                                            </ul>
+                                        {/* Safety Summary */}
+                                        <div className="bg-primary/50 dark:bg-black/20 p-4 rounded-2xl border border-rose-500/10 text-xs space-y-2">
+                                            <div className="font-extrabold uppercase tracking-wider text-rose-600 dark:text-rose-400 text-[10px]">Reference Safety Record:</div>
+                                            <div className="grid grid-cols-2 gap-2 text-text-secondary font-medium">
+                                                <div>Matches Linked: <span className="font-bold text-text-primary">{eligibility.matchesCount}</span></div>
+                                                <div>Tournaments Linked: <span className="font-bold text-text-primary">{eligibility.tournamentsCount}</span></div>
+                                                <div>Players in Roster: <span className="font-bold text-text-primary">{eligibility.playersCount}</span></div>
+                                                <div>Other References: <span className="font-bold text-text-primary">{eligibility.referencesCount}</span></div>
+                                            </div>
                                         </div>
 
-                                        <div className="pt-2">
+                                        {!eligibility.canDelete ? (
+                                            <div className="bg-amber-500/10 border border-amber-500/20 p-3 rounded-2xl text-xs text-amber-600 dark:text-amber-400 leading-relaxed font-semibold">
+                                                This team cannot be permanently deleted because it is still linked to matches, tournaments, players, or historical records. Use Archive Team instead.
+                                            </div>
+                                        ) : (
+                                            <div className="bg-emerald-500/10 border border-emerald-500/20 p-3 rounded-2xl text-xs text-emerald-600 dark:text-emerald-400 leading-relaxed font-semibold">
+                                                This action permanently removes the team profile only. It cannot be undone.
+                                            </div>
+                                        )}
+
+                                        <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                                            {!team?.isArchived ? (
+                                                <button
+                                                    onClick={() => setIsArchiveConfirmOpen(true)}
+                                                    className="flex-grow py-2.5 px-4 rounded-xl text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 transition-all text-center flex items-center justify-center gap-1.5 uppercase tracking-wide cursor-pointer active:scale-95 touch-manipulation font-sans"
+                                                >
+                                                    Archive Team
+                                                </button>
+                                            ) : (
+                                                <button
+                                                    onClick={() => setIsRestoreConfirmOpen(true)}
+                                                    className="flex-grow py-2.5 px-4 rounded-xl text-xs font-bold text-white bg-emerald-500 hover:bg-emerald-600 transition-all text-center flex items-center justify-center gap-1.5 uppercase tracking-wide cursor-pointer active:scale-95 touch-manipulation font-sans"
+                                                >
+                                                    Restore Team
+                                                </button>
+                                            )}
+                                            
                                             <button
                                                 id="settings-delete-btn"
-                                                disabled
+                                                disabled={!eligibility.canDelete}
                                                 onClick={() => {
-                                                    setSettingsNotice("Permanent delete is disabled for data safety.");
-                                                    setSettingsNoticeType('warning');
+                                                    setDeleteConfirmTyped('');
+                                                    setIsDeleteConfirmOpen(true);
                                                 }}
-                                                className="w-full py-2.5 px-4 rounded-xl text-xs font-bold text-rose-600 dark:text-rose-400 bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20 transition-all text-center flex items-center justify-center gap-1.5 uppercase tracking-wide cursor-not-allowed opacity-50"
+                                                className={`flex-grow py-2.5 px-4 rounded-xl text-xs font-bold text-center flex items-center justify-center gap-1.5 uppercase tracking-wide transition-all font-sans
+                                                    ${eligibility.canDelete 
+                                                        ? 'text-white bg-rose-600 hover:bg-rose-700 cursor-pointer active:scale-95 touch-manipulation' 
+                                                        : 'text-rose-600 dark:text-rose-400 bg-rose-500/10 border border-rose-500/20 cursor-not-allowed opacity-50'
+                                                    }`}
                                             >
-                                                Delete Team — Disabled / Coming Later
+                                                Delete Permanently
                                             </button>
                                         </div>
                                     </CrickIQCard>
@@ -2340,6 +2440,211 @@ const TeamDetailsHub: React.FC<TeamDetailsHubProps> = ({
                     )}
                 </div>
             </div>
+
+            {/* Edit Team Slide-up Sheet */}
+            {team && updateTeamProfile && isEditTeamOpen && (
+                <EditTeamSheet
+                    key={`${team.id}_${isEditTeamOpen}`}
+                    isOpen={isEditTeamOpen}
+                    onClose={() => setIsEditTeamOpen(false)}
+                    team={team}
+                    teams={teams}
+                    updateTeamProfile={updateTeamProfile}
+                    onSuccess={(updatedTeam) => {
+                        setSettingsNotice(`Team "${updatedTeam.name}" profile updated successfully.`);
+                        setSettingsNoticeType('success');
+                        
+                        // Scroll to settings notice for better UX visibility
+                        setTimeout(() => {
+                            const elem = document.getElementById("settings-notice-container");
+                            if (elem) {
+                                elem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                            }
+                        }, 100);
+                    }}
+                />
+            )}
+
+            {/* Restore Team Confirmation Dialog (Phase 12 requested) */}
+            {isRestoreConfirmOpen && team && (
+                <div 
+                    className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-[100] p-4 animate-fadeIn"
+                    onClick={() => setIsRestoreConfirmOpen(false)}
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="restore-confirmation-title"
+                >
+                    <div 
+                        className="w-full max-w-md bg-white dark:bg-slate-900 p-6 rounded-3xl shadow-xl border border-brand-blue/10 dark:border-brand-blue/20"
+                        onClick={e => e.stopPropagation()}
+                    >
+                        <div className="flex items-center gap-3 text-emerald-500 mb-4">
+                            <CheckCircle2 className="w-8 h-8 rounded-2xl bg-emerald-500/10 p-1.5 shrink-0" />
+                            <div>
+                                <h2 id="restore-confirmation-title" className="text-base font-extrabold uppercase tracking-wide text-text-primary">Restore Team?</h2>
+                                <p className="text-[10px] text-text-secondary font-medium uppercase font-mono">Reverse Archive Actions Only</p>
+                            </div>
+                        </div>
+
+                        <p className="text-xs text-text-secondary leading-relaxed mb-5">
+                            This team will become available again for new quick matches, tournament selections, and active team lists. All historical data remains unchanged.
+                        </p>
+
+                        <div className="flex gap-3 justify-end">
+                            <button 
+                                onClick={() => setIsRestoreConfirmOpen(false)} 
+                                className="h-11 px-5 flex items-center justify-center bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 border border-black/10 dark:border-white/20 rounded-2xl font-bold text-xs uppercase tracking-wider text-text-secondary hover:text-text-primary transition-all active:scale-95 touch-manipulation cursor-pointer"
+                            >
+                                Cancel
+                            </button>
+                            <button 
+                                onClick={handleConfirmRestore} 
+                                className="h-11 px-5 flex items-center justify-center bg-emerald-500 text-white hover:bg-emerald-600 rounded-2xl font-bold text-xs uppercase tracking-wider shadow-sm hover:shadow-md transition-all active:scale-95 touch-manipulation cursor-pointer"
+                            >
+                                Restore Team
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Archive Team Confirmation Dialog (Phase 11 requested) */}
+            {isArchiveConfirmOpen && team && (
+                <div 
+                    className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-[100] p-4 animate-fadeIn"
+                    onClick={() => setIsArchiveConfirmOpen(false)}
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="archive-confirmation-title"
+                >
+                    <div 
+                        className="w-full max-w-md bg-white dark:bg-slate-900 p-6 rounded-3xl shadow-xl border border-brand-blue/10 dark:border-brand-blue/20"
+                        onClick={e => e.stopPropagation()}
+                    >
+                        <div className="flex items-center gap-3 text-amber-500 mb-4">
+                            <Archive className="w-8 h-8 rounded-2xl bg-amber-500/10 p-1.5 shrink-0" />
+                            <div>
+                                <h2 id="archive-confirmation-title" className="text-base font-extrabold uppercase tracking-wide text-text-primary">Archive Team?</h2>
+                                <p className="text-[10px] text-text-secondary font-medium uppercase font-mono">Non-Destructive Safety Actions Only</p>
+                            </div>
+                        </div>
+
+                        <p className="text-xs text-text-secondary leading-relaxed mb-5">
+                            This team will be hidden from new match and tournament selections, but match history, scorecards, players, tournaments, and stats will remain safe.
+                        </p>
+
+                        {/* Protected Items Summary Dashboard */}
+                        <div className="bg-emerald-500/5 dark:bg-emerald-500/10 border border-emerald-500/15 p-4 rounded-2xl space-y-3 mb-6">
+                            <div className="text-[10px] font-extrabold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
+                                <CheckCircle2 className="w-4 h-4" />
+                                <span>Core Data Protected Directory</span>
+                            </div>
+
+                            <div className="grid grid-cols-3 gap-2 text-center text-xs">
+                                <div className="p-2 bg-white/40 dark:bg-black/10 border border-emerald-500/5 rounded-xl">
+                                    <div className="text-sm font-extrabold text-emerald-600 dark:text-emerald-400 font-mono">{completedMatchesCount}</div>
+                                    <div className="text-[9px] font-extrabold text-text-secondary uppercase">Matches</div>
+                                </div>
+                                <div className="p-2 bg-white/40 dark:bg-black/10 border border-emerald-500/5 rounded-xl">
+                                    <div className="text-sm font-extrabold text-emerald-600 dark:text-emerald-400 font-mono">{tournamentCount}</div>
+                                    <div className="text-[9px] font-extrabold text-text-secondary uppercase">Leagues</div>
+                                </div>
+                                <div className="p-2 bg-white/40 dark:bg-black/10 border border-emerald-500/5 rounded-xl">
+                                    <div className="text-sm font-extrabold text-emerald-600 dark:text-emerald-400 font-mono">{teamPlayersCount}</div>
+                                    <div className="text-[9px] font-extrabold text-text-secondary uppercase">Players</div>
+                                </div>
+                            </div>
+
+                            <p className="text-[10px] text-text-secondary leading-normal opacity-90 pl-0.5">
+                                Completed scorecards and associated league stand-ins remain historic and cryptographically locked against accidental modifications.
+                            </p>
+                        </div>
+
+                        <div className="flex gap-3 justify-end">
+                            <button 
+                                onClick={() => setIsArchiveConfirmOpen(false)} 
+                                className="h-11 px-5 flex items-center justify-center bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 border border-black/10 dark:border-white/20 rounded-2xl font-bold text-xs uppercase tracking-wider text-text-secondary hover:text-text-primary transition-all active:scale-95 touch-manipulation cursor-pointer"
+                            >
+                                Cancel
+                            </button>
+                            <button 
+                                onClick={handleConfirmArchive} 
+                                className="h-11 px-5 flex items-center justify-center bg-amber-500 text-white hover:bg-amber-600 rounded-2xl font-bold text-xs uppercase tracking-wider shadow-sm hover:shadow-md transition-all active:scale-95 touch-manipulation cursor-pointer"
+                            >
+                                Archive Team
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Permanent Delete Team Confirmation Dialog (Phase 13 requested) */}
+            {isDeleteConfirmOpen && team && eligibility && (
+                <div 
+                    className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-[100] p-4 animate-fadeIn"
+                    onClick={() => {
+                        setIsDeleteConfirmOpen(false);
+                        setDeleteConfirmTyped('');
+                    }}
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="delete-confirmation-title"
+                >
+                    <div 
+                        className="w-full max-w-md bg-white dark:bg-slate-900 p-6 rounded-3xl shadow-xl border border-rose-500/10 dark:border-rose-500/20"
+                        onClick={e => e.stopPropagation()}
+                    >
+                        <div className="flex items-center gap-3 text-rose-500 mb-4">
+                            <AlertTriangle className="w-8 h-8 rounded-2xl bg-rose-500/10 p-1.5 shrink-0" />
+                            <div>
+                                <h2 id="delete-confirmation-title" className="text-base font-extrabold uppercase tracking-wide text-text-primary">Permanently Delete Team?</h2>
+                                <p className="text-[10px] text-text-secondary font-medium uppercase font-mono">Irreversible Action Warning</p>
+                            </div>
+                        </div>
+
+                        <p className="text-xs text-text-secondary leading-relaxed mb-4">
+                            This team has no matches, no tournaments, no references, and no players linked. This action cannot be undone. All team profile data will be permanently cleared from local storage.
+                        </p>
+
+                        <div className="mb-5">
+                            <label htmlFor="typed-confirm" className="block text-[10px] font-extrabold uppercase tracking-wider text-text-secondary mb-2">
+                                Type <span className="text-rose-600 dark:text-rose-400 font-mono font-black">DELETE</span> to confirm:
+                            </label>
+                            <input
+                                id="typed-confirm"
+                                type="text"
+                                placeholder="Type DELETE here..."
+                                value={deleteConfirmTyped}
+                                onChange={e => setDeleteConfirmTyped(e.target.value)}
+                                className="w-full h-11 px-4 text-xs font-bold bg-primary border border-black/10 dark:border-white/10 rounded-2xl focus:outline-none focus:border-rose-500/40 text-[#2c3e50] dark:text-[#ecf0f1]"
+                            />
+                        </div>
+
+                        <div className="flex gap-3 justify-end">
+                            <button 
+                                onClick={() => {
+                                    setIsDeleteConfirmOpen(false);
+                                    setDeleteConfirmTyped('');
+                                }} 
+                                className="h-11 px-5 flex items-center justify-center bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 border border-black/10 dark:border-white/20 rounded-2xl font-bold text-xs uppercase tracking-wider text-text-secondary hover:text-text-primary transition-all active:scale-95 touch-manipulation cursor-pointer"
+                            >
+                                Cancel
+                            </button>
+                            <button 
+                                onClick={handleConfirmDelete} 
+                                disabled={deleteConfirmTyped !== 'DELETE'}
+                                className={`h-11 px-5 flex items-center justify-center rounded-2xl font-bold text-xs uppercase tracking-wider transition-all shadow-sm active:scale-95 touch-manipulation
+                                    ${deleteConfirmTyped === 'DELETE' 
+                                        ? 'bg-rose-600 text-white hover:bg-rose-700 cursor-pointer shadow-md' 
+                                        : 'bg-rose-500/10 text-rose-600/40 border border-rose-500/15 cursor-not-allowed opacity-50'
+                                    }`}
+                            >
+                                Delete Permanently
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

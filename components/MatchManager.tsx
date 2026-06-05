@@ -20,6 +20,7 @@ import ScheduleGenerator from './ScheduleGenerator';
 import { calculatePlayerCareerStats } from '../utils/cricketLogic';
 import { validateTournamentMatch, validateMaxOversPerBowler } from '../utils/validation';
 import { getMaxPlayers } from '../utils/matchConfig';
+import { detectDuplicateTeams } from '../utils/teamNormalization';
 import TossModal from './TossModal';
 import PointsTable from './PointsTable';
 
@@ -126,11 +127,43 @@ const MatchManager: React.FC<MatchManagerProps> = (props) => {
     const calendarContainerRef = useRef<HTMLDivElement>(null);
 
     const [newTeamName, setNewTeamName] = useState('');
+    const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
+    const [isAutocompleteOpen, setIsAutocompleteOpen] = useState(false);
+    const [ignoreDuplicateFor, setIgnoreDuplicateFor] = useState<string | null>(null);
     const [editingTeamId, setEditingTeamId] = useState<string | null>(null);
     const [previewingTeam, setPreviewingTeam] = useState<Team | null>(null);
     
     const tournament = useMemo(() => getTournamentById(selectedTournamentId || ''), [getTournamentById, selectedTournamentId]);
     const maxPlayers = useMemo(() => getMaxPlayers(undefined, tournament), [tournament]);
+
+    const autocompleteSuggestions = useMemo(() => {
+        const query = newTeamName.trim().toLowerCase();
+        if (!query || selectedTeam) return [];
+        return teams.filter(team => {
+            if (team.isArchived) return false;
+            // Exclude already added teams
+            const isAlreadyAdded = tournament ? tournament.teamIds.includes(team.id) : false;
+            if (isAlreadyAdded) return false;
+
+            return (
+                team.name.toLowerCase().includes(query) ||
+                (team.shortName && team.shortName.toLowerCase().includes(query))
+            );
+        }).sort((a, b) => {
+            if (a.scope === 'global' && b.scope !== 'global') return -1;
+            if (b.scope === 'global' && a.scope !== 'global') return 1;
+            return a.name.localeCompare(b.name);
+        });
+    }, [newTeamName, teams, selectedTeam, tournament]);
+
+    const showSuggestions = isAutocompleteOpen && autocompleteSuggestions.length > 0;
+
+    const duplicateCandidates = useMemo(() => {
+        const trimmed = newTeamName.trim();
+        if (!trimmed || selectedTeam || ignoreDuplicateFor === trimmed) return [];
+        const dupes = detectDuplicateTeams(trimmed, teams);
+        return dupes.filter((t: Team) => !t.isArchived && !(tournament?.teamIds.includes(t.id)));
+    }, [newTeamName, teams, selectedTeam, ignoreDuplicateFor, tournament]);
 
     const tournamentMatches = useMemo(() => {
         if (!selectedTournamentId) return [];
@@ -497,13 +530,28 @@ const MatchManager: React.FC<MatchManagerProps> = (props) => {
             showNotification("Team name is too long (max 30 chars).", 'error');
             return;
         }
+
+        if (selectedTeam && tournament && tournament.teamIds.includes(selectedTeam.id)) {
+            showNotification("This team is already added to this tournament.", 'error');
+            return;
+        }
         
         teamAddGuard.current = true;
-        const { success, error } = addTeamToTournament(trimmedName, tournamentId);
+        const { success, error, warning } = addTeamToTournament(
+            selectedTeam ? selectedTeam.name : trimmedName, 
+            tournamentId, 
+            selectedTeam?.id
+        );
         
         if (success) {
-            showNotification(`Team "${newTeamName.trim()}" added!`, 'success');
+            if (warning) {
+                showNotification(warning, 'info');
+            } else {
+                showNotification(`Team "${selectedTeam ? selectedTeam.name : trimmedName}" added!`, 'success');
+            }
             setNewTeamName('');
+            setSelectedTeam(null);
+            setIgnoreDuplicateFor(null);
         } else if (error) {
             showNotification(error, 'error');
         }
@@ -511,6 +559,20 @@ const MatchManager: React.FC<MatchManagerProps> = (props) => {
         setTimeout(() => {
             teamAddGuard.current = false;
         }, 300);
+    };
+
+    const handleInputChange = (value: string) => {
+        setNewTeamName(value);
+        if (selectedTeam && value !== selectedTeam.name) {
+            setSelectedTeam(null);
+        }
+        setIsAutocompleteOpen(true);
+    };
+
+    const handleSelectSuggestion = (team: Team) => {
+        setSelectedTeam(team);
+        setNewTeamName(team.name);
+        setIsAutocompleteOpen(false);
     };
     
     const handleDeleteTeam = (team: Team) => {
@@ -958,13 +1020,145 @@ const MatchManager: React.FC<MatchManagerProps> = (props) => {
                                 <PlusIcon className="w-5 h-5" />
                                 Add New Team
                              </h3>
-                             <div className="grid grid-cols-5 gap-4">
-                                <input type="text" value={newTeamName} onChange={e => setNewTeamName(e.target.value)} placeholder="Team Name" className="col-span-3 p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" />
+                             <div className="relative grid grid-cols-5 gap-4">
+                                <div className="col-span-3 relative">
+                                    <input 
+                                        type="text" 
+                                        value={newTeamName} 
+                                        onChange={e => handleInputChange(e.target.value)} 
+                                        onFocus={() => setIsAutocompleteOpen(true)}
+                                        onBlur={() => setTimeout(() => setIsAutocompleteOpen(false), 200)}
+                                        placeholder="Type or select existing team..." 
+                                        className="w-full p-2.5 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue text-sm"
+                                        autoComplete="off"
+                                    />
+                                    {showSuggestions && (
+                                        <div className="absolute left-0 right-0 mt-1 bg-white dark:bg-slate-800 border border-brand-blue/15 dark:border-brand-blue/30 rounded-xl shadow-xl z-50 max-h-60 overflow-y-auto divide-y divide-gray-100 dark:divide-slate-700">
+                                            {autocompleteSuggestions.map(team => {
+                                                const initials = (team.shortName || team.name).slice(0, 3).toUpperCase();
+                                                const isGlobal = team.scope === 'global';
+                                                const scopeLabel = isGlobal ? 'Global' : team.scope === 'quick' ? 'Quick' : 'Tournament';
+                                                
+                                                return (
+                                                    <button
+                                                        key={team.id}
+                                                        type="button"
+                                                        onMouseDown={() => {
+                                                            handleSelectSuggestion(team);
+                                                        }}
+                                                        className="w-full flex items-center gap-3 p-3 text-left hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors pointer-events-auto"
+                                                    >
+                                                        <div 
+                                                            className="w-9 h-9 flex items-center justify-center rounded-xl text-xs font-bold text-white shrink-0 shadow-inner"
+                                                            style={{ backgroundColor: team.logoColor || team.logo || '#3B82F6' }}
+                                                        >
+                                                            {initials}
+                                                        </div>
+                                                        <div className="flex-grow min-w-0">
+                                                            <div className="flex items-center gap-1.5">
+                                                                <span className="font-bold text-text-primary text-xs truncate">{team.name}</span>
+                                                                {team.shortName && (
+                                                                    <span className="text-[10px] text-text-secondary font-medium uppercase font-mono">({team.shortName})</span>
+                                                                )}
+                                                            </div>
+                                                            <div className="flex flex-wrap items-center gap-1.5 mt-0.5 text-[10px] text-text-secondary font-medium">
+                                                                <span className={`px-1.5 py-0.2 rounded font-semibold uppercase tracking-wider text-[9px] ${
+                                                                    isGlobal ? 'bg-indigo-500/10 text-indigo-500 dark:bg-indigo-400/20 dark:text-indigo-300' :
+                                                                    team.scope === 'quick' ? 'bg-amber-500/10 text-amber-500 dark:bg-amber-400/20' : 'bg-blue-500/10 text-blue-500'
+                                                                }`}>
+                                                                    {scopeLabel}
+                                                                </span>
+                                                                <span>•</span>
+                                                                <span>{team.players.length} Players</span>
+                                                                {team.teamType && (
+                                                                    <>
+                                                                        <span>•</span>
+                                                                        <span className="capitalize">{team.teamType}</span>
+                                                                    </>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
+                                </div>
                                 <Button onClick={handleAddTeam} variant="primary" disabled={!newTeamName.trim()} className="w-full col-span-2">
                                     <PlusIcon />
                                     Add
                                 </Button>
                              </div>
+
+                             {selectedTeam && (
+                                 <div className="mt-3 p-3 bg-indigo-500/5 dark:bg-indigo-400/5 border border-indigo-500/20 rounded-xl flex items-center justify-between gap-3 animate-fadeIn">
+                                     <div className="flex items-center gap-3">
+                                         <div 
+                                             className="w-8 h-8 flex items-center justify-center rounded-lg text-xs font-mono font-bold text-white shadow-sm shrink-0"
+                                             style={{ backgroundColor: selectedTeam.logoColor || selectedTeam.logo || '#3B82F6' }}
+                                         >
+                                             {(selectedTeam.shortName || selectedTeam.name).slice(0, 3).toUpperCase()}
+                                         </div>
+                                         <div className="min-w-0">
+                                             <div className="flex items-center gap-1.5">
+                                                 <span className="font-bold text-text-primary text-xs truncate">{selectedTeam.name}</span>
+                                                 <span className="px-1.5 py-0.2 rounded bg-indigo-500/10 text-indigo-500 dark:bg-indigo-400/20 dark:text-indigo-300 font-mono text-[9px] font-bold uppercase shrink-0">
+                                                     {selectedTeam.scope === 'global' ? 'Global' : 'Reused'}
+                                                 </span>
+                                             </div>
+                                             <p className="text-[10px] text-text-secondary mt-0.5 font-medium">
+                                                 Selected Existing Team • {selectedTeam.players.length} Players • {selectedTeam.teamType || 'Custom'} Type
+                                             </p>
+                                         </div>
+                                     </div>
+                                     <button
+                                         type="button"
+                                         onClick={() => {
+                                             setSelectedTeam(null);
+                                             setNewTeamName('');
+                                         }}
+                                         className="p-1 text-text-secondary hover:text-highlight hover:bg-black/5 dark:hover:bg-white/5 rounded-lg transition-all"
+                                         title="Clear selection"
+                                     >
+                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                             <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                         </svg>
+                                     </button>
+                                 </div>
+                             )}
+
+                             {duplicateCandidates.length > 0 && (
+                                 <div className="bg-amber-100/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 p-3 rounded-xl text-xs flex flex-col gap-2 mt-3">
+                                     <div className="flex items-start gap-1.5 font-bold">
+                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                         </svg>
+                                         <span>A similar saved team already exists.</span>
+                                     </div>
+                                     <p className="text-[11px] leading-relaxed opacity-90">Would you like to reuse the existing team to keep stats connected, or create a brand new tournament-scoped team?</p>
+                                     <div className="flex gap-2">
+                                         <button
+                                             type="button"
+                                             onClick={() => {
+                                                 setSelectedTeam(duplicateCandidates[0]);
+                                                 setNewTeamName(duplicateCandidates[0].name);
+                                             }}
+                                             className="bg-brand-blue text-white px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider hover:brightness-105 transition-all"
+                                         >
+                                             Use Existing Team
+                                         </button>
+                                         <button
+                                             type="button"
+                                             onClick={() => {
+                                                 setIgnoreDuplicateFor(newTeamName.trim());
+                                             }}
+                                             className="bg-transparent hover:bg-black/5 dark:hover:bg-white/5 border border-amber-500/30 px-2.5 py-1 rounded-lg text-[10px] font-bold text-text-secondary uppercase tracking-wider transition-all"
+                                         >
+                                             Create New Anyway
+                                         </button>
+                                     </div>
+                                 </div>
+                             )}
                         </CrickIQCard>
 
                         {allTournamentTeams.length > 0 ? (
@@ -1019,9 +1213,19 @@ const MatchManager: React.FC<MatchManagerProps> = (props) => {
                                                     <div className="w-6 h-6 flex items-center justify-center bg-gray-400 text-black rounded-full font-bold text-caption flex-shrink-0">VC</div>
                                                     <span className="font-semibold truncate text-text-primary">{viceCaptain ? viceCaptain.name : 'Not Set'}</span>
                                                 </div>
-                                                <div className="flex items-center gap-4 text-body">
-                                                    <UserGroupIcon className="w-6 h-6 text-text-secondary" />
-                                                    <span className="font-semibold text-text-primary">{team.players.length} / {maxPlayers} Players</span>
+                                                <div className="flex flex-col gap-1.5 justify-center">
+                                                    <div className="flex items-center gap-4 text-body">
+                                                        <UserGroupIcon className="w-6 h-6 text-text-secondary" />
+                                                        <span className="font-semibold text-text-primary">{team.players.length} / {maxPlayers} Players</span>
+                                                    </div>
+                                                    {team.players.length !== maxPlayers && (
+                                                        <div className="text-[11px] text-highlight font-medium flex items-center gap-1 leading-normal ml-10">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                                                                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                                                            </svg>
+                                                            <span>Roster incomplete — add {maxPlayers} players before match setup.</span>
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
                                             <div className="mt-4 pt-4 border-t border-brand-blue/15 text-center">
