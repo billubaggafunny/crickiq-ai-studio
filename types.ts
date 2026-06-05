@@ -45,6 +45,8 @@ export interface Player {
     role: PlayerRole;
 }
 
+// Team identity must always be based on team.id.
+// Team name is display metadata only and must never be used as the permanent identity.
 export interface Team {
     id: string;
     ownerId?: string;
@@ -56,6 +58,19 @@ export interface Team {
     createdAt?: string;
     updatedAt?: string;
     syncStatus?: SyncStatus;
+    shortName?: string;
+    teamType?: 'local' | 'club' | 'school' | 'college' | 'corporate' | 'academy' | 'domestic' | 'franchise' | 'national' | 'custom';
+    logoColor?: string;
+    logoUrl?: string;
+    teamInitials?: string;
+    homeGround?: string;
+    city?: string;
+    state?: string;
+    country?: string;
+    scope?: 'global' | 'quick' | 'tournament';
+    tournamentId?: string | null;
+    isArchived?: boolean;
+    archivedAt?: string | null;
 }
 
 export interface ScheduleMatch {
@@ -198,6 +213,9 @@ export interface Match {
     knockoutType?: 'semifinal' | 'final';
     groupId?: 'a' | 'b';
     replacements?: PlayerReplacement[];
+    matchNumber?: number;
+    rivalryKey?: string;
+    rivalryMatchNumber?: number;
 }
 
 export interface PlayerReplacement {

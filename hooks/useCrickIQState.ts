@@ -183,6 +183,7 @@ export const useCrickIQState = () => {
         endInnings: matchDomain.endInnings,
         setManOfTheMatch: matchDomain.setManOfTheMatch,
         toggleFreeHit: matchDomain.toggleFreeHit,
+        ensureTournamentMatchNumbers: matchDomain.ensureTournamentMatchNumbers,
 
         // Persistence Domain
         exportImport: {

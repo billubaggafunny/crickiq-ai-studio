@@ -1,5 +1,6 @@
 import { AppState } from './stateSerializer';
 import { Match, Innings, Tournament } from '../types';
+import { normalizeTeam } from './teamNormalization';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const migrateInnings = (innings: any, matchContext: Partial<Match>): Innings | undefined => {
@@ -106,6 +107,11 @@ export const migrateState = (state: AppState & { schemaVersion?: number }): AppS
     
     // Safety Net: Ensure globalPlayerIds are populated in all teams
     migratedState = ensureGlobalPlayerIds(migratedState as AppState);
+    
+    // Normalize Team fields for future-ready compatibility
+    if (Array.isArray(migratedState.teams)) {
+        migratedState.teams = migratedState.teams.map(t => normalizeTeam(t));
+    }
     
     return migratedState;
 };

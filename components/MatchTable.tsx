@@ -19,6 +19,7 @@ export interface MatchTableProps {
     onStartMatch: (match: Match) => void;
     setTossMatch: (match: Match) => void;
     onOpenMatchHub?: (matchId: string, returnLocation?: Record<string, unknown>) => void;
+    handleDeleteMatch?: (id: string) => void;
 }
 
 const MatchTable: React.FC<MatchTableProps> = ({
@@ -34,8 +35,10 @@ const MatchTable: React.FC<MatchTableProps> = ({
     onContinueMatch,
     onStartMatch,
     setTossMatch,
-    onOpenMatchHub
+    onOpenMatchHub,
+    handleDeleteMatch
 }) => {
+    const [matchToDelete, setMatchToDelete] = React.useState<Match | null>(null);
     const dayAfterTomorrow = new Date(today);
     dayAfterTomorrow.setDate(today.getDate() + 2);
     dayAfterTomorrow.setHours(23, 59, 59, 999);
@@ -104,13 +107,29 @@ const MatchTable: React.FC<MatchTableProps> = ({
                         }
                         
                         const displayState = getMatchDisplayState(match);
+                        const isDeleteEligible = match.status !== 'live' && match.status !== 'completed' && !match.wasAbandoned;
 
                         return (
                             <CrickIQCard 
                                 key={match.id}
                                 accentColor={team1.logo}
-                                className="flex flex-col p-0 overflow-hidden shadow-sm hover:shadow-md bg-white rounded-xl transition-all duration-300"
+                                className="flex flex-col p-0 overflow-hidden shadow-sm hover:shadow-md bg-white rounded-xl transition-all duration-300 relative"
                             >
+                                {handleDeleteMatch && isDeleteEligible && (
+                                    <button
+                                        type="button"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setMatchToDelete(match);
+                                        }}
+                                        className="absolute top-4 right-4 z-10 w-7 h-7 bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 dark:bg-red-950/40 dark:text-red-400 dark:hover:bg-red-900/40 flex items-center justify-center rounded-full transition-colors border border-red-100 shadow-sm"
+                                        title="Delete Match"
+                                    >
+                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                )}
                                 <div 
                                     className="p-5 cursor-pointer hover:bg-gray-50 flex-grow" 
                                     onClick={() => {
@@ -122,10 +141,22 @@ const MatchTable: React.FC<MatchTableProps> = ({
                                     }}
                                 >
                                     <div className="flex justify-between items-center mb-4">
-                                        <span className="bg-gray-100 px-2 py-0.5 rounded font-bold text-[10px] uppercase text-gray-600 tracking-wider">
-                                            {displayState.label}
-                                        </span>
-                                        <span className="text-sm font-medium text-gray-500">
+                                        <div className="flex gap-1.5 items-center">
+                                            <span className="bg-gray-100 px-2 py-0.5 rounded font-bold text-[10px] uppercase text-gray-600 tracking-wider">
+                                                {displayState.label}
+                                            </span>
+                                            {match.tournamentId && match.tournamentId !== 't_quick_matches' && match.matchNumber !== undefined && match.matchNumber !== null && (
+                                                <span className="bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-300 px-2 py-0.5 rounded font-bold text-[10px] uppercase tracking-wider border border-sky-100 dark:border-sky-900/30">
+                                                    Match {match.matchNumber}
+                                                </span>
+                                            )}
+                                            {(!match.tournamentId || match.tournamentId === 't_quick_matches' || match.isQuickMatch) && match.rivalryMatchNumber !== undefined && match.rivalryMatchNumber !== null && (
+                                                <span className="bg-emerald-50 dark:bg-emerald-950/45 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded font-bold text-[10px] uppercase tracking-wider border border-emerald-100 dark:border-emerald-900/30">
+                                                    Match - {match.rivalryMatchNumber}
+                                                </span>
+                                            )}
+                                        </div>
+                                        <span className={`text-sm font-medium text-gray-500 ${isDeleteEligible && handleDeleteMatch ? 'mr-7' : ''}`}>
                                             {match.oversPerInnings} Overs
                                         </span>
                                     </div>
@@ -216,6 +247,45 @@ const MatchTable: React.FC<MatchTableProps> = ({
                             </CrickIQCard>
                         )
                     })}
+                </div>
+            )}
+
+            {/* Delete Match Confirmation Dialog */}
+            {matchToDelete && (
+                <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200">
+                    <CrickIQCard className="max-w-md w-full p-6 bg-white dark:bg-gray-900 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-800 space-y-5 animate-in zoom-in-95 duration-200">
+                        <div className="flex flex-col items-center text-center space-y-3">
+                            <div className="w-12 h-12 bg-red-50 dark:bg-red-950/30 rounded-full flex items-center justify-center text-red-600 dark:text-red-400">
+                                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                            </div>
+                            <h3 className="text-xl font-bold text-gray-900 dark:text-white">⚠️ Delete Match?</h3>
+                            <p className="text-sm text-gray-650 dark:text-gray-350">
+                                This match will be deleted.
+                            </p>
+                        </div>
+                        
+                        <div className="flex gap-3 justify-end pt-2">
+                            <button 
+                                onClick={() => setMatchToDelete(null)}
+                                className="flex-1 py-3 px-4 rounded-xl font-bold bg-green-600 hover:bg-green-700 text-white shadow-md transition duration-200 cursor-pointer text-center text-button"
+                            >
+                                Cancel
+                            </button>
+                            <button 
+                                onClick={() => {
+                                    if (handleDeleteMatch && matchToDelete) {
+                                        handleDeleteMatch(matchToDelete.id);
+                                    }
+                                    setMatchToDelete(null);
+                                }}
+                                className="flex-1 py-3 px-4 rounded-xl font-bold bg-red-600 hover:bg-red-700 text-white shadow-md transition duration-200 cursor-pointer text-center text-button"
+                            >
+                                Delete
+                            </button>
+                        </div>
+                    </CrickIQCard>
                 </div>
             )}
         </div>

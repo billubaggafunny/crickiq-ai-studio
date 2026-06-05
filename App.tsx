@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { TrophyIcon, CalendarIcon, SparklesIcon, LockClosedIcon, LockOpenIcon, AnalyticsIcon, BallIcon } from './constants';
+import { TrophyIcon, CalendarIcon, SparklesIcon, LockClosedIcon, LockOpenIcon, AnalyticsIcon, BallIcon, UserGroupIcon } from './constants';
 import TournamentManager from './components/TournamentManager';
 import MatchManager from './components/MatchManager';
 import MatchesView from './components/MatchesView';
 import LiveScoring from './components/LiveScoring';
+import TeamsPage from './components/TeamsPage';
+import TeamDetailsHub from './components/TeamDetailsHub';
 import { useCrickIQState } from './hooks/useCrickIQState';
 import type { Match, Theme, FontSize, Team } from './types';
 import SettingsModal from './components/SettingsModal';
@@ -146,6 +148,14 @@ const AppUI: React.FC = () => {
     const [isQuickMatchMode, setIsQuickMatchMode] = useState(false);
     const [viewingScorecardMatchId, setViewingScorecardMatchId] = useState<string | null>(null);
     const [viewingMatchHubId, setViewingMatchHubId] = useState<string | null>(null);
+    const [viewingTeamHubId, setViewingTeamHubId] = useState<string | null>(null);
+    const [teamHubReturnState, setTeamHubReturnState] = useState<{
+        teamDetailsTab?: string;
+        matchSearchQuery?: string;
+        matchSelectedFilter?: string;
+        matchSortOrder?: 'recent' | 'oldest' | 'status';
+        visibleMatchCount?: number;
+    } | null>(null);
     const [matchHubReturnLocation, setMatchHubReturnLocation] = useState<{
         activeTab: string;
         selectedTournamentId: string | null;
@@ -153,6 +163,13 @@ const AppUI: React.FC = () => {
         quickMatchSetupId?: string | null;
         matchManagerView?: string;
         matchType?: boolean;
+        source?: string;
+        teamId?: string | null;
+        teamDetailsTab?: string;
+        matchSearchQuery?: string;
+        matchSelectedFilter?: string;
+        matchSortOrder?: 'recent' | 'oldest' | 'status';
+        visibleMatchCount?: number;
     } | null>(null);
 
     const openMatchHub = (matchId: string, returnLocation?: Record<string, unknown>) => {
@@ -209,6 +226,16 @@ const AppUI: React.FC = () => {
             }
             if (matchHubReturnLocation.quickMatchSetupId !== undefined) {
                 setQuickMatchSetupId(matchHubReturnLocation.quickMatchSetupId);
+            }
+            if (matchHubReturnLocation.source === 'team_details') {
+                setViewingTeamHubId(matchHubReturnLocation.teamId || null);
+                setTeamHubReturnState({
+                    teamDetailsTab: matchHubReturnLocation.teamDetailsTab,
+                    matchSearchQuery: matchHubReturnLocation.matchSearchQuery,
+                    matchSelectedFilter: matchHubReturnLocation.matchSelectedFilter,
+                    matchSortOrder: matchHubReturnLocation.matchSortOrder,
+                    visibleMatchCount: matchHubReturnLocation.visibleMatchCount,
+                });
             }
         } else {
             setActiveTab('tournament');
@@ -281,6 +308,7 @@ const AppUI: React.FC = () => {
         const items = [
             { id: 'tournament', label: 'Home', icon: <TrophyIcon /> },
             { id: 'all-matches', label: 'Matches', icon: <BallIcon /> },
+            { id: 'teams', label: 'Teams', icon: <UserGroupIcon /> },
             { id: 'matches', label: 'Tournaments', icon: <CalendarIcon /> },
             { id: 'analytics', label: 'Analytics', icon: <AnalyticsIcon /> },
         ];
@@ -335,6 +363,22 @@ const AppUI: React.FC = () => {
             return () => clearTimeout(timeoutId);
         }
     }, [activeTab, quickMatchSetupId, liveQuickMatch, isQuickMatchMode]);
+
+    const { isHydrating, tournaments, ensureTournamentMatchNumbers } = tournamentState;
+
+    useEffect(() => {
+        if (isHydrating) return;
+        
+        // 1. If a tournament is selected, ensure its match numbers
+        if (selectedTournamentId) {
+            ensureTournamentMatchNumbers(selectedTournamentId);
+        }
+        
+        // 2. Also proactively run it for all existing tournaments on initial hydration
+        tournaments.forEach(t => {
+            ensureTournamentMatchNumbers(t.id);
+        });
+    }, [selectedTournamentId, isHydrating, tournaments, ensureTournamentMatchNumbers]);
 
     useEffect(() => {
         const root = window.document.documentElement;
@@ -709,6 +753,7 @@ const AppUI: React.FC = () => {
             return "Home";
         }
         if (activeTab === 'matches') return "Tournaments";
+        if (activeTab === 'teams') return "Teams";
         if (activeTab === 'analytics') return "Analytics Hub";
         if (activeTab === 'live') {
             return selectedMatch?.status === 'completed' ? "Match Result" : "Live Match";
@@ -718,6 +763,17 @@ const AppUI: React.FC = () => {
     
     const renderContent = () => {
         switch (activeTab) {
+            case 'teams':
+                return (
+                    <ErrorBoundary componentName="Teams" onReset={() => setActiveTab('tournament')}>
+                        <TeamsPage 
+                            teams={tournamentState.teams}
+                            matches={tournamentState.matches}
+                            tournaments={tournamentState.tournaments}
+                            onOpenTeamDetails={(teamId) => setViewingTeamHubId(teamId)}
+                        />
+                    </ErrorBoundary>
+                );
             case 'all-matches':
                 return (
                     <ErrorBoundary componentName="All Matches" onReset={() => { setActiveTab('tournament'); }}>
@@ -736,6 +792,7 @@ const AppUI: React.FC = () => {
                             setEditingMatch={handleEditMatch}
                             onOpenMatchHub={openMatchHub}
                             initialMatchType={matchHubReturnLocation?.matchType}
+                            tournaments={tournamentState.tournaments}
                         />
                     </ErrorBoundary>
                 );
@@ -930,6 +987,32 @@ const AppUI: React.FC = () => {
                 )}
                 
                 {renderPlayerDetailsPage()}
+
+                {viewingTeamHubId && (
+                    <ErrorBoundary componentName="Team Details Hub" onReset={() => { setViewingTeamHubId(null); setTeamHubReturnState(null); }}>
+                        <TeamDetailsHub
+                            teamId={viewingTeamHubId}
+                            teams={tournamentState.teams}
+                            matches={tournamentState.matches}
+                            tournaments={tournamentState.tournaments}
+                            onBack={() => {
+                                setViewingTeamHubId(null);
+                                setTeamHubReturnState(null);
+                            }}
+                            onOpenMatchHub={openMatchHub}
+                            onViewTournament={(tournamentId) => {
+                                setViewingTeamHubId(null);
+                                setTeamHubReturnState(null);
+                                handleViewTournament(tournamentId);
+                            }}
+                            initialTab={teamHubReturnState?.teamDetailsTab}
+                            initialMatchSearchQuery={teamHubReturnState?.matchSearchQuery}
+                            initialMatchSelectedFilter={teamHubReturnState?.matchSelectedFilter}
+                            initialMatchSortOrder={teamHubReturnState?.matchSortOrder}
+                            initialVisibleMatchCount={teamHubReturnState?.visibleMatchCount}
+                        />
+                    </ErrorBoundary>
+                )}
             </div>
         </>
     );

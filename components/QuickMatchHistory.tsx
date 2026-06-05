@@ -91,7 +91,14 @@ const QuickMatchHistory: React.FC<QuickMatchHistoryProps> = ({ matches, getTeamB
                                 className="p-5 cursor-pointer hover:bg-gray-50 transition-colors flex-grow"
                             >
                                 <div className="flex justify-between items-center text-sm text-gray-500 mb-4">
-                                    <span>{new Date(match.date).toLocaleDateString()} {match.time ? `• ${match.time}` : ''}</span>
+                                    <div className="flex items-center gap-2">
+                                        <span>{new Date(match.date).toLocaleDateString()} {match.time ? `• ${match.time}` : ''}</span>
+                                        {match.rivalryMatchNumber !== undefined && match.rivalryMatchNumber !== null && (
+                                            <span className="bg-emerald-50 dark:bg-emerald-950/45 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded font-bold text-[10px] uppercase tracking-wider border border-emerald-100 dark:border-emerald-900/30">
+                                                Match - {match.rivalryMatchNumber}
+                                            </span>
+                                        )}
+                                    </div>
                                     <span className="font-medium">{match.oversPerInnings} Overs</span>
                                 </div>
                                 

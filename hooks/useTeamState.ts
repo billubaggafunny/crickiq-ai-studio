@@ -5,6 +5,7 @@ import { PlayerRole } from '../types';
 import { generateEntityId, createTimestamp, createSyncMetadata } from '../utils/idGenerator';
 import { generateDefaultRoles, LOGO_OPTIONS } from '../utils/initialData';
 import { getMaxPlayers } from '../utils/matchConfig';
+import { normalizeTeam, detectDuplicateTeams } from '../utils/teamNormalization';
 
 export const useTeamState = (
     teams: Team[],
@@ -26,7 +27,10 @@ export const useTeamState = (
             return { success: false, error: "Tournament not found" };
         }
     
-        const existingTeam = teams.find(t => t.name.trim().toLowerCase() === trimmedName.toLowerCase());
+        // Duplicate handling safety: detect candidates using normalized names but preserve the auto-reuse fallback for Phase 1.
+        // TODO for Phase 2: Show confirmation prompt "Team already exists. Use Existing or Create New Anyway."
+        const duplicates = detectDuplicateTeams(trimmedName, teams);
+        const existingTeam = duplicates.length > 0 ? duplicates[0] : undefined;
         let teamIdToAdd: string;
     
         if (existingTeam) {
@@ -46,7 +50,7 @@ export const useTeamState = (
             }));
             const logo = LOGO_OPTIONS[teams.length % LOGO_OPTIONS.length];
             const timestamp = createTimestamp();
-            const newTeam: Team = { 
+            const newTeam: Team = normalizeTeam({ 
                 id: newTeamId, 
                 ownerId: tournament.ownerId,
                 name: trimmedName, 
@@ -56,8 +60,10 @@ export const useTeamState = (
                 viceCaptainId: null,
                 createdAt: timestamp,
                 updatedAt: timestamp,
+                scope: 'tournament',
+                tournamentId: tournament.id,
                 ...createSyncMetadata()
-            };
+            });
             
             setTeams(prev => [...prev, newTeam]);
             teamIdToAdd = newTeam.id;

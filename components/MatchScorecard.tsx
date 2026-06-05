@@ -429,8 +429,14 @@ const MatchScorecard: React.FC<MatchScorecardProps> = ({ match, tournament, team
             >
                 <div className="p-6 text-center shrink-0 bg-primary/50 rounded-xl">
                     <div className="flex justify-between items-center text-caption text-text-secondary mb-4">
-                        <span className="font-semibold truncate pr-2">{tournament.name}</span>
-                        {getStageTag(match, tournament)}
+                        <span className="font-semibold truncate pr-2">
+                            {match.isQuickMatch ? 'Quick Match' : tournament.name}
+                        </span>
+                        {match.isQuickMatch && match.rivalryMatchNumber !== undefined && match.rivalryMatchNumber !== null ? (
+                            <span className="text-[10px] font-bold text-emerald-600 bg-emerald-100 dark:bg-emerald-900/30 px-2 py-0.5 rounded-2xl uppercase">
+                                Match - {match.rivalryMatchNumber}
+                            </span>
+                        ) : getStageTag(match, tournament)}
                         <span className="font-semibold truncate pl-2">{tournament.location}</span>
                     </div>
                     <p className="text-sm text-text-secondary mb-1">{new Date(match.date).toDateString()}</p>

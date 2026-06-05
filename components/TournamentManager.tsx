@@ -6,7 +6,6 @@ import { LightningBoltIcon } from '../constants';
 import ConfirmationModal from './ConfirmationModal';
 import QuickMatchSetup from './QuickMatchSetup';
 import { useNotification } from '../hooks/useNotification';
-import QuickMatchHistory from './QuickMatchHistory';
 import { Plus, Minus } from 'lucide-react';
 import { validateQuickMatch } from '../utils/validation';
 
@@ -82,13 +81,9 @@ const TournamentManager: React.FC<TournamentManagerProps> = (props) => {
         onContinueMatch,
         onAbandonMatch,
         quickMatchSetupId,
-        setQuickMatchSetupId,
         onClearQuickMatchSetup,
         onStartMatch,
-        onViewQuickMatchResult,
-        onRematch,
-        startRematchWithToss,
-        onOpenMatchHub
+        startRematchWithToss
     } = props;
     const [quickTeam1, setQuickTeam1] = useState('');
     const [quickTeam2, setQuickTeam2] = useState('');
@@ -386,7 +381,6 @@ const TournamentManager: React.FC<TournamentManagerProps> = (props) => {
                                 </div>
                             </div>
                         </CrickIQCard>
-                        <QuickMatchHistory {...props} setQuickMatchSetupId={setQuickMatchSetupId} onViewResult={onViewQuickMatchResult} onRematch={onRematch} onOpenMatchHub={onOpenMatchHub} />
                     </div>
                 )}
 

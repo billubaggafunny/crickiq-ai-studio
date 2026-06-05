@@ -407,10 +407,22 @@ const MatchDetailsHub: React.FC<MatchDetailsHubProps> = ({
                                             <span className="text-gray-900 font-bold text-sm">{match.isQuickMatch ? 'Quick Match' : tournament?.name}</span>
                                         </div>
                                     )}
-                                    {match.matchId && (
+                                    {match.tournamentId && match.tournamentId !== 't_quick_matches' && (
                                         <div className="p-3 px-4 flex justify-between items-center bg-white hover:bg-gray-50 transition-colors">
                                             <span className="text-gray-500 font-medium text-sm">Match Number</span>
-                                            <span className="text-gray-900 font-bold font-mono text-sm">#{match.matchId.slice(-4)}</span>
+                                            <span className="text-gray-900 font-bold text-sm">
+                                                {match.matchNumber !== undefined && match.matchNumber !== null 
+                                                    ? `Match ${match.matchNumber}` 
+                                                    : 'Not assigned'}
+                                            </span>
+                                        </div>
+                                    )}
+                                    {(match.isQuickMatch || match.tournamentId === 't_quick_matches') && match.rivalryMatchNumber !== undefined && match.rivalryMatchNumber !== null && (
+                                        <div className="p-3 px-4 flex justify-between items-center bg-white hover:bg-gray-50 transition-colors">
+                                            <span className="text-gray-500 font-medium text-sm">Match Number</span>
+                                            <span className="text-gray-900 font-bold text-sm">
+                                                Match - {match.rivalryMatchNumber}
+                                            </span>
                                         </div>
                                     )}
                                     {tournament?.location && (

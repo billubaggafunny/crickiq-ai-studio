@@ -6,6 +6,33 @@ import { generateEntityId, createTimestamp, createSyncMetadata } from '../utils/
 import { calculateStats, rebuildInnings, determineWinner, calculatePointsTable } from '../utils/cricketLogic';
 import { generateDefaultRoles, LOGO_OPTIONS } from '../utils/initialData';
 import { getMaxPlayers } from '../utils/matchConfig';
+import { normalizeTeam, makeTeamPairKey, matchBelongsToRivalry, makeLegacyNameRivalryKey, detectDuplicateTeams } from '../utils/teamNormalization';
+
+export const getNextTournamentMatchNumber = (tournamentId: string, allMatches: Match[]): number => {
+    if (!tournamentId || tournamentId === 't_quick_matches') return 1;
+    const tournamentMatches = allMatches.filter(m => m.tournamentId === tournamentId && m.tournamentId !== 't_quick_matches');
+    if (tournamentMatches.length === 0) return 1;
+    let maxNum = 0;
+    for (const m of tournamentMatches) {
+        if (m.matchNumber !== undefined && m.matchNumber !== null && m.matchNumber > maxNum) {
+            maxNum = m.matchNumber;
+        }
+    }
+    return maxNum + 1;
+};
+
+export const getNextRivalryMatchNumber = (rivalryKey: string, allMatches: Match[], allTeams: Team[] = []): number => {
+    if (!rivalryKey) return 1;
+    // Support comparing via ID-based rivalryKey and legacy names
+    const previousMatches = allMatches.filter(m => m.isQuickMatch && matchBelongsToRivalry(m, rivalryKey, allTeams));
+    let maxNum = 0;
+    for (const m of previousMatches) {
+        if (m.rivalryMatchNumber !== undefined && m.rivalryMatchNumber !== null && m.rivalryMatchNumber > maxNum) {
+            maxNum = m.rivalryMatchNumber;
+        }
+    }
+    return maxNum + 1;
+};
 
 export const useMatchState = (
     matches: Match[],
@@ -34,38 +61,52 @@ export const useMatchState = (
             return;
         }
         const timestamp = createTimestamp();
-        const newMatch: Match = { 
-            id: `m_${generateEntityId()}`, 
-            ownerId,
-            matchId: generateEntityId(),
-            tournamentId, 
-            team1Id, 
-            team2Id, 
-            date, 
-            time, 
-            status: 'scheduled', 
-            oversPerInnings,
-            maxOversPerBowler,
-            createdAt: timestamp,
-            updatedAt: timestamp,
-            ...createSyncMetadata()
-        };
-        setMatches(prev => [...prev, newMatch]);
+        setMatches(prev => {
+            const nextMatchNumber = getNextTournamentMatchNumber(tournamentId, prev);
+            const newMatch: Match = { 
+                id: `m_${generateEntityId()}`, 
+                ownerId,
+                matchId: generateEntityId(),
+                tournamentId, 
+                team1Id, 
+                team2Id, 
+                date, 
+                time, 
+                status: 'scheduled', 
+                oversPerInnings,
+                maxOversPerBowler,
+                createdAt: timestamp,
+                updatedAt: timestamp,
+                matchNumber: nextMatchNumber,
+                ...createSyncMetadata()
+            };
+            return [...prev, newMatch];
+        });
     }, [teams, setMatches]);
 
     const addMatchesBatch = useCallback((matchesToAdd: Omit<Match, 'id' | 'status'>[], ownerId?: string) => {
         const timestamp = createTimestamp();
-        const newMatches: Match[] = matchesToAdd.map((m) => ({
-            ...m,
-            id: `m_${generateEntityId()}`,
-            ownerId,
-            matchId: generateEntityId(),
-            status: 'scheduled',
-            createdAt: timestamp,
-            updatedAt: timestamp,
-            ...createSyncMetadata()
-        }));
-        setMatches(prev => [...prev, ...newMatches]);
+        setMatches(prev => {
+            const tempMatches = [...prev];
+            const newMatches: Match[] = matchesToAdd.map((m) => {
+                const tournamentId = m.tournamentId;
+                const nextMatchNumber = getNextTournamentMatchNumber(tournamentId, tempMatches);
+                const newMatchObj: Match = {
+                    ...m,
+                    id: `m_${generateEntityId()}`,
+                    ownerId,
+                    matchId: generateEntityId(),
+                    status: 'scheduled',
+                    createdAt: timestamp,
+                    updatedAt: timestamp,
+                    matchNumber: nextMatchNumber,
+                    ...createSyncMetadata()
+                };
+                tempMatches.push(newMatchObj);
+                return newMatchObj;
+            });
+            return [...prev, ...newMatches];
+        });
     }, [setMatches]);
     
     const updateMatch = useCallback((matchId: string, updatedDetails: Partial<Match>) => {
@@ -140,7 +181,12 @@ export const useMatchState = (
 
             if (typeof data === 'string') {
                 const teamName = data.trim();
-                const existingTeam = allKnownTeams.find(t => t.name.toLowerCase() === teamName.toLowerCase());
+                
+                // TODO: For Phase 2, instead of auto-matching by case-insensitive name,
+                // show duplicate confirmation modal: "Team already exists. Use Existing or Create New Anyway."
+                // For Phase 1.2, we add duplicate detection but temporarily preserve existing auto-reuse behavior to avoid breaking current UI.
+                const duplicates = detectDuplicateTeams(teamName, allKnownTeams);
+                const existingTeam = duplicates.length > 0 ? duplicates[0] : undefined;
                 
                 if (existingTeam) {
                     return existingTeam;
@@ -159,7 +205,7 @@ export const useMatchState = (
                     };
                 });
                 const timestamp = createTimestamp();
-                const newTeam: Team = {
+                const newTeam: Team = normalizeTeam({
                     id: newId,
                     ownerId,
                     name: teamName,
@@ -169,8 +215,10 @@ export const useMatchState = (
                     viceCaptainId: null,
                     createdAt: timestamp,
                     updatedAt: timestamp,
+                    scope: 'quick',
+                    tournamentId: QUICK_MATCH_TOURNAMENT_ID,
                     ...createSyncMetadata()
-                };
+                });
                 newTeamsToCreate.push(newTeam);
                 return newTeam;
             } else {
@@ -200,29 +248,35 @@ export const useMatchState = (
         const now = new Date();
         const time = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
         const timestamp = createTimestamp();
-        const newMatch: Match = {
-            id: newMatchId,
-            ownerId,
-            matchId: generateEntityId(),
-            tournamentId: QUICK_MATCH_TOURNAMENT_ID,
-            team1Id: finalTeam1.id,
-            team2Id: finalTeam2.id,
-            date: now.toISOString().split('T')[0],
-            time: time,
-            status: 'scheduled',
-            isDraft,
-            oversPerInnings,
-            isQuickMatch: true,
-            numberOfPlayers,
-            team1SquadIds: isTeam1New ? finalTeam1.players.map(p => p.id) : undefined,
-            team2SquadIds: isTeam2New ? finalTeam2.players.map(p => p.id) : undefined,
-            maxOversPerBowler,
-            createdAt: timestamp,
-            updatedAt: timestamp,
-            ...createSyncMetadata()
-        };
+        const rKey = makeTeamPairKey(finalTeam1.id, finalTeam2.id);
 
-        setMatches(prev => [...prev, newMatch]);
+        setMatches(prev => {
+            const rMatchNumber = getNextRivalryMatchNumber(rKey, prev, [...teams, ...newTeamsToCreate]);
+            const newMatch: Match = {
+                id: newMatchId,
+                ownerId,
+                matchId: generateEntityId(),
+                tournamentId: QUICK_MATCH_TOURNAMENT_ID,
+                team1Id: finalTeam1.id,
+                team2Id: finalTeam2.id,
+                date: now.toISOString().split('T')[0],
+                time: time,
+                status: 'scheduled',
+                isDraft,
+                oversPerInnings,
+                isQuickMatch: true,
+                numberOfPlayers,
+                team1SquadIds: isTeam1New ? finalTeam1.players.map(p => p.id) : undefined,
+                team2SquadIds: isTeam2New ? finalTeam2.players.map(p => p.id) : undefined,
+                maxOversPerBowler,
+                createdAt: timestamp,
+                updatedAt: timestamp,
+                rivalryKey: rKey,
+                rivalryMatchNumber: rMatchNumber,
+                ...createSyncMetadata()
+            };
+            return [...prev, newMatch];
+        });
         
         return { matchId: newMatchId, team1Id: finalTeam1.id, team2Id: finalTeam2.id };
     }, [teams, setTournaments, setTeams, setMatches]);
@@ -238,6 +292,13 @@ export const useMatchState = (
         const now = new Date();
         const time = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
         const timestamp = createTimestamp();
+        
+        const t1 = teams.find(t => t.id === originalMatch.team1Id);
+        const t2 = teams.find(t => t.id === originalMatch.team2Id);
+        const rKey = (originalMatch.team1Id && originalMatch.team2Id)
+            ? makeTeamPairKey(originalMatch.team1Id, originalMatch.team2Id)
+            : (originalMatch.rivalryKey || (t1 && t2 ? makeLegacyNameRivalryKey(t1.name, t2.name) : ''));
+        const rMatchNumber = getNextRivalryMatchNumber(rKey, matches, teams);
     
         const newMatch: Match = {
             id: `m_${generateEntityId()}`,
@@ -257,12 +318,14 @@ export const useMatchState = (
             team2SquadIds: originalMatch.team2SquadIds ? [...originalMatch.team2SquadIds] : undefined,
             createdAt: timestamp,
             updatedAt: timestamp,
+            rivalryKey: rKey,
+            rivalryMatchNumber: rMatchNumber,
             ...createSyncMetadata()
         };
     
         setMatches(prev => [...prev, newMatch]);
         return newMatch;
-    }, [matches, setMatches]);
+    }, [matches, teams, setMatches]);
     
     const abandonMatch = useCallback((matchId: string) => {
         setMatches(prev => prev.map(m => 
@@ -443,7 +506,14 @@ export const useMatchState = (
         }
         
         if (newKnockoutMatches.length > 0) {
-            updatedMatches = [...updatedMatches, ...newKnockoutMatches];
+            const tempMatches = [...updatedMatches];
+            const knockoutMatchesWithNumber = newKnockoutMatches.map((m) => {
+                const nextMatchNumber = getNextTournamentMatchNumber(tournament.id, tempMatches);
+                const completeMatchObj = { ...m, matchNumber: nextMatchNumber };
+                tempMatches.push(completeMatchObj);
+                return completeMatchObj;
+            });
+            updatedMatches = [...updatedMatches, ...knockoutMatchesWithNumber];
         }
         
         setMatches(updatedMatches);
@@ -777,6 +847,35 @@ export const useMatchState = (
         }));
     }, [setMatches]);
 
+    const ensureTournamentMatchNumbers = useCallback((tournamentId: string) => {
+        if (!tournamentId || tournamentId === 't_quick_matches') return;
+        setMatches(prev => {
+            const tournamentMatches = prev.filter(m => m.tournamentId === tournamentId && m.tournamentId !== 't_quick_matches');
+            if (tournamentMatches.length === 0) return prev;
+
+            const hasMissing = tournamentMatches.some(m => m.matchNumber === undefined || m.matchNumber === null);
+            if (!hasMissing) return prev;
+
+            let maxNum = 0;
+            for (const m of tournamentMatches) {
+                if (m.matchNumber !== undefined && m.matchNumber !== null && m.matchNumber > maxNum) {
+                    maxNum = m.matchNumber;
+                }
+            }
+
+            let currentNextNum = maxNum + 1;
+            const updatedMatches = prev.map(m => {
+                if (m.tournamentId === tournamentId && m.tournamentId !== 't_quick_matches' && (m.matchNumber === undefined || m.matchNumber === null)) {
+                    const updatedMatch = { ...m, matchNumber: currentNextNum };
+                    currentNextNum++;
+                    return updatedMatch;
+                }
+                return m;
+            });
+            return updatedMatches;
+        });
+    }, [setMatches]);
+
     return {
         addMatch,
         addMatchesBatch,
@@ -795,6 +894,7 @@ export const useMatchState = (
         undoLastBall,
         endInnings,
         setManOfTheMatch,
-        toggleFreeHit
+        toggleFreeHit,
+        ensureTournamentMatchNumbers
     };
 };
