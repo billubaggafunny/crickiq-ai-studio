@@ -7,6 +7,7 @@ import { calculateStrikeRate, getTopPerformers, getDismissalText, calculateRunRa
 import { TrophyIcon, ShareIcon, UndoIcon } from '../constants';
 import { useNotification } from '../hooks/useNotification';
 import Header from './Header';
+import { getPlayerDisplayFromSnapshot } from '../utils/playerSnapshots';
 
 interface MatchScorecardProps {
     match: Match;
@@ -38,10 +39,7 @@ const InningsScorecard: React.FC<{ innings: Innings; teams: Team[]; match: Match
 
     if (!battingTeam || !bowlingTeam) return null;
 
-    const getPlayerName = (playerId: string): string => {
-        const allPlayers = teams.flatMap(t => t.players);
-        return allPlayers.find(p => p.id === playerId)?.name || 'Unknown Player';
-    };
+    const getPlayerName = (playerId: string): string => getPlayerDisplayFromSnapshot(match, playerId, teams);
 
     const sortedBatsmen = battingTeam.players
         .filter(player => innings.batsmanScores[player.id])
@@ -255,16 +253,28 @@ const MatchScorecard: React.FC<MatchScorecardProps> = ({ match, tournament, team
 
     const manOfTheMatchPlayer = useMemo(() => {
         if (!match.manOfTheMatchId) return null;
+        const name = getPlayerDisplayFromSnapshot(match, match.manOfTheMatchId, teams);
+        // We still need a minimal object for rendering
         const allPlayers = teams.flatMap(t => t.players);
-        return allPlayers.find(p => p.id === match.manOfTheMatchId) || null;
-    }, [match.manOfTheMatchId, teams]);
+        const p = allPlayers.find(p => p.id === match.manOfTheMatchId);
+        
+        if (p) {
+            return { ...p, name };
+        }
+        
+        return { 
+            id: match.manOfTheMatchId,
+            name, 
+            role: 'Player', 
+            number: 0,
+            originalId: '',
+            globalPlayerId: ''
+        };
+    }, [match, teams]);
     
     if (!match || !team1 || !team2) return (<div className="p-4 text-center text-text-secondary">Match data could not be loaded. Please try again.</div>);
     
-    const getPlayerName = (playerId: string): string => {
-        const allPlayers = teams.flatMap(t => t.players);
-        return allPlayers.find(p => p.id === playerId)?.name || 'Unknown Player';
-    };
+    const getPlayerName = (playerId: string): string => getPlayerDisplayFromSnapshot(match, playerId, teams);
 
     const getPlayerMatchStats = (playerId: string) => {
         const stats: {batting: string | null, bowling: string | null} = { batting: null, bowling: null };

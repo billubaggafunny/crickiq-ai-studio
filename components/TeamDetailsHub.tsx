@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { 
     ChevronLeft, Users, Trophy, Activity, Award, Settings, 
     Layers, MapPin, ShieldAlert, AlertTriangle, Calendar,
-    Search, ChevronRight, CheckCircle2, Archive, Info, Lock
+    Search, ChevronRight, CheckCircle2, Archive, Info, Lock, Plus
 } from 'lucide-react';
 import CrickIQCard from './CrickIQCard';
 import type { Team, Match, Tournament, Player } from '../types';
@@ -11,6 +11,7 @@ import { usePlayerNavigation } from '../contexts/PlayerNavigationContext';
 import { useNotification } from '../hooks/useNotification';
 import { calculatePointsTable } from '../utils/cricketLogic';
 import { EditTeamSheet } from './EditTeamSheet';
+import { AddPlayerSheet } from './AddPlayerSheet';
 import type { DeleteEligibility } from '../hooks/useTeamState';
 
 interface ExtendedPlayer extends Player {
@@ -62,6 +63,16 @@ export interface TeamDetailsHubProps {
             country?: string;
         }
     ) => Team | null;
+    addPlayerToTeam?: (teamId: string, input: {
+        name: string;
+        role: import('../types').PlayerRole;
+        jerseyNumber?: number;
+        battingStyle?: string;
+        bowlingStyle?: string;
+        isCaptain?: boolean;
+        isViceCaptain?: boolean;
+        isWicketKeeper?: boolean;
+    }) => void;
     archiveTeam?: (teamId: string) => void;
     restoreTeam?: (teamId: string) => void;
     deleteTeamPermanently?: (teamId: string, eligibility: DeleteEligibility) => boolean;
@@ -139,6 +150,7 @@ const TeamDetailsHub: React.FC<TeamDetailsHubProps> = ({
     initialTournamentSortOrder,
     initialVisibleTournamentCount,
     updateTeamProfile,
+    addPlayerToTeam,
     archiveTeam,
     restoreTeam,
     deleteTeamPermanently,
@@ -156,6 +168,7 @@ const TeamDetailsHub: React.FC<TeamDetailsHubProps> = ({
         }
     }, [activeTab]);
     const [isEditTeamOpen, setIsEditTeamOpen] = useState(false);
+    const [isAddPlayerOpen, setIsAddPlayerOpen] = useState(false);
     const [isArchiveConfirmOpen, setIsArchiveConfirmOpen] = useState(false);
     const [isRestoreConfirmOpen, setIsRestoreConfirmOpen] = useState(false);
     const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
@@ -457,15 +470,18 @@ const TeamDetailsHub: React.FC<TeamDetailsHubProps> = ({
     // Filter and search players roster list with maximum speed and useMemo
     const filteredPlayers = useMemo(() => {
         const roster = team?.players || [];
-        if (!playerSearchQuery && selectedRoleFilter === 'all') {
-            return roster;
-        }
-
-        const query = playerSearchQuery.toLowerCase().trim();
         
         return roster.filter(player => {
+            // Check archive status
+            const isArchived = (player as any).isArchived;
+            if (selectedRoleFilter === 'archived') {
+                if (!isArchived) return false;
+            } else {
+                if (isArchived) return false;
+            }
+
             // Match Role Filter
-            if (selectedRoleFilter !== 'all') {
+            if (selectedRoleFilter !== 'all' && selectedRoleFilter !== 'archived') {
                 const roleVal = (player.role || '').toLowerCase();
                 const filterMap: Record<string, string[]> = {
                     batsman: ['batsman', 'batter'],
@@ -479,7 +495,8 @@ const TeamDetailsHub: React.FC<TeamDetailsHubProps> = ({
             }
 
             // Match Search Query
-            if (query) {
+            if (playerSearchQuery) {
+                const query = playerSearchQuery.toLowerCase().trim();
                 const nameMatches = (player.name || '').toLowerCase().includes(query);
                 const roleMatches = (player.role || '').toLowerCase().includes(query);
                 const jerseyMatches = player.number !== undefined && String(player.number).includes(query);
@@ -1338,7 +1355,8 @@ const TeamDetailsHub: React.FC<TeamDetailsHubProps> = ({
                                         { id: 'batsman', label: 'Batters' },
                                         { id: 'bowler', label: 'Bowlers' },
                                         { id: 'all_rounder', label: 'All-Rounders' },
-                                        { id: 'wicket_keeper', label: 'Wicketkeepers' }
+                                        { id: 'wicket_keeper', label: 'Wicketkeepers' },
+                                        { id: 'archived', label: 'Archived' }
                                     ].map(chip => {
                                         const isSelected = selectedRoleFilter === chip.id;
                                         return (
@@ -1367,14 +1385,14 @@ const TeamDetailsHub: React.FC<TeamDetailsHubProps> = ({
                                     <div className="space-y-1.5">
                                         <h3 className="text-sm font-bold text-text-primary">No Players Added</h3>
                                         <p className="text-xs text-text-secondary max-w-xs leading-relaxed">
-                                            This team has no saved roster yet. Player management will be available in the next phase.
+                                            This team has no saved roster yet. Add your first player to build this team roster.
                                         </p>
                                     </div>
                                     <button
-                                        disabled
-                                        className="px-5 py-2.5 text-xs font-bold text-white bg-gray-400 dark:bg-zinc-700 cursor-not-allowed rounded-2xl shadow-sm tracking-wide uppercase"
+                                        onClick={() => setIsAddPlayerOpen(true)}
+                                        className="px-5 py-2.5 text-xs font-bold text-white bg-brand-blue hover:bg-brand-blue/90 rounded-2xl shadow-sm tracking-wide uppercase transition-colors"
                                     >
-                                        Add Player Coming Soon
+                                        Add Player
                                     </button>
                                 </CrickIQCard>
                             ) : filteredPlayers.length === 0 ? (
@@ -1448,6 +1466,16 @@ const TeamDetailsHub: React.FC<TeamDetailsHubProps> = ({
                                     })}
                                 </div>
                             )}
+
+                            {/* Floating Action Button for Add Player */}
+                            <button
+                                onClick={() => setIsAddPlayerOpen(true)}
+                                className="fixed bottom-24 right-6 z-40 flex items-center justify-center gap-2 px-5 h-14 bg-brand-blue hover:bg-brand-blue/90 text-white rounded-full font-bold shadow-lg shadow-brand-blue/20 transition-all active:scale-95 border border-brand-blue/10"
+                                aria-label="Add Player"
+                            >
+                                <Plus className="w-5 h-5 shrink-0" />
+                                <span className="text-[13px] tracking-wide uppercase">Add Player</span>
+                            </button>
                         </div>
                     ) : activeTab === 'matches' ? (
                         /* Read-Only Matches Tab */
@@ -1791,24 +1819,24 @@ const TeamDetailsHub: React.FC<TeamDetailsHubProps> = ({
                                 </div>
 
                                 {/* Scrollable Filter Chips */}
-                                <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1 scroll-smooth shrink-0 -mx-4 px-4 sm:mx-0 sm:px-0">
+                                <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
                                     {[
                                         { id: 'all', label: 'All' },
                                         { id: 'active', label: 'Active' },
                                         { id: 'upcoming', label: 'Upcoming' },
                                         { id: 'completed', label: 'Completed' },
                                         { id: 'won', label: 'Won' },
-                                        { id: 'knockouts', label: 'Finals/Knockouts' }
+                                        { id: 'knockouts', label: 'Knockouts' }
                                     ].map((badge) => {
                                         const isSelected = tournamentSelectedFilter === badge.id;
                                         return (
                                             <button
                                                 key={badge.id}
                                                 onClick={() => setTournamentSelectedFilter(badge.id)}
-                                                className={`px-4.5 py-2.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all shadow-sm shrink-0 border cursor-pointer border-brand-blue/10 ${
-                                                    isSelected
-                                                        ? 'bg-brand-blue text-white font-extrabold border-brand-blue'
-                                                        : 'bg-primary text-text-secondary hover:text-text-primary hover:bg-secondary'
+                                                className={`px-3.5 py-1.5 text-xs font-bold rounded-xl whitespace-nowrap border cursor-pointer transition-all ${
+                                                    isSelected 
+                                                        ? 'bg-brand-blue text-white border-brand-blue shadow-md' 
+                                                        : 'bg-primary text-text-secondary border-brand-blue/10 hover:border-brand-blue/20'
                                                 }`}
                                             >
                                                 {badge.label}
@@ -2543,6 +2571,22 @@ const TeamDetailsHub: React.FC<TeamDetailsHubProps> = ({
                                 elem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                             }
                         }, 100);
+                    }}
+                />
+            )}
+
+            {/* Add Player Slide-up Sheet */}
+            {team && addPlayerToTeam && isAddPlayerOpen && (
+                <AddPlayerSheet
+                    isOpen={isAddPlayerOpen}
+                    onClose={() => setIsAddPlayerOpen(false)}
+                    teamId={team.id}
+                    existingPlayers={team.players}
+                    teams={teams}
+                    onAddPlayer={(tid, input) => {
+                        addPlayerToTeam(tid, input);
+                        setIsAddPlayerOpen(false);
+                        showNotification(`Player "${input.name}" added successfully.`, 'success');
                     }}
                 />
             )}

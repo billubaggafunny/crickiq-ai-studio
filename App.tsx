@@ -710,6 +710,8 @@ const AppUI: React.FC = () => {
                             isMatchLive={isMatchActuallyLive}
                             updateTeam={tournamentState.updateTeam}
                             updateMatch={tournamentState.updateMatch}
+                            archivePlayer={tournamentState.archivePlayer}
+                            restorePlayer={tournamentState.restorePlayer}
                             onBack={returnFromPlayerDetails}
                             mode={navigationContext.mode || 'view'}
                         />
@@ -1032,6 +1034,7 @@ const AppUI: React.FC = () => {
                             matches={tournamentState.matches}
                             tournaments={tournamentState.tournaments}
                             updateTeamProfile={tournamentState.updateTeamProfile}
+                            addPlayerToTeam={tournamentState.addPlayerToTeam}
                             archiveTeam={tournamentState.archiveTeam}
                             restoreTeam={tournamentState.restoreTeam}
                             deleteTeamPermanently={tournamentState.deleteTeamPermanently}

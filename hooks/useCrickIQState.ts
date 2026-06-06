@@ -5,6 +5,7 @@ import { useTeamState, getTeamDeleteEligibility } from './useTeamState';
 import { useTournamentState as useTournamentStateDomain } from './useTournamentState';
 import { useMatchState } from './useMatchState';
 import { getHydrationGeneration, incrementHydrationGeneration } from '../utils/authLifecycleManager';
+import { normalizeTeam } from '../utils/teamNormalization';
 import type { Tournament, Team, Match } from '../types';
 
 export const useCrickIQState = () => {
@@ -31,7 +32,7 @@ export const useCrickIQState = () => {
                 return;
             }
             setTournaments(data.tournaments);
-            setTeams(data.teams);
+            setTeams(data.teams.map(normalizeTeam));
             setMatches(data.matches);
         } catch (err) {
             console.error('[App] Hydration error (reload):', err);
@@ -50,7 +51,7 @@ export const useCrickIQState = () => {
                 const data = await loadAppState();
                 if (mounted && generationSnapshot === getHydrationGeneration()) {
                     setTournaments(data.tournaments);
-                    setTeams(data.teams);
+                    setTeams(data.teams.map(normalizeTeam));
                     setMatches(data.matches);
                     setIsHydrating(false);
                 } else if (generationSnapshot !== getHydrationGeneration()) {
@@ -93,7 +94,7 @@ export const useCrickIQState = () => {
         }
 
         setTournaments(newData.tournaments);
-        setTeams(newData.teams);
+        setTeams(newData.teams.map(normalizeTeam));
         setMatches(newData.matches);
     }, [handleCreateSnapshot, restoreBackup]);
 
@@ -154,7 +155,10 @@ export const useCrickIQState = () => {
         updateTeam: teamDomain.updateTeam,
         updateTeamProfile: teamDomain.updateTeamProfile,
         addPlayer: teamDomain.addPlayer,
+        addPlayerToTeam: teamDomain.addPlayerToTeam,
         deletePlayer: teamDomain.deletePlayer,
+        archivePlayer: teamDomain.archivePlayer,
+        restorePlayer: teamDomain.restorePlayer,
         getTeamById: teamDomain.getTeamById,
         archiveTeam: teamDomain.archiveTeam,
         restoreTeam: teamDomain.restoreTeam,

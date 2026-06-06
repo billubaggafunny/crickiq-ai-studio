@@ -6,6 +6,7 @@ import { useCrickIQState } from '../hooks/useCrickIQState';
 import { PLAYER_ROLES, getShortRoleName, getRoleEmoji } from '../constants';
 import { useNotification } from '../hooks/useNotification';
 import { getEffectiveSquadIds, getEffectiveSquadPlayers } from '../utils/matchConfig';
+import { generateGlobalPlayerId } from '../utils/idGenerator';
 
 const Button: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'primary' | 'secondary' | 'danger' | 'blue' }> = ({ children, className, variant = 'primary', ...props }) => {
     const baseClasses = 'px-4 py-2 rounded-2xl text-button transition-all duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-md';
@@ -79,6 +80,7 @@ export const ImpactPlayerModal: React.FC<ImpactPlayerModalProps> = ({ isOpen, on
         const alreadyOutgoingIds = match.replacements?.map(r => r.outgoingPlayerId) || [];
         
         return team.players.filter(p => 
+            !p.isArchived &&
             !effectiveSquadIds.includes(p.id) && 
             !alreadyIncomingIds.includes(p.id) &&
             !alreadyOutgoingIds.includes(p.id)
@@ -133,10 +135,10 @@ export const ImpactPlayerModal: React.FC<ImpactPlayerModalProps> = ({ isOpen, on
 
         const newPlayer: Player = {
             id: `p_${Date.now()}`,
+            globalPlayerId: generateGlobalPlayerId(),
             name: newName.trim(),
             number: Number(newNumber),
             role: newRole as PlayerRoleEnum,
-            globalPlayerId: `gp_p_${Date.now()}`
         };
 
         updateTeam({

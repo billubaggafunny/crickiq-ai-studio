@@ -1,11 +1,13 @@
 import React, { useState, useMemo } from 'react';
 import { Player, Team, Match, PlayerRole, Tournament, Innings } from '../types';
-import { ChevronLeft, ChevronRight, X, Info } from 'lucide-react';
+import { ChevronLeft, ChevronRight, X, Info, AlertCircle, Users, CheckCircle2 } from 'lucide-react';
 import { getRoleIcon, PLAYER_ROLES } from '../constants';
 import { validatePlayer } from '../utils/validation';
 import { useNotification } from '../hooks/useNotification';
 import { useTeamLock } from '../hooks/useTeamLock';
 import { getMaxPlayers } from '../utils/matchConfig';
+import { generateGlobalPlayerId } from '../utils/idGenerator';
+import { findExistingPlayerCandidates } from '../utils/playerLinking';
 
 interface PlayerDetailsPageProps {
     player?: Player;
@@ -19,6 +21,8 @@ interface PlayerDetailsPageProps {
     isMatchLive?: boolean;
     updateTeam?: (team: Team) => void;
     updateMatch?: (matchId: string, updates: Partial<Match>) => void;
+    archivePlayer?: (teamId: string, playerId: string) => void;
+    restorePlayer?: (teamId: string, playerId: string) => void;
     onBack: () => void;
     mode?: 'view' | 'edit' | 'add';
 }
@@ -31,12 +35,18 @@ const PlayerDetailsView: React.FC<PlayerDetailsPageProps> = ({
     tournament,
     matches = [],
     teams = [],
-    onBack
+    archivePlayer,
+    restorePlayer,
+    onBack,
+    updateTeam
 }) => {
     // Cast player as Player since view mode always has a player
     const safePlayer = player as Player;
     const isCaptain = safePlayer?.id === team?.captainId;
     const isViceCaptain = safePlayer?.id === team?.viceCaptainId;
+    const [showArchiveConfirm, setShowArchiveConfirm] = useState(false);
+    const [showRestoreConfirm, setShowRestoreConfirm] = useState(false);
+    const { showNotification } = useNotification();
     
     const [activeTab, setActiveTab] = useState('Overview');
     const tabs = ['Overview', 'Stats', 'Matches', 'Teams', 'Tournaments'];
@@ -489,14 +499,41 @@ const PlayerDetailsView: React.FC<PlayerDetailsPageProps> = ({
                             </div>
                         ) : (
                             <div className="p-6 bg-primary border border-brand-blue/10 rounded-[20px] text-center shadow-sm text-sm font-medium text-text-secondary">
-                                No Match History Available
+                            No Match History Available
+                        </div>
+                    )}
+                    </div>
+                    
+                    {/* Player State Controls */}
+                    <div className="p-6">
+                        {safePlayer.isArchived ? (
+                            <div className="flex flex-col gap-3">
+                                <div className="p-4 rounded-xl bg-orange-50 border border-orange-200 text-orange-800 text-sm flex gap-3 shadow-sm dark:bg-orange-950/30 dark:border-orange-500/30 dark:text-orange-400">
+                                    <div className="font-bold uppercase tracking-wider shrink-0 mt-0.5">Archived</div>
+                                    <div className="opacity-90 leading-relaxed">This player is hidden from future match selections. Historical scorecards remain protected.</div>
+                                </div>
+                                {restorePlayer && (
+                                    <button 
+                                        onClick={() => setShowRestoreConfirm(true)}
+                                        className="w-full py-4 font-bold rounded-xl bg-green-500 text-white hover:bg-green-600 active:scale-95 transition-all text-sm shadow-sm"
+                                    >
+                                        Restore Player
+                                    </button>
+                                )}
                             </div>
+                        ) : (
+                            archivePlayer && (
+                                <button 
+                                    onClick={() => setShowArchiveConfirm(true)}
+                                    className="w-full py-4 font-bold rounded-xl bg-secondary text-orange-600 border border-orange-200 hover:bg-orange-50 active:scale-95 transition-all text-sm shadow-sm dark:border-orange-500/30 dark:text-orange-400 dark:hover:bg-orange-950/30"
+                                >
+                                    Archive Player
+                                </button>
+                            )
                         )}
                     </div>
-
                 </div>
             )}
-
             
             {/* Stats Tab Content */}
             {activeTab === 'Stats' && (
@@ -864,6 +901,76 @@ const PlayerDetailsView: React.FC<PlayerDetailsPageProps> = ({
                 </div>
             </div>
             )}
+            
+            {/* Archive Confirmation Modal */}
+            {showArchiveConfirm && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm shadow-sm flex items-center justify-center p-4 z-[200]">
+                    <div className="bg-primary rounded-2xl w-full max-w-sm overflow-hidden animate-spring-up border border-brand-blue/15 shadow-xl">
+                        <div className="p-6 text-center">
+                            <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4 text-orange-500">
+                                <Info size={32} />
+                            </div>
+                            <h3 className="text-xl font-black text-text-primary mb-2">Archive Player?</h3>
+                            <p className="text-text-secondary text-sm">
+                                This player will be hidden from future match selections, but historical scorecards, commentary, stats, and snapshots will remain protected.
+                            </p>
+                        </div>
+                        <div className="flex border-t border-brand-blue/10">
+                            <button
+                                onClick={() => setShowArchiveConfirm(false)}
+                                className="flex-1 py-4 font-bold text-text-secondary hover:bg-slate-50 transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={() => {
+                                    archivePlayer?.(team.id, safePlayer.id);
+                                    setShowArchiveConfirm(false);
+                                    showNotification('Player archived successfully.', 'success');
+                                }}
+                                className="flex-1 py-4 font-bold text-orange-600 hover:bg-orange-50 transition-colors"
+                            >
+                                Archive Player
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Restore Confirmation Modal */}
+            {showRestoreConfirm && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm shadow-sm flex items-center justify-center p-4 z-[200]">
+                    <div className="bg-primary rounded-2xl w-full max-w-sm overflow-hidden animate-spring-up border border-brand-blue/15 shadow-xl">
+                        <div className="p-6 text-center">
+                            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 text-green-500">
+                                <Info size={32} />
+                            </div>
+                            <h3 className="text-xl font-black text-text-primary mb-2">Restore Player?</h3>
+                            <p className="text-text-secondary text-sm">
+                                This player will become available again for future match selections.
+                            </p>
+                        </div>
+                        <div className="flex border-t border-brand-blue/10">
+                            <button
+                                onClick={() => setShowRestoreConfirm(false)}
+                                className="flex-1 py-4 font-bold text-text-secondary hover:bg-slate-50 transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={() => {
+                                    restorePlayer?.(team.id, safePlayer.id);
+                                    setShowRestoreConfirm(false);
+                                    showNotification('Player restored successfully.', 'success');
+                                }}
+                                className="flex-1 py-4 font-bold text-green-600 hover:bg-green-50 transition-colors"
+                            >
+                                Restore Player
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
@@ -874,6 +981,7 @@ const PlayerDetailsForm: React.FC<PlayerDetailsPageProps> = ({
     match,
     tournament,
     tournamentId,
+    teams = [],
     isMatchLive = false,
     updateTeam,
     updateMatch,
@@ -896,6 +1004,35 @@ const PlayerDetailsForm: React.FC<PlayerDetailsPageProps> = ({
     const [editIsViceCaptain, setEditIsViceCaptain] = useState(player ? player.id === team.viceCaptainId : false);
     const [errors, setErrors] = useState<{name: string | null, number: string | null, role: string | null}>({name: null, number: null, role: null});
 
+    // Linking support
+    const [selectedExistingPlayer, setSelectedExistingPlayer] = useState<import('../utils/playerLinking').PlayerCandidate | null>(null);
+
+    const sameTeamDuplicates = useMemo(() => {
+        const trimmedName = editName.trim().toLowerCase();
+        if (isAdding && trimmedName.length >= 2) {
+            return team.players.filter(p => p.name.trim().toLowerCase() === trimmedName);
+        }
+        return [];
+    }, [editName, team.players, isAdding]);
+
+    const crossTeamCandidates = useMemo(() => {
+        if (!isAdding || !teams.length) return [];
+        return findExistingPlayerCandidates(editName, teams, team.id);
+    }, [editName, teams, team.id, isAdding]);
+
+    const handleUseExisting = (candidate: import('../utils/playerLinking').PlayerCandidate) => {
+        const p = candidate.player;
+        setSelectedExistingPlayer(candidate);
+        setEditName(p.name);
+        setEditRole(p.role);
+        setEditNumber(p.number !== undefined && p.number !== -1 ? p.number : '');
+        setErrors({name: null, number: null, role: null});
+    };
+
+    const handleCreateNewAnyway = () => {
+        setSelectedExistingPlayer(null);
+    };
+
     const handleSave = () => {
         if (isLocked) {
              showNotification('Team roster is locked.', 'error');
@@ -912,12 +1049,17 @@ const PlayerDetailsForm: React.FC<PlayerDetailsPageProps> = ({
         }
         
         const newPlayerId = isAdding ? crypto.randomUUID() : player!.id;
+        
+        // Preserve selected candidate's fields fully
+        const basePlayer = isAdding && selectedExistingPlayer ? { ...selectedExistingPlayer.player } : (player || {});
+
         const newPlayer: Player = {
+            ...basePlayer,
             id: newPlayerId,
             name: editName.trim(),
             number: Number(editNumber),
             role: editRole as PlayerRole,
-            globalPlayerId: isAdding ? newPlayerId : player?.globalPlayerId
+            globalPlayerId: isAdding ? (selectedExistingPlayer?.player.globalPlayerId || generateGlobalPlayerId()) : (player?.globalPlayerId || generateGlobalPlayerId())
         };
 
         const updatedTeam = { ...team };
@@ -976,6 +1118,91 @@ const PlayerDetailsForm: React.FC<PlayerDetailsPageProps> = ({
                     <div className="p-4 bg-yellow-50 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-200 rounded-xl text-sm border border-yellow-200 dark:border-yellow-800/50">
                         Roster editing is locked because the match has started or toss has been completed.
                     </div>
+                 )}
+
+                 {/* Same-team Duplicates Warning segment */}
+                 {isAdding && sameTeamDuplicates.length > 0 && !selectedExistingPlayer && (
+                     <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-4 flex flex-col gap-3 dark:bg-red-500/5">
+                         <div className="flex items-start gap-2.5">
+                             <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
+                             <div>
+                                 <h4 className="text-sm font-bold text-red-500">Player already exists in this team</h4>
+                                 <p className="text-xs text-text-secondary mt-0.5">
+                                     A player named &ldquo;<span className="font-semibold text-text-primary">{sameTeamDuplicates[0].name}</span>&rdquo; is already in this team. Are you sure you want to add another?
+                                 </p>
+                             </div>
+                         </div>
+                     </div>
+                 )}
+
+                 {/* Cross-team Candidates Warning segment */}
+                 {crossTeamCandidates.length > 0 && !selectedExistingPlayer && sameTeamDuplicates.length === 0 && (
+                     <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4 flex flex-col gap-3 dark:bg-amber-500/5">
+                         <div className="flex items-start gap-2.5">
+                             <Users className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+                             <div>
+                                 <h4 className="text-sm font-bold text-amber-500">Similar player found in another team</h4>
+                                 <p className="text-xs text-text-secondary mt-0.5">
+                                     Would you like to link to an existing profile to share stats?
+                                 </p>
+                             </div>
+                         </div>
+                         
+                         <div className="space-y-2 mt-1">
+                             {crossTeamCandidates.slice(0, 3).map((candidate, idx) => {
+                                 const isArchived = "isArchived" in candidate.player && typeof (candidate.player as {isArchived?: boolean}).isArchived === "boolean" ? (candidate.player as {isArchived?: boolean}).isArchived : false;
+                                 return (
+                                     <div key={`${candidate.player.id}-${idx}`} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 bg-secondary rounded-xl border border-brand-blue/5">
+                                         <div>
+                                             <div className="flex items-center gap-2">
+                                                 <span className="text-sm font-bold text-text-primary">{candidate.player.name}</span>
+                                                 {isArchived && <span className="text-[10px] uppercase font-bold text-orange-500 bg-orange-50 dark:bg-orange-900/30 px-1.5 py-0.5 rounded">Archived</span>}
+                                             </div>
+                                             <p className="text-xs text-text-secondary mt-0.5 font-medium">
+                                                 {candidate.team.name} &bull; {candidate.player.role} {candidate.player.number !== undefined && candidate.player.number !== -1 ? `• #${candidate.player.number}` : ''}
+                                             </p>
+                                         </div>
+                                         <div className="flex flex-row gap-2 shrink-0">
+                                             <button
+                                                 type="button"
+                                                 onClick={() => handleUseExisting(candidate)}
+                                                 className="px-3.5 py-1.5 bg-brand-blue text-white rounded-xl text-xs font-bold transition-all hover:bg-brand-blue/90 cursor-pointer shadow-sm"
+                                             >
+                                                 Use Existing
+                                             </button>
+                                         </div>
+                                     </div>
+                                 );
+                             })}
+                             {crossTeamCandidates.length > 3 && (
+                                 <p className="text-xs text-text-secondary text-center italic mt-2">
+                                     + {crossTeamCandidates.length - 3} more match(es)
+                                 </p>
+                             )}
+                         </div>
+                     </div>
+                 )}
+
+                 {/* Selected Existing Player Banner */}
+                 {selectedExistingPlayer && (
+                     <div className="bg-green-500/10 border border-green-500/20 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 dark:bg-green-500/5">
+                         <div className="flex items-start gap-2.5">
+                             <CheckCircle2 className="w-5 h-5 text-green-500 shrink-0 mt-0.5" />
+                             <div>
+                                 <h4 className="text-sm font-bold text-green-600 dark:text-green-400">Linked to existing profile</h4>
+                                 <p className="text-xs text-text-secondary mt-0.5">
+                                     <span className="font-semibold text-text-primary">{selectedExistingPlayer.player.name}</span> from {selectedExistingPlayer.team.name}
+                                 </p>
+                             </div>
+                         </div>
+                         <button
+                             type="button"
+                             onClick={handleCreateNewAnyway}
+                             className="px-3 py-1.5 bg-secondary text-text-secondary rounded-xl text-xs font-bold transition-all hover:bg-gray-100 dark:hover:bg-white/5 cursor-pointer shrink-0"
+                         >
+                             Unlink
+                         </button>
+                     </div>
                  )}
                  
                  <div>

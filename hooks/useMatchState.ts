@@ -2,11 +2,12 @@ import { useCallback } from 'react';
 import type React from 'react';
 import type { Tournament, Team, Match, Toss, Innings, Ball } from '../types';
 import { PlayerRole, BattingStatus } from '../types';
-import { generateEntityId, createTimestamp, createSyncMetadata } from '../utils/idGenerator';
+import { generateEntityId, createTimestamp, createSyncMetadata, generateGlobalPlayerId } from '../utils/idGenerator';
 import { calculateStats, rebuildInnings, determineWinner, calculatePointsTable } from '../utils/cricketLogic';
 import { generateDefaultRoles, LOGO_OPTIONS } from '../utils/initialData';
 import { getMaxPlayers } from '../utils/matchConfig';
 import { normalizeTeam, makeTeamPairKey, matchBelongsToRivalry, makeLegacyNameRivalryKey, detectDuplicateTeams } from '../utils/teamNormalization';
+import { buildMatchPlayerSnapshots } from '../utils/playerSnapshots';
 
 export const getNextTournamentMatchNumber = (tournamentId: string, allMatches: Match[]): number => {
     if (!tournamentId || tournamentId === 't_quick_matches') return 1;
@@ -198,7 +199,7 @@ export const useMatchState = (
                     const entityId = generateEntityId();
                     return {
                         id: `p_${entityId}`,
-                        globalPlayerId: `gp_${entityId}`,
+                        globalPlayerId: generateGlobalPlayerId(),
                         number: i + 1,
                         name: `Player ${i + 1}`,
                         role: defaultRoles[i] || PlayerRole.BATSMAN,
@@ -336,11 +337,23 @@ export const useMatchState = (
     const updateToss = useCallback((matchId: string, toss: Toss) => {
         setMatches(prev => prev.map(m => {
             if (m.id === matchId) {
-                return { ...m, toss, updatedAt: createTimestamp() };
+                const updatedMatch = { ...m, toss, updatedAt: createTimestamp() };
+                if (!updatedMatch.playerSnapshots) {
+                    const team1 = teams.find(t => t.id === updatedMatch.team1Id);
+                    const team2 = teams.find(t => t.id === updatedMatch.team2Id);
+                    if (team1 && team2) {
+                        updatedMatch.playerSnapshots = buildMatchPlayerSnapshots({ match: updatedMatch, team1, team2 });
+                        updatedMatch.team1CaptainSnapshotId = team1.captainId;
+                        updatedMatch.team2CaptainSnapshotId = team2.captainId;
+                        updatedMatch.team1ViceCaptainSnapshotId = team1.viceCaptainId;
+                        updatedMatch.team2ViceCaptainSnapshotId = team2.viceCaptainId;
+                    }
+                }
+                return updatedMatch;
             }
             return m;
         }));
-    }, [setMatches]);
+    }, [setMatches, teams]);
 
     const startMatch = useCallback((matchId: string) => {
          setMatches(prev => prev.map(m => {
@@ -367,11 +380,31 @@ export const useMatchState = (
                     manualOverrides: [],
                 };
 
-                return { ...m, status: 'live' as const, isDraft: false, innings1, updatedAt: createTimestamp() };
+                const updatedMatch: Match = { 
+                    ...m, 
+                    status: 'live' as const, 
+                    isDraft: false, 
+                    innings1, 
+                    updatedAt: createTimestamp() 
+                };
+                
+                if (!updatedMatch.playerSnapshots) {
+                    const team1 = teams.find(t => t.id === updatedMatch.team1Id);
+                    const team2 = teams.find(t => t.id === updatedMatch.team2Id);
+                    if (team1 && team2) {
+                        updatedMatch.playerSnapshots = buildMatchPlayerSnapshots({ match: updatedMatch, team1, team2 });
+                        updatedMatch.team1CaptainSnapshotId = team1.captainId;
+                        updatedMatch.team2CaptainSnapshotId = team2.captainId;
+                        updatedMatch.team1ViceCaptainSnapshotId = team1.viceCaptainId;
+                        updatedMatch.team2ViceCaptainSnapshotId = team2.viceCaptainId;
+                    }
+                }
+                
+                return updatedMatch;
             }
             return m;
         }));
-    }, [setMatches]);
+    }, [setMatches, teams]);
     
     const endMatch = useCallback((matchId: string) => {
         const matchToEnd = matches.find(m => m.id === matchId);
@@ -533,6 +566,19 @@ export const useMatchState = (
             const currentInnings = m[currentInningsKey];
             if (!currentInnings) return m;
 
+            let updatedMatch = { ...m };
+            if (!updatedMatch.playerSnapshots) {
+                const team1 = teams.find(t => t.id === updatedMatch.team1Id);
+                const team2 = teams.find(t => t.id === updatedMatch.team2Id);
+                if (team1 && team2) {
+                    updatedMatch.playerSnapshots = buildMatchPlayerSnapshots({ match: updatedMatch, team1, team2 });
+                    updatedMatch.team1CaptainSnapshotId = team1.captainId;
+                    updatedMatch.team2CaptainSnapshotId = team2.captainId;
+                    updatedMatch.team1ViceCaptainSnapshotId = team1.viceCaptainId;
+                    updatedMatch.team2ViceCaptainSnapshotId = team2.viceCaptainId;
+                }
+            }
+
             const ballWithMetadata = {
                 ...ball,
                 ballId: generateEntityId(),
@@ -543,9 +589,9 @@ export const useMatchState = (
             const { updatedInnings } = calculateStats(currentInnings, ballWithMetadata);
             console.log('[useMatchState] BALL_RECORDED:', ballWithMetadata.ballId, 'Match:', matchId);
             
-            if (currentInningsKey === 'innings2' && m.innings1 && updatedInnings.score > m.innings1.score) {
+            if (currentInningsKey === 'innings2' && updatedMatch.innings1 && updatedInnings.score > updatedMatch.innings1.score) {
                 return {
-                    ...m,
+                    ...updatedMatch,
                     innings2: updatedInnings,
                     status: 'completed',
                     winnerId: updatedInnings.battingTeamId,
@@ -554,11 +600,11 @@ export const useMatchState = (
             }
 
             const battingTeam = teams.find(t => t.id === updatedInnings.battingTeamId);
-            const parentTournament = m.tournamentId ? tournaments.find(t => t.id === m.tournamentId) : undefined;
-            const maxPlayers = getMaxPlayers(m, parentTournament);
+            const parentTournament = updatedMatch.tournamentId ? tournaments.find(t => t.id === updatedMatch.tournamentId) : undefined;
+            const maxPlayers = getMaxPlayers(updatedMatch, parentTournament);
             const totalPlayers = battingTeam?.players?.length > 0 ? battingTeam.players.length : maxPlayers;
             const isAllOut = updatedInnings.wickets >= totalPlayers - 1;
-            const isOversFinished = updatedInnings.overs >= m.oversPerInnings;
+            const isOversFinished = updatedInnings.overs >= updatedMatch.oversPerInnings;
 
             if (isAllOut || isOversFinished) {
                  if (currentInningsKey === 'innings1') {
@@ -576,14 +622,14 @@ export const useMatchState = (
                         lastBowlerId: null,
                         manualOverrides: [],
                      };
-                     return { ...m, innings1: updatedInnings, innings2: newInnings2, updatedAt: createTimestamp() };
-                 } else if (currentInningsKey === 'innings2' && m.innings1) {
-                    const winnerId = determineWinner(m.innings1, updatedInnings);
-                    return { ...m, innings2: updatedInnings, status: 'completed', winnerId, updatedAt: createTimestamp() };
+                     return { ...updatedMatch, innings1: updatedInnings, innings2: newInnings2, updatedAt: createTimestamp() };
+                 } else if (currentInningsKey === 'innings2' && updatedMatch.innings1) {
+                    const winnerId = determineWinner(updatedMatch.innings1, updatedInnings);
+                    return { ...updatedMatch, innings2: updatedInnings, status: 'completed', winnerId, updatedAt: createTimestamp() };
                  }
             }
             
-            return { ...m, [currentInningsKey]: updatedInnings, updatedAt: createTimestamp() };
+            return { ...updatedMatch, [currentInningsKey]: updatedInnings, updatedAt: createTimestamp() };
         }));
     }, [teams, setMatches, tournaments]);
     

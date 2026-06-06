@@ -1,4 +1,5 @@
-import { Team } from '../types';
+import { Team, Player } from '../types';
+import { ensurePlayerHasGlobalId } from './idGenerator';
 
 /**
  * Team identity must always be based on team.id.
@@ -39,7 +40,7 @@ export const normalizeTeam = (team: Partial<Team> & { name: string }): Team => {
     const ownerId = team.ownerId;
     const name = team.name ? team.name.trim() : 'Unnamed Team';
     const logo = team.logo || '#3B82F6';
-    const players = Array.isArray(team.players) ? team.players : [];
+    const players = Array.isArray(team.players) ? team.players.map(ensurePlayerHasGlobalId) : [];
     const captainId = team.captainId === undefined ? null : team.captainId;
     const viceCaptainId = team.viceCaptainId === undefined ? null : team.viceCaptainId;
     const createdAt = team.createdAt || now;

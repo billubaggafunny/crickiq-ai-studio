@@ -1,11 +1,14 @@
 import React, { useMemo, useCallback } from 'react';
-import { Innings, Team } from '../types';
+import { Innings, Team, Match } from '../types';
 import { generateCommentaryData, getBallDisplay } from '../utils/cricketLogic';
+import { getPlayerDisplayFromSnapshot } from '../utils/playerSnapshots';
 
 interface MatchCommentaryProps {
     innings: Innings;
     battingTeam: Team;
     bowlingTeam: Team;
+    match: Match;
+    teams: Team[];
 }
 
 const CommentaryFeedDisplay: React.FC<{ data: ReturnType<typeof generateCommentaryData> }> = ({ data }) => {
@@ -38,10 +41,10 @@ const CommentaryFeedDisplay: React.FC<{ data: ReturnType<typeof generateCommenta
     );
 };
 
-const MatchCommentary: React.FC<MatchCommentaryProps> = ({ innings, battingTeam, bowlingTeam }) => {
+const MatchCommentary: React.FC<MatchCommentaryProps> = ({ innings, match, teams }) => {
     const getPlayerName = useCallback((id: string) => {
-        return bowlingTeam?.players.find(p => p.id === id)?.name || battingTeam?.players.find(p => p.id === id)?.name || 'Unknown';
-    }, [battingTeam, bowlingTeam]);
+        return getPlayerDisplayFromSnapshot(match, id, teams);
+    }, [match, teams]);
 
     const commentaryData = useMemo(() => generateCommentaryData(innings, getPlayerName), [innings, getPlayerName]);
 

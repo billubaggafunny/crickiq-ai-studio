@@ -92,7 +92,7 @@ export const getTeamDeleteEligibility = (
         reasons
     };
 };
-import { generateEntityId, createTimestamp, createSyncMetadata } from '../utils/idGenerator';
+import { generateEntityId, createTimestamp, createSyncMetadata, generateGlobalPlayerId } from '../utils/idGenerator';
 import { generateDefaultRoles, LOGO_OPTIONS } from '../utils/initialData';
 import { getMaxPlayers } from '../utils/matchConfig';
 import { normalizeTeam, detectDuplicateTeams } from '../utils/teamNormalization';
@@ -321,6 +321,7 @@ export const useTeamState = (
 
                 const newPlayer: Player = {
                     id: `p_${generateEntityId()}`,
+                    globalPlayerId: generateGlobalPlayerId(),
                     number,
                     name: trimmedName,
                     role,
@@ -346,6 +347,32 @@ export const useTeamState = (
                 if (updatedTeam.viceCaptainId === playerId) {
                     updatedTeam.viceCaptainId = null;
                 }
+                return updatedTeam;
+            }
+            return t;
+        }));
+    }, [setTeams]);
+
+    const archivePlayer = useCallback((teamId: string, playerId: string) => {
+        setTeams(prev => prev.map(t => {
+            if (t.id === teamId) {
+                const updatedTeam = { ...t, updatedAt: createTimestamp() };
+                updatedTeam.players = updatedTeam.players.map(p => 
+                    p.id === playerId ? { ...p, isArchived: true, archivedAt: createTimestamp(), updatedAt: createTimestamp() } : p
+                );
+                return updatedTeam;
+            }
+            return t;
+        }));
+    }, [setTeams]);
+
+    const restorePlayer = useCallback((teamId: string, playerId: string) => {
+        setTeams(prev => prev.map(t => {
+            if (t.id === teamId) {
+                const updatedTeam = { ...t, updatedAt: createTimestamp() };
+                updatedTeam.players = updatedTeam.players.map(p => 
+                    p.id === playerId ? { ...p, isArchived: false, archivedAt: null, updatedAt: createTimestamp() } : p
+                );
                 return updatedTeam;
             }
             return t;
@@ -386,6 +413,60 @@ export const useTeamState = (
         console.log('[useTeamState] TEAM_RESTORED:', teamId);
     }, [setTeams]);
 
+    const addPlayerToTeam = useCallback((teamId: string, input: {
+        name: string;
+        role: PlayerRole;
+        jerseyNumber?: number;
+        battingStyle?: string;
+        bowlingStyle?: string;
+        isCaptain?: boolean;
+        isViceCaptain?: boolean;
+        isWicketKeeper?: boolean;
+        globalPlayerId?: string;
+    }) => {
+        const trimmedName = input.name.trim();
+        if (!trimmedName || trimmedName.length < 2 || trimmedName.length > 50) {
+            console.warn('[RuntimeValidation] Invalid player name rejected.');
+            return null;
+        }
+
+        const newPlayerId = `player_${generateEntityId()}`;
+        const newPlayer = {
+            id: newPlayerId,
+            globalPlayerId: input.globalPlayerId || generateGlobalPlayerId(),
+            name: trimmedName,
+            role: input.role,
+            number: typeof input.jerseyNumber === 'number' ? input.jerseyNumber : -1,
+            battingStyle: input.battingStyle,
+            bowlingStyle: input.bowlingStyle,
+            isWicketKeeper: input.isWicketKeeper
+        };
+
+        setTeams(prevTeams => prevTeams.map(team => {
+            if (team.id === teamId) {
+                const updatedTeam = {
+                    ...team,
+                    players: [...(team.players || []), newPlayer as Player],
+                    updatedAt: createTimestamp()
+                };
+
+                // Handle leadership logic safely
+                if (input.isCaptain) {
+                    updatedTeam.captainId = newPlayerId;
+                }
+                if (input.isViceCaptain) {
+                    updatedTeam.viceCaptainId = newPlayerId;
+                }
+
+                return updatedTeam;
+            }
+            return team;
+        }));
+
+        console.log('[useTeamState] PLAYER_ADDED:', newPlayerId, 'to team:', teamId);
+        return newPlayer;
+    }, [setTeams]);
+
     const deleteTeamPermanently = useCallback((teamId: string, eligibility: DeleteEligibility) => {
         if (!eligibility || !eligibility.canDelete) {
             console.warn('[useTeamState] Deletion blocked: team is ineligible');
@@ -402,7 +483,10 @@ export const useTeamState = (
         updateTeam,
         updateTeamProfile,
         addPlayer,
+        addPlayerToTeam,
         deletePlayer,
+        archivePlayer,
+        restorePlayer,
         getTeamById,
         archiveTeam,
         restoreTeam,

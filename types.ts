@@ -43,6 +43,10 @@ export interface Player {
     number: number;
     name: string;
     role: PlayerRole;
+    isArchived?: boolean;
+    archivedAt?: string | null;
+    updatedAt?: string;
+    createdAt?: string;
 }
 
 // Team identity must always be based on team.id.
@@ -184,6 +188,21 @@ export interface Innings {
     }[];
 }
 
+export interface MatchPlayerSnapshot {
+    playerId: string;
+    globalPlayerId?: string | null;
+    name: string;
+    number?: number | string | null;
+    role?: PlayerRole | string | null;
+    battingStyle?: string | null;
+    bowlingStyle?: string | null;
+    isWicketKeeper?: boolean;
+    isCaptain?: boolean;
+    isViceCaptain?: boolean;
+    teamId: string;
+    teamSide?: "team1" | "team2";
+}
+
 export interface Match {
     id: string;
     ownerId?: string;
@@ -216,6 +235,13 @@ export interface Match {
     matchNumber?: number;
     rivalryKey?: string;
     rivalryMatchNumber?: number;
+    playerSnapshots?: Record<string, MatchPlayerSnapshot>;
+    team1CaptainSnapshotId?: string | null;
+    team2CaptainSnapshotId?: string | null;
+    team1ViceCaptainSnapshotId?: string | null;
+    team2ViceCaptainSnapshotId?: string | null;
+    team1WicketKeeperSnapshotId?: string | null;
+    team2WicketKeeperSnapshotId?: string | null;
 }
 
 export interface PlayerReplacement {

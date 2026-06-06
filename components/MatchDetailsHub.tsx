@@ -662,7 +662,9 @@ const MatchDetailsHub: React.FC<MatchDetailsHubProps> = ({
                                         <MatchCommentary 
                                             innings={match.innings1} 
                                             battingTeam={teams.find(t => t.id === match.innings1!.battingTeamId)!} 
-                                            bowlingTeam={teams.find(t => t.id === match.innings1!.bowlingTeamId)!} 
+                                            bowlingTeam={teams.find(t => t.id === match.innings1!.bowlingTeamId)!}
+                                            match={match}
+                                            teams={teams}
                                         />
                                     )
                                 ) : match.innings2 ? (
@@ -675,7 +677,9 @@ const MatchDetailsHub: React.FC<MatchDetailsHubProps> = ({
                                         <MatchCommentary 
                                             innings={match.innings2} 
                                             battingTeam={teams.find(t => t.id === match.innings2!.battingTeamId)!} 
-                                            bowlingTeam={teams.find(t => t.id === match.innings2!.bowlingTeamId)!} 
+                                            bowlingTeam={teams.find(t => t.id === match.innings2!.bowlingTeamId)!}
+                                            match={match}
+                                            teams={teams}
                                         />
                                     )
                                 ) : null}

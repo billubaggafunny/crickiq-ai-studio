@@ -18,6 +18,17 @@ export const generateEntityId = (): string => {
     });
 };
 
+export const generateGlobalPlayerId = (): string => {
+    return 'gplayer_' + generateEntityId().replace(/-/g, '').substring(0, 12);
+};
+
+export const ensurePlayerHasGlobalId = <T extends { globalPlayerId?: string | null }>(player: T): T & { globalPlayerId: string } => {
+    if (!player.globalPlayerId) {
+        return { ...player, globalPlayerId: generateGlobalPlayerId() };
+    }
+    return player as T & { globalPlayerId: string };
+};
+
 /**
  * Creates an ISO 8601 timestamp string for entity creation/updates.
  */

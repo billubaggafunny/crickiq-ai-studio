@@ -400,37 +400,39 @@ export const TeamEditorModal: React.FC<TeamEditorModalProps> = (props) => {
                                 </div>
                             </div>
                         </div>
-                    ) : (
-                        <>
-                            {!isTeamLocked && isKeeperMissing && team.players.length > 0 && (
-                                <div className="p-2 mb-4 bg-warning/20 dark:bg-warning/20 text-yellow-800 dark:text-yellow-300 text-body font-semibold rounded-md text-center">
-                                    A team of {maxPlayers} must have one designated Wicket Keeper.
-                                </div>
-                            )}
-                            {!isTeamLocked && (isCaptainMissing || isViceCaptainMissing) && team.players.length > 0 && (
-                                <div className="p-2 mb-4 bg-warning/20 dark:bg-warning/20 text-yellow-800 dark:text-yellow-300 text-body font-semibold rounded-md text-center">
-                                    {isCaptainMissing && isViceCaptainMissing ? "A Captain and Vice-Captain must be selected." : (isCaptainMissing ? "A Captain must be selected." : "A Vice-Captain must be selected.")}
-                                </div>
-                            )}
-
-                            {team.players.length === 0 ? (
-                                <div className="flex flex-col items-center justify-center p-8 text-center text-balance space-y-4">
-                                    <h4 className="text-h3 font-bold text-text-primary">No Players Added Yet</h4>
-                                    <p className="text-body text-text-secondary">Build your team before the toss.</p>
-                                    {!isTeamLocked && (
-                                        <Button onClick={handleAddPlayerClick} variant="blue" className="mt-4">
-                                            <PlusIcon /> Add Player
-                                        </Button>
+                    ) : (() => {
+                            const activePlayers = team.players.filter(p => !p.isArchived);
+                            return (
+                                <>
+                                    {!isTeamLocked && isKeeperMissing && activePlayers.length > 0 && (
+                                        <div className="p-2 mb-4 bg-warning/20 dark:bg-warning/20 text-yellow-800 dark:text-yellow-300 text-body font-semibold rounded-md text-center">
+                                            A team of {maxPlayers} must have one designated Wicket Keeper.
+                                        </div>
                                     )}
-                                </div>
-                            ) : (
-                                <div className="space-y-4">
-                                    <div className="flex justify-between items-center text-sm font-semibold text-text-secondary px-2">
-                                        <span>Team Players</span>
-                                        <span>{team.players.length} / {maxPlayers} Players Added</span>
-                                    </div>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                        {team.players.map(player => (
+                                    {!isTeamLocked && (isCaptainMissing || isViceCaptainMissing) && activePlayers.length > 0 && (
+                                        <div className="p-2 mb-4 bg-warning/20 dark:bg-warning/20 text-yellow-800 dark:text-yellow-300 text-body font-semibold rounded-md text-center">
+                                            {isCaptainMissing && isViceCaptainMissing ? "A Captain and Vice-Captain must be selected." : (isCaptainMissing ? "A Captain must be selected." : "A Vice-Captain must be selected.")}
+                                        </div>
+                                    )}
+
+                                    {activePlayers.length === 0 ? (
+                                        <div className="flex flex-col items-center justify-center p-8 text-center text-balance space-y-4">
+                                            <h4 className="text-h3 font-bold text-text-primary">No Players Added Yet</h4>
+                                            <p className="text-body text-text-secondary">Build your team before the toss.</p>
+                                            {!isTeamLocked && (
+                                                <Button onClick={handleAddPlayerClick} variant="blue" className="mt-4">
+                                                    <PlusIcon /> Add Player
+                                                </Button>
+                                            )}
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-4">
+                                            <div className="flex justify-between items-center text-sm font-semibold text-text-secondary px-2">
+                                                <span>Team Players</span>
+                                                <span>{activePlayers.length} / {maxPlayers} Players Added</span>
+                                            </div>
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                {activePlayers.map(player => (
                                             <div 
                                                 key={player.id} 
                                                 onClick={() => handlePlayerClick(player)}
@@ -462,7 +464,8 @@ export const TeamEditorModal: React.FC<TeamEditorModalProps> = (props) => {
                                 </div>
                             )}
                         </>
-                    )}
+                            );
+                        })()}
                 </div>
                 <div className="p-4 md:p-6 border-t border-gray-300 dark:border-gray-700 flex justify-between items-center gap-4 bg-primary/80 backdrop-blur-md rounded-b-2xl safe-pad-b">
                     <div className="flex-1 flex gap-2">
