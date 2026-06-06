@@ -50,6 +50,9 @@ interface MatchManagerProps extends UseCrickIQStateReturn {
     onViewMatchResult: (matchId: string) => void;
     onOpenMatchHub?: (matchId: string, returnLocation?: Record<string, unknown>) => void;
     initialView?: string;
+    initialTab?: string;
+    focusTeamId?: string;
+    originatingTeamId?: string;
 }
 
 const MatchManager: React.FC<MatchManagerProps> = (props) => {
@@ -60,11 +63,13 @@ const MatchManager: React.FC<MatchManagerProps> = (props) => {
         addTeamToTournament, removeTeamFromTournament, onViewTournament, onViewMatchResult,
         onOpenMatchHub,
         initialView,
-        addPlayerReplacement
+        addPlayerReplacement,
+        initialTab, focusTeamId
     } = props;
     const { showNotification } = useNotification();
     type View = 'tournaments' | 'schedule' | 'history' | 'teams' | 'stats' | 'points' | 'semifinals' | 'final';
-    const [view, setView] = useState<View>((initialView as View) || (selectedTournamentId ? 'teams' : 'tournaments'));
+    const resolvedInitialView = initialTab === 'fixtures' ? 'schedule' : initialView;
+    const [view, setView] = useState<View>((resolvedInitialView as View) || (selectedTournamentId ? 'teams' : 'tournaments'));
 
     const handleOpenMatchHub = (matchId: string) => {
         onOpenMatchHub?.(matchId, { matchManagerView: view });
@@ -786,7 +791,8 @@ const MatchManager: React.FC<MatchManagerProps> = (props) => {
         onContinueMatch,
         onStartMatch,
         setTossMatch,
-        onOpenMatchHub: handleOpenMatchHub
+        onOpenMatchHub: handleOpenMatchHub,
+        focusTeamId
     };
 
     const getStageTag = (match: Match) => {
@@ -808,10 +814,22 @@ const MatchManager: React.FC<MatchManagerProps> = (props) => {
         return null;
     };
 
+    const focusedTeam = focusTeamId ? getTeamById(focusTeamId) : null;
+
     return (
         <div className="space-y-6">
             {renderHeader()}
             
+            {focusedTeam && (
+                <div className="bg-brand-blue/5 border border-brand-blue/20 p-3 rounded-xl flex items-center justify-between text-sm shadow-sm">
+                    <div className="flex items-center gap-2 text-brand-blue dark:text-blue-400">
+                        <svg className="w-5 h-5 text-brand-blue/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span className="font-semibold">Viewing fixtures for {focusedTeam.name}</span>
+                    </div>
+                </div>
+            )}
             
             <MatchFilters tabs={TABS} currentView={view} onViewChange={setView} />
             

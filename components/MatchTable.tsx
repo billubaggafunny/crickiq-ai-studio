@@ -20,6 +20,7 @@ export interface MatchTableProps {
     setTossMatch: (match: Match) => void;
     onOpenMatchHub?: (matchId: string, returnLocation?: Record<string, unknown>) => void;
     handleDeleteMatch?: (id: string) => void;
+    focusTeamId?: string;
 }
 
 const MatchTable: React.FC<MatchTableProps> = ({
@@ -36,7 +37,8 @@ const MatchTable: React.FC<MatchTableProps> = ({
     onStartMatch,
     setTossMatch,
     onOpenMatchHub,
-    handleDeleteMatch
+    handleDeleteMatch,
+    focusTeamId
 }) => {
     const [matchToDelete, setMatchToDelete] = React.useState<Match | null>(null);
     const dayAfterTomorrow = new Date(today);
@@ -153,6 +155,11 @@ const MatchTable: React.FC<MatchTableProps> = ({
                                             {(!match.tournamentId || match.tournamentId === 't_quick_matches' || match.isQuickMatch) && match.rivalryMatchNumber !== undefined && match.rivalryMatchNumber !== null && (
                                                 <span className="bg-emerald-50 dark:bg-emerald-950/45 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded font-bold text-[10px] uppercase tracking-wider border border-emerald-100 dark:border-emerald-900/30">
                                                     Match - {match.rivalryMatchNumber}
+                                                </span>
+                                            )}
+                                            {focusTeamId && (match.team1Id === focusTeamId || match.team2Id === focusTeamId) && (
+                                                <span className="bg-brand-blue/10 text-brand-blue px-2 py-0.5 rounded font-bold text-[10px] uppercase tracking-wider border border-brand-blue/20">
+                                                    Team Match
                                                 </span>
                                             )}
                                         </div>

@@ -27,10 +27,18 @@ export interface TeamsPageProps {
 
 const TEAMS_FILTER_CHIPS = [
     { id: 'all', label: 'All' },
-    { id: 'community', label: 'Community' },
-    { id: 'education', label: 'Education' },
-    { id: 'professional', label: 'Professional' },
+    { id: 'quick_match', label: 'Quick Match' },
+    { id: 'tournament', label: 'Tournament' },
+    { id: 'local', label: 'Local' },
+    { id: 'club', label: 'Club' },
+    { id: 'school', label: 'School' },
+    { id: 'college', label: 'College' },
+    { id: 'corporate', label: 'Corporate' },
+    { id: 'academy', label: 'Academy' },
+    { id: 'domestic', label: 'Domestic' },
+    { id: 'franchise', label: 'Franchise' },
     { id: 'national', label: 'National' },
+    { id: 'custom', label: 'Custom' },
     { id: 'archived', label: 'Archived' }
 ];
 
@@ -108,6 +116,34 @@ const TeamsPage: React.FC<TeamsPageProps> = ({ teams, matches, tournaments, onOp
         return teams.map(t => normalizeTeam(t));
     }, [teams]);
 
+    const quickMatchTeamIds = useMemo(() => {
+        const ids = new Set<string>();
+        matches.forEach(match => {
+            const isQuick = match.isQuickMatch === true || !match.tournamentId || match.tournamentId === 't_quick_matches';
+            if (isQuick) {
+                if (match.team1Id) ids.add(match.team1Id);
+                if (match.team2Id) ids.add(match.team2Id);
+            }
+        });
+        return ids;
+    }, [matches]);
+
+    const tournamentTeamIds = useMemo(() => {
+        const ids = new Set<string>();
+        tournaments.forEach(tournament => {
+            const isPseudoQuick =
+                tournament.id === "t_quick_matches" ||
+                tournament.isQuickMatch === true ||
+                tournament.type === "quick" ||
+                tournament.format === "quick";
+
+            if (!isPseudoQuick) {
+                tournament.teamIds?.forEach(id => ids.add(id));
+            }
+        });
+        return ids;
+    }, [tournaments]);
+
     const filteredTeams = useMemo(() => {
         return processedTeams.filter(team => {
             // Apply Search Filtering (name, short name, initials)
@@ -124,21 +160,15 @@ const TeamsPage: React.FC<TeamsPageProps> = ({ teams, matches, tournaments, onOp
                 return !team.isArchived;
             } else if (activeFilter === 'archived') {
                 return team.isArchived;
-            } else if (activeFilter === 'community') {
-                const type = (team.teamType || 'custom').toLowerCase();
-                return !team.isArchived && (type === 'local' || type === 'club' || type === 'custom');
-            } else if (activeFilter === 'education') {
-                const type = (team.teamType || '').toLowerCase();
-                return !team.isArchived && (type === 'school' || type === 'college' || type === 'academy');
-            } else if (activeFilter === 'professional') {
-                const type = (team.teamType || '').toLowerCase();
-                return !team.isArchived && (type === 'corporate' || type === 'domestic' || type === 'franchise');
-            } else if (activeFilter === 'national') {
-                return !team.isArchived && (team.teamType || '').toLowerCase() === 'national';
+            } else if (activeFilter === 'quick_match') {
+                return !team.isArchived && quickMatchTeamIds.has(team.id);
+            } else if (activeFilter === 'tournament') {
+                return !team.isArchived && tournamentTeamIds.has(team.id);
+            } else {
+                return !team.isArchived && (team.teamType || 'custom').toLowerCase() === activeFilter;
             }
-            return !team.isArchived;
         });
-    }, [processedTeams, searchQuery, activeFilter]);
+    }, [processedTeams, searchQuery, activeFilter, quickMatchTeamIds, tournamentTeamIds]);
 
     // Sorting implementation
     const sortedTeams = useMemo(() => {

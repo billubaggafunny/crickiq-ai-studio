@@ -1,7 +1,7 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
     ChevronLeft, Users, Trophy, Activity, Award, Settings, 
-    Layers, MapPin, ShieldAlert, Sparkles, AlertTriangle, Calendar,
+    Layers, MapPin, ShieldAlert, AlertTriangle, Calendar,
     Search, ChevronRight, CheckCircle2, Archive, Info, Lock
 } from 'lucide-react';
 import CrickIQCard from './CrickIQCard';
@@ -74,7 +74,6 @@ const TABS = [
     { id: 'matches', label: 'Matches', icon: <Activity className="w-4 h-4" /> },
     { id: 'tournaments', label: 'Tournaments', icon: <Trophy className="w-4 h-4" /> },
     { id: 'stats', label: 'Stats', icon: <Award className="w-4 h-4" /> },
-    { id: 'records', label: 'Records', icon: <Sparkles className="w-4 h-4" /> },
     { id: 'settings', label: 'Settings', icon: <Settings className="w-4 h-4" /> }
 ];
 
@@ -146,7 +145,16 @@ const TeamDetailsHub: React.FC<TeamDetailsHubProps> = ({
     getTeamDeleteEligibility
 }) => {
     const { showNotification } = useNotification();
-    const [activeTab, setActiveTab] = useState(initialTab || 'overview');
+    const [activeTab, setActiveTab] = useState(() => {
+        const t = initialTab || 'overview';
+        return t === 'records' ? 'stats' : t;
+    });
+
+    useEffect(() => {
+        if (activeTab === 'records') {
+            setActiveTab('stats');
+        }
+    }, [activeTab]);
     const [isEditTeamOpen, setIsEditTeamOpen] = useState(false);
     const [isArchiveConfirmOpen, setIsArchiveConfirmOpen] = useState(false);
     const [isRestoreConfirmOpen, setIsRestoreConfirmOpen] = useState(false);
@@ -253,6 +261,11 @@ const TeamDetailsHub: React.FC<TeamDetailsHubProps> = ({
     const participatedTournaments = useMemo(() => {
         if (!teamId) return [];
         return tournaments.filter(t => {
+            // Do not show the pseudo quick match tournament or any quick-match containers
+            if (t.id === 't_quick_matches' || t.isQuickMatch === true || t.type === 'quick' || t.format === 'quick') {
+                return false;
+            }
+
             // direct check
             const isDirectMember = t.teamIds && Array.isArray(t.teamIds) && t.teamIds.includes(teamId);
             if (isDirectMember) return true;
@@ -1787,7 +1800,10 @@ const TeamDetailsHub: React.FC<TeamDetailsHubProps> = ({
                                                                 tournamentSearchQuery,
                                                                 tournamentSelectedFilter,
                                                                 tournamentSortOrder,
-                                                                visibleTournamentCount
+                                                                visibleTournamentCount,
+                                                                preferredTournamentTab: 'fixtures',
+                                                                filterTeamId: teamId,
+                                                                originatingTeamId: teamId
                                                             });
                                                         }
                                                     }}
@@ -2427,7 +2443,6 @@ const TeamDetailsHub: React.FC<TeamDetailsHubProps> = ({
                                     {activeTab === 'matches' && "Historical detailed scoreboard ledgers, wagon wheels, and ball-by-ball analysis logs are coming in Phase 5."}
                                     {activeTab === 'tournaments' && "Tournament fixture scheduling, points-table history, and league standings will be added later."}
                                     {activeTab === 'stats' && "Advanced visual graphs, career averages, run-rates, strike-rates, and form metrics will be unlocked in later phases."}
-                                    {activeTab === 'records' && "Milestone charts, match-defining records, streak trackers, and legacy board logs will be added later."}
                                 </p>
                             </div>
                             <button

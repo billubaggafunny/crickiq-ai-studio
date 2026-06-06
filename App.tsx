@@ -168,6 +168,9 @@ const AppUI: React.FC = () => {
         tournamentSelectedFilter?: string;
         tournamentSortOrder?: 'recent' | 'name' | 'status' | 'matches';
         visibleTournamentCount?: number;
+        preferredTournamentTab?: string;
+        filterTeamId?: string;
+        originatingTeamId?: string;
     } | null>(null);
     const [matchHubReturnLocation, setMatchHubReturnLocation] = useState<{
         activeTab: string;
@@ -841,6 +844,9 @@ const AppUI: React.FC = () => {
                             onViewMatchResult={handleViewScorecard}
                             onOpenMatchHub={openMatchHub}
                             initialView={matchHubReturnLocation?.matchManagerView}
+                            initialTab={tournamentReturnState?.preferredTournamentTab}
+                            focusTeamId={tournamentReturnState?.filterTeamId}
+                            originatingTeamId={tournamentReturnState?.originatingTeamId}
                         />
                     </ErrorBoundary>
                 );

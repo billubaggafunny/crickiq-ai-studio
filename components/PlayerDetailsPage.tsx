@@ -771,63 +771,73 @@ const PlayerDetailsView: React.FC<PlayerDetailsPageProps> = ({
                 </div>
 
                 <div className="p-4 space-y-4">
-                    {/* Match Context */}
-                    <div className="bg-primary rounded-xl border border-brand-blue/10 overflow-hidden shadow-sm">
-                        <div className="px-4 py-3 border-b border-brand-blue/10 bg-brand-blue/5 flex items-center gap-2">
-                            <Info size={16} className="text-brand-blue" />
-                            <h3 className="font-bold text-sm text-brand-blue">Match Context</h3>
-                        </div>
-                        <div className="p-4 space-y-3">
-                            <div className="flex justify-between">
-                                <span className="text-sm text-text-secondary">Match Name</span>
-                                <span className="text-sm font-medium text-text-primary text-right">{matchName}</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-sm text-text-secondary">Match Type</span>
-                                <span className="text-sm font-medium text-text-primary">{match.isQuickMatch ? 'Quick Match' : 'Tournament Match'}</span>
-                            </div>
-                            {tournament?.name && (
-                                <div className="flex justify-between">
-                                    <span className="text-sm text-text-secondary">Tournament</span>
-                                    <span className="text-sm font-medium text-text-primary text-right">{tournament.name}</span>
+                    {match ? (
+                        <>
+                            {/* Match Context */}
+                            <div className="bg-primary rounded-xl border border-brand-blue/10 overflow-hidden shadow-sm">
+                                <div className="px-4 py-3 border-b border-brand-blue/10 bg-brand-blue/5 flex items-center gap-2">
+                                    <Info size={16} className="text-brand-blue" />
+                                    <h3 className="font-bold text-sm text-brand-blue">Match Context</h3>
                                 </div>
-                            )}
-                            <div className="flex justify-between">
-                                <span className="text-sm text-text-secondary">Status</span>
-                                <span className="text-sm font-medium text-text-primary capitalize">{match.status}</span>
+                                <div className="p-4 space-y-3">
+                                    <div className="flex justify-between">
+                                        <span className="text-sm text-text-secondary">Match Name</span>
+                                        <span className="text-sm font-medium text-text-primary text-right">{matchName}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-sm text-text-secondary">Match Type</span>
+                                        <span className="text-sm font-medium text-text-primary">{match?.isQuickMatch ? 'Quick Match' : 'Tournament Match'}</span>
+                                    </div>
+                                    {tournament?.name && (
+                                        <div className="flex justify-between">
+                                            <span className="text-sm text-text-secondary">Tournament</span>
+                                            <span className="text-sm font-medium text-text-primary text-right">{tournament.name}</span>
+                                        </div>
+                                    )}
+                                    <div className="flex justify-between">
+                                        <span className="text-sm text-text-secondary">Status</span>
+                                        <span className="text-sm font-medium text-text-primary capitalize">{match?.status}</span>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    </div>
 
-                    {/* Participation Snapshot */}
-                    <div className="bg-primary rounded-xl border border-brand-blue/10 overflow-hidden shadow-sm">
-                        <div className="px-4 py-3 border-b border-brand-blue/10 bg-brand-blue/5 flex items-center gap-2">
-                            <Info size={16} className="text-brand-blue" />
-                            <h3 className="font-bold text-sm text-brand-blue">Participation Snapshot</h3>
+                            {/* Participation Snapshot */}
+                            <div className="bg-primary rounded-xl border border-brand-blue/10 overflow-hidden shadow-sm">
+                                <div className="px-4 py-3 border-b border-brand-blue/10 bg-brand-blue/5 flex items-center gap-2">
+                                    <Info size={16} className="text-brand-blue" />
+                                    <h3 className="font-bold text-sm text-brand-blue">Participation Snapshot</h3>
+                                </div>
+                                <div className="grid grid-cols-2 divide-x divide-y divide-gray-100 dark:divide-gray-800 border-b border-gray-100 dark:border-gray-800">
+                                    <div className="p-3 flex justify-between items-center bg-primary">
+                                        <span className="text-xs text-text-secondary">Has Batted</span>
+                                        <span className={`text-xs font-bold px-2 py-0.5 rounded border ${hasBatted ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800' : 'bg-secondary text-text-secondary border-gray-200 dark:border-gray-700'}`}>{hasBatted ? 'Yes' : 'No'}</span>
+                                    </div>
+                                    <div className="p-3 flex justify-between items-center bg-primary">
+                                        <span className="text-xs text-text-secondary">Has Bowled</span>
+                                        <span className={`text-xs font-bold px-2 py-0.5 rounded border ${hasBowled ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800' : 'bg-secondary text-text-secondary border-gray-200 dark:border-gray-700'}`}>{hasBowled ? 'Yes' : 'No'}</span>
+                                    </div>
+                                    <div className="p-3 flex justify-between items-center bg-primary">
+                                        <span className="text-xs text-text-secondary">Is Out</span>
+                                        <span className={`text-xs font-bold px-2 py-0.5 rounded border ${isOut ? 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800' : 'bg-secondary text-text-secondary border-gray-200 dark:border-gray-700'}`}>{isOut ? 'Yes' : 'No'}</span>
+                                    </div>
+                                    <div className="p-3 flex justify-between items-center bg-primary">
+                                        <span className="text-xs text-text-secondary">Current Batter</span>
+                                        <span className={`text-xs font-bold px-2 py-0.5 rounded border ${isCurrentBatter ? 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800' : 'bg-secondary text-text-secondary border-gray-200 dark:border-gray-700'}`}>{isCurrentBatter ? 'Yes' : 'No'}</span>
+                                    </div>
+                                    <div className="p-3 flex justify-between items-center bg-primary">
+                                        <span className="text-xs text-text-secondary">Current Bowler</span>
+                                        <span className={`text-xs font-bold px-2 py-0.5 rounded border ${isCurrentBowler ? 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800' : 'bg-secondary text-text-secondary border-gray-200 dark:border-gray-700'}`}>{isCurrentBowler ? 'Yes' : 'No'}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </>
+                    ) : (
+                        <div className="bg-primary rounded-xl border border-brand-blue/10 overflow-hidden shadow-sm p-6 text-center">
+                            <Info size={24} className="text-brand-blue/50 mx-auto mb-2" />
+                            <h3 className="font-bold text-sm text-text-primary mb-1">Global Player View</h3>
+                            <p className="text-xs text-text-secondary">Match-specific stats are not available from this view.</p>
                         </div>
-                        <div className="grid grid-cols-2 divide-x divide-y divide-gray-100 dark:divide-gray-800 border-b border-gray-100 dark:border-gray-800">
-                            <div className="p-3 flex justify-between items-center bg-primary">
-                                <span className="text-xs text-text-secondary">Has Batted</span>
-                                <span className={`text-xs font-bold px-2 py-0.5 rounded border ${hasBatted ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800' : 'bg-secondary text-text-secondary border-gray-200 dark:border-gray-700'}`}>{hasBatted ? 'Yes' : 'No'}</span>
-                            </div>
-                            <div className="p-3 flex justify-between items-center bg-primary">
-                                <span className="text-xs text-text-secondary">Has Bowled</span>
-                                <span className={`text-xs font-bold px-2 py-0.5 rounded border ${hasBowled ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800' : 'bg-secondary text-text-secondary border-gray-200 dark:border-gray-700'}`}>{hasBowled ? 'Yes' : 'No'}</span>
-                            </div>
-                            <div className="p-3 flex justify-between items-center bg-primary">
-                                <span className="text-xs text-text-secondary">Is Out</span>
-                                <span className={`text-xs font-bold px-2 py-0.5 rounded border ${isOut ? 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800' : 'bg-secondary text-text-secondary border-gray-200 dark:border-gray-700'}`}>{isOut ? 'Yes' : 'No'}</span>
-                            </div>
-                            <div className="p-3 flex justify-between items-center bg-primary">
-                                <span className="text-xs text-text-secondary">Current Batter</span>
-                                <span className={`text-xs font-bold px-2 py-0.5 rounded border ${isCurrentBatter ? 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800' : 'bg-secondary text-text-secondary border-gray-200 dark:border-gray-700'}`}>{isCurrentBatter ? 'Yes' : 'No'}</span>
-                            </div>
-                            <div className="p-3 flex justify-between items-center bg-primary">
-                                <span className="text-xs text-text-secondary">Current Bowler</span>
-                                <span className={`text-xs font-bold px-2 py-0.5 rounded border ${isCurrentBowler ? 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800' : 'bg-secondary text-text-secondary border-gray-200 dark:border-gray-700'}`}>{isCurrentBowler ? 'Yes' : 'No'}</span>
-                            </div>
-                        </div>
-                    </div>
+                    )}
 
                     {/* Notes Section */}
                     {(retiredNote || replacementNote) && (
