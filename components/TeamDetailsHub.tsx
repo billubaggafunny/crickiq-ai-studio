@@ -892,20 +892,6 @@ const TeamDetailsHub: React.FC<TeamDetailsHubProps> = ({
         });
     }, [matches, teamId, teams]);
 
-    // Helper to format match score line or status result nicely
-    const renderMatchResult = (match: Match) => {
-        if (match.status === 'live') {
-            return <span className="text-red-500 font-bold animate-pulse uppercase tracking-wider text-[11px]">Live Scored</span>;
-        }
-        if (match.status === 'draft') {
-            return <span className="text-yellow-600 dark:text-yellow-400 font-bold uppercase tracking-wider text-[11px]">Draft</span>;
-        }
-        if (match.resultSummary) {
-            return <span className="text-brand-blue font-semibold text-xs">{match.resultSummary}</span>;
-        }
-        return <span className="text-text-secondary text-xs">Match Finished (No summary)</span>;
-    };
-
     // Safe error screen if team doesn't exist
     if (!team) {
         return (
@@ -1166,32 +1152,119 @@ const TeamDetailsHub: React.FC<TeamDetailsHubProps> = ({
                                             const opponentRaw = teams.find(t => t.id === opponentId);
                                             const opponent = opponentRaw ? normalizeTeam(opponentRaw) : null;
                                             
+                                            // Resolve Context-Aware Result
+                                            const isTie = match.winnerId === 'draw' || match.winnerId === 'tie';
+                                            const isWinner = match.winnerId === teamId;
+                                            let resultText = 'Result not available';
+                                            
+                                            if (match.wasAbandoned) {
+                                                resultText = 'No Result';
+                                            } else if (isTie) {
+                                                resultText = 'Match Tied';
+                                            } else if (match.winnerId) {
+                                                let marginText = '';
+                                                if (match.innings2 && match.winnerId === match.innings2.battingTeamId) {
+                                                    let totalPlayers = 11;
+                                                    const squadIds = match.team1Id === match.winnerId ? (match.team1SquadIds || []) : (match.team2SquadIds || []);
+                                                    if (squadIds.length > 0) {
+                                                        totalPlayers = squadIds.length;
+                                                    } else if (match.numberOfPlayers) {
+                                                        totalPlayers = match.numberOfPlayers;
+                                                    }
+                                                    const wicketsLeft = Math.max(0, totalPlayers - 1 - (match.innings2.wickets || 0));
+                                                    marginText = `by ${wicketsLeft} Wickets`;
+                                                } else if (match.innings1 && match.winnerId === match.innings1.battingTeamId) {
+                                                    const runMargin = (match.innings1.score || 0) - (match.innings2?.score || 0);
+                                                    marginText = `by ${runMargin} Runs`;
+                                                }
+                                                
+                                                if (isWinner) {
+                                                    resultText = marginText ? `Won ${marginText}` : 'Won';
+                                                } else {
+                                                    resultText = marginText ? `Lost ${marginText}` : 'Lost';
+                                                }
+                                            } else if (match.status === 'live') {
+                                                resultText = 'Live Scored';
+                                            } else if (match.status === 'draft') {
+                                                resultText = 'Draft';
+                                            } else if (match.resultSummary) {
+                                                resultText = match.resultSummary;
+                                            }
+                                            
+                                            // Resolve MVP
+                                            let mvpText = 'Not available';
+                                            if (match.manOfTheMatchId) {
+                                                const mvpId = match.manOfTheMatchId;
+                                                const mvpPlayerRaw = team.players?.find(p => p.id === mvpId) || opponent?.players?.find(p => p.id === mvpId);
+                                                const mvpName = mvpPlayerRaw?.name || 'Unknown Player';
+                                                
+                                                let battingStats = '';
+                                                let bowlingStats = '';
+                                                
+                                                const batInnings = match.innings1?.batsmanScores?.[mvpId] || match.innings2?.batsmanScores?.[mvpId];
+                                                if (batInnings && batInnings.runs >= 0) {
+                                                    battingStats = `${batInnings.runs} (${batInnings.balls})`;
+                                                }
+                                                
+                                                const bowlInnings = match.innings1?.bowlerScores?.[mvpId] || match.innings2?.bowlerScores?.[mvpId];
+                                                if (bowlInnings && bowlInnings.wickets > 0) {
+                                                    bowlingStats = `${bowlInnings.wickets}/${bowlInnings.runs}`;
+                                                }
+                                                
+                                                let perf = '';
+                                                if (battingStats && bowlingStats) {
+                                                    perf = `${battingStats} + ${bowlingStats}`;
+                                                } else if (battingStats) {
+                                                    perf = `${battingStats}`;
+                                                } else if (bowlingStats) {
+                                                    perf = `${bowlingStats}`;
+                                                }
+                                                
+                                                mvpText = perf ? `${mvpName} — ${perf}` : mvpName;
+                                            }
+
                                             return (
                                                 <div 
                                                     key={match.id}
-                                                    className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3.5 bg-black/5 dark:bg-white/5 rounded-2xl border border-black/5 dark:border-white/5 gap-3"
+                                                    className="flex flex-col p-3.5 bg-black/5 dark:bg-white/5 rounded-2xl border border-black/5 dark:border-white/5 gap-3"
                                                 >
-                                                    <div className="flex items-center gap-3">
-                                                        {/* Color chip representing opponent logo */}
-                                                        <div 
-                                                            className="w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold text-white uppercase shrink-0"
-                                                            style={{ backgroundColor: opponent?.logoColor || opponent?.logo || '#A1A1AA' }}
-                                                        >
-                                                            {opponent?.teamInitials || 'OP'}
-                                                        </div>
-                                                        <div className="space-y-0.5">
-                                                            <div className="text-xs font-bold text-text-primary">
-                                                                vs {opponent?.name || 'Unknown Opponent'}
+                                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-black/5 dark:border-white/5 pb-3">
+                                                        <div className="flex items-center gap-3">
+                                                            {/* Color chip representing opponent logo */}
+                                                            <div 
+                                                                className="w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold text-white uppercase shrink-0"
+                                                                style={{ backgroundColor: opponent?.logoColor || opponent?.logo || '#A1A1AA' }}
+                                                            >
+                                                                {opponent?.teamInitials || 'OP'}
                                                             </div>
-                                                            <div className="text-[10px] text-text-secondary flex items-center gap-1">
-                                                                <Calendar className="w-3 h-3 shrink-0 text-gray-400" />
-                                                                {match.createdAt ? new Date(match.createdAt).toLocaleDateString() : 'Unknown Date'}
-                                                                {match.tournamentId && <span className="text-brand-blue ml-1 font-bold">● League</span>}
+                                                            <div className="space-y-0.5">
+                                                                <div className="text-xs font-bold text-text-primary">
+                                                                    vs {opponent?.name || 'Unknown Opponent'}
+                                                                </div>
+                                                                <div className="text-[10px] text-text-secondary flex items-center gap-1">
+                                                                    <Calendar className="w-3 h-3 shrink-0 text-gray-400" />
+                                                                    {match.date ? new Date((match.date || '').replace(/-/g, '/')).toLocaleDateString() : 'Unknown Date'}
+                                                                    {match.tournamentId && match.tournamentId !== 't_quick_matches' && <span className="text-brand-blue ml-1 font-bold">● League</span>}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div className="text-left sm:text-right">
+                                                            <div className="text-xs font-bold text-text-primary">
+                                                                <span className="text-text-muted mr-1 font-medium">Result:</span>
+                                                                <span className={isWinner ? "text-green-600 dark:text-green-400" : (match.winnerId && !isTie ? "text-red-500" : "text-text-primary")}>
+                                                                    {resultText}
+                                                                </span>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <div className="text-right sm:text-right">
-                                                        {renderMatchResult(match)}
+                                                    
+                                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pl-11 sm:pl-0 sm:pr-2">
+                                                        <div className="text-left sm:flex-1 sm:text-right">
+                                                            <div className="text-xs font-bold text-text-primary">
+                                                                <span className="text-text-muted mr-1 font-medium">MVP:</span>
+                                                                {mvpText}
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             );
@@ -1208,37 +1281,31 @@ const TeamDetailsHub: React.FC<TeamDetailsHubProps> = ({
                     ) : activeTab === 'players' ? (
                         /* Read-Only Players Tab */
                         <div className="space-y-4">
-                            {/* Roster & Leadership Compact Header Card */}
-                            <CrickIQCard className="p-4 border border-brand-blue/10 dark:border-brand-blue/20 bg-primary rounded-3xl shadow-sm">
-                                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                                    <div>
-                                        <div className="text-[10px] font-extrabold uppercase tracking-widest text-text-secondary">Roster Overview</div>
-                                        <div className="text-2xl font-extrabold text-brand-blue mt-0.5">
-                                            {team.players?.length || 0} <span className="text-sm font-semibold text-text-secondary">Players</span>
-                                        </div>
+                            {/* Roster Summary Compact Header Card */}
+                            <CrickIQCard className="p-3 sm:p-4 border border-brand-blue/10 dark:border-brand-blue/20 bg-primary rounded-xl shadow-sm">
+                                <div className="flex flex-row items-center gap-4 sm:gap-6">
+                                    {/* Left Column */}
+                                    <div className="flex flex-col items-center justify-center shrink-0 min-w-[70px]">
+                                        <div className="text-3xl sm:text-4xl font-extrabold text-brand-blue leading-none">{team.players?.length || 0}</div>
+                                        <div className="text-[10px] uppercase font-bold text-text-secondary mt-1 tracking-wider">Players</div>
                                     </div>
-                                    <div className="h-px w-full sm:h-8 sm:w-px bg-brand-blue/10 shrink-0" />
-                                    <div className="flex-1 w-full grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-6 h-6 rounded-lg bg-yellow-500/10 text-yellow-600 font-extrabold text-center flex items-center justify-center text-xs border border-yellow-500/15 shrink-0">C</div>
-                                            <div className="min-w-0">
-                                                <div className="text-[10px] text-text-secondary uppercase font-bold leading-none">Captain</div>
-                                                <div className="text-xs font-bold text-text-primary truncate">{teamLeadership.captain ? teamLeadership.captain.name : 'Not set'}</div>
-                                            </div>
+
+                                    {/* Vertical Divider */}
+                                    <div className="w-px h-12 bg-brand-blue/10 shrink-0" />
+
+                                    {/* Right Column */}
+                                    <div className="flex-1 flex flex-col gap-1.5 justify-center min-w-0">
+                                        <div className="flex items-center text-sm gap-2">
+                                            <span className="bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 text-[9px] font-extrabold px-1.5 py-0.5 rounded-md border border-yellow-500/15 leading-none w-8 text-center shrink-0">C</span>
+                                            <span className="text-text-primary font-bold truncate flex-1">{teamLeadership.captain ? teamLeadership.captain.name : 'Not set'}</span>
                                         </div>
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-6 h-6 rounded-lg bg-slate-500/10 text-slate-500 font-extrabold text-center flex items-center justify-center text-xs border border-slate-500/15 shrink-0">VC</div>
-                                            <div className="min-w-0">
-                                                <div className="text-[10px] text-text-secondary uppercase font-bold leading-none">Vice Captain</div>
-                                                <div className="text-xs font-bold text-text-primary truncate">{teamLeadership.viceCaptain ? teamLeadership.viceCaptain.name : 'Not set'}</div>
-                                            </div>
+                                        <div className="flex items-center text-sm gap-2">
+                                            <span className="bg-slate-500/10 text-slate-500 dark:text-slate-300 text-[9px] font-extrabold px-1.5 py-0.5 rounded-md border border-slate-500/15 leading-none w-8 text-center shrink-0">VC</span>
+                                            <span className="text-text-primary font-bold truncate flex-1">{teamLeadership.viceCaptain ? teamLeadership.viceCaptain.name : 'Not set'}</span>
                                         </div>
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-6 h-6 rounded-lg bg-green-500/10 text-green-600 font-extrabold text-center flex items-center justify-center text-xs border border-green-500/15 shrink-0">WK</div>
-                                            <div className="min-w-0">
-                                                <div className="text-[10px] text-text-secondary uppercase font-bold leading-none">Wicketkeeper</div>
-                                                <div className="text-xs font-bold text-text-primary truncate">{teamLeadership.wicketKeeper ? teamLeadership.wicketKeeper.name : 'Not set'}</div>
-                                            </div>
+                                        <div className="flex items-center text-sm gap-2">
+                                            <span className="bg-green-500/10 text-green-600 dark:text-green-400 text-[9px] font-extrabold px-1.5 py-0.5 rounded-md border border-green-500/15 leading-none w-8 text-center shrink-0">WK</span>
+                                            <span className="text-text-primary font-bold truncate flex-1">{teamLeadership.wicketKeeper ? teamLeadership.wicketKeeper.name : 'Not set'}</span>
                                         </div>
                                     </div>
                                 </div>
