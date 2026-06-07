@@ -592,44 +592,46 @@ export const calculatePointsTable = (
 
 export const getBallDisplay = (ball: Ball) => {
     let text = '';
-    let className = 'w-7 h-7 rounded-full flex items-center justify-center text-button ';
+    let className = 'w-7 h-7 rounded-full flex items-center justify-center font-medium leading-none tracking-tight ';
     let title = '';
 
     if (ball.isWicket) {
         text = 'W';
         if (ball.runs > 0) text = `${ball.runs}W`;
-        className += 'bg-highlight text-white';
+        className += 'bg-highlight text-white text-[11px]';
         title = `Wicket! ${ball.runs > 0 ? `+ ${ball.runs} run(s)` : ''}`;
     } else if (ball.isWide) {
         const totalRuns = ball.runs + 1;
         text = `${totalRuns}wd`;
-        className += 'bg-yellow-400/80 text-gray-900 text-[10px]';
+        className += 'bg-yellow-400/80 text-text-primary text-[11px]';
         title = `${totalRuns} run(s) from wide`;
     } else if (ball.isNoBall) {
         text = `${ball.runs}nb`;
-        className += 'bg-yellow-400/80 text-gray-900 text-[10px]';
+        className += 'bg-yellow-400/80 text-text-primary text-[11px]';
         title = `${ball.runs + 1} run(s) from no-ball`;
     } else if (ball.isBye) {
         text = `${ball.runs}b`;
-        className += 'bg-gray-200 text-gray-700 text-[10px]';
+        className += 'bg-gray-400 dark:bg-gray-600 text-white text-[11px]';
         title = `${ball.runs} bye(s)`;
     } else if (ball.isLegBye) {
         text = `${ball.runs}lb`;
-        className += 'bg-gray-200 text-gray-700 text-[10px]';
-        title = `${ball.runs} leg-bye(s)`;
-    } else if (ball.runs === 0) {
-        text = '•';
-        className += 'bg-gray-100 text-gray-500';
-        title = 'Dot ball';
+        className += 'bg-gray-400 dark:bg-gray-600 text-white text-[11px]';
+        title = `${ball.runs} leg bye(s)`;
     } else {
-        text = ball.runs.toString();
-        title = `${ball.runs} runs`;
-        if (ball.runs === 4) {
-             className += 'bg-blue-500 text-white font-bold';
-        } else if (ball.runs === 6) {
-             className += 'bg-purple-600 text-white font-bold';
+        // Normal delivery
+        text = `${ball.runs}`;
+        title = `${ball.runs} run(s)`;
+        if (ball.runs === 6) {
+             className += 'bg-purple-500 text-white text-[11px]';
+        } else if (ball.runs === 4) {
+             className += 'bg-brand-blue text-white text-[11px]';
+        } else if (ball.runs <= 3) {
+             className += 'bg-primary text-text-primary border border-black/10 dark:border-white/10 text-[11px]';
+            if (ball.runs === 0) {
+                title = 'Dot ball';
+            }
         } else {
-             className += 'bg-white border border-gray-200 text-gray-800';
+             className += 'bg-primary/50 text-text-primary border border-brand-blue/15 text-[11px]';
         }
     }
 

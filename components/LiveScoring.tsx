@@ -16,7 +16,9 @@ import {
   getDismissalText,
   calculateRunRate,
   generateCommentaryData,
+  getBallDisplay,
 } from "../utils/cricketLogic";
+import CommentaryFeedDisplay from "./CommentaryFeedDisplay";
 import { getEffectiveSquadPlayers } from "../utils/matchConfig";
 import { getRoleEmoji, SwapIcon, PlusIcon, MinusIcon } from "../constants";
 import ConfirmationModal from "./ConfirmationModal";
@@ -41,56 +43,6 @@ const Select: React.FC<React.SelectHTMLAttributes<HTMLSelectElement>> = (
   />
 );
 
-const getBallDisplay = (ball: Ball) => {
-  let text = "";
-  let className =
-    "w-7 h-7 rounded-full flex items-center justify-center font-medium leading-none tracking-tight ";
-  let title = "";
-
-  if (ball.isWicket) {
-    text = "W";
-    if (ball.runs > 0) text = `${ball.runs}W`;
-    className += "bg-highlight text-white text-[11px]";
-    title = `Wicket! ${ball.runs > 0 ? `+ ${ball.runs} run(s)` : ""}`;
-  } else if (ball.isWide) {
-    const totalRuns = ball.runs + 1;
-    text = `${totalRuns}wd`;
-    className += "bg-yellow-400/80 text-text-primary text-[11px]";
-    title = `${totalRuns} run(s) from wide`;
-  } else if (ball.isNoBall) {
-    text = `${ball.runs}nb`;
-    className += "bg-yellow-400/80 text-text-primary text-[11px]";
-    title = `${ball.runs + 1} run(s) from no-ball`;
-  } else if (ball.isBye) {
-    text = `${ball.runs}b`;
-    className += "bg-gray-400 dark:bg-gray-600 text-white text-[11px]";
-    title = `${ball.runs} bye(s)`;
-  } else if (ball.isLegBye) {
-    text = `${ball.runs}lb`;
-    className += "bg-gray-400 dark:bg-gray-600 text-white text-[11px]";
-    title = `${ball.runs} leg bye(s)`;
-  } else {
-    // Normal delivery
-    text = `${ball.runs}`;
-    title = `${ball.runs} run(s)`;
-    if (ball.runs === 6) {
-      className += "bg-purple-500 text-white text-[11px]";
-    } else if (ball.runs === 4) {
-      className += "bg-brand-blue text-white text-[11px]";
-    } else if (ball.runs <= 3) {
-      className +=
-        "bg-primary text-text-primary border border-black/10 dark:border-white/10 text-[11px]";
-      if (ball.runs === 0) {
-        title = "Dot ball";
-      }
-    } else {
-      className +=
-        "bg-primary/50 text-text-primary border border-brand-blue/15 text-[11px]";
-    }
-  }
-  return { text, className, title };
-};
-
 function usePrevious<T>(value: T): T | undefined {
   // FIX: Changed useRef<T>() to useRef<T | undefined>() to be more explicit about the ref's type,
   // which can hold either a value of type T or undefined. This helps resolve obscure tooling errors.
@@ -103,100 +55,6 @@ function usePrevious<T>(value: T): T | undefined {
   // eslint-disable-next-line react-hooks/refs
   return ref.current;
 }
-
-const CommentaryFeedDisplay: React.FC<{
-  data: ReturnType<typeof generateCommentaryData>;
-}> = ({ data }) => {
-  const [expandedOver, setExpandedOver] = useState<number | null>(null);
-
-  if (data.length === 0) {
-    return (
-      <p className="text-text-secondary text-center py-8">
-        Commentary will appear here as the match progresses.
-      </p>
-    );
-  }
-
-  return (
-    <div className="space-y-4">
-      {data.map(({ over, balls }) => {
-        const isExpanded = expandedOver === over;
-        const overRuns = balls.reduce((sum, { ball }) => {
-          let r = ball.runs;
-          if (ball.isWide || ball.isNoBall) r += 1;
-          return sum + r;
-        }, 0);
-
-        return (
-          <div
-            key={`over-${over}`}
-            className="bg-primary/30 dark:bg-white/5 border border-black/5 dark:border-white/5 rounded-2xl overflow-hidden transition-all duration-200"
-          >
-            <button
-              onClick={() => setExpandedOver(isExpanded ? null : over)}
-              className="w-full flex flex-col p-4 text-left hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
-            >
-              <div className="flex justify-between items-center w-full mb-3">
-                <h4 className="font-semibold text-text-primary text-body">
-                  Over {over}
-                </h4>
-                <div className="flex items-center gap-3">
-                  <span className="text-sm font-medium text-text-secondary">
-                    {overRuns} Runs
-                  </span>
-                  {isExpanded ? (
-                    <MinusIcon className="w-5 h-5 text-text-secondary" />
-                  ) : (
-                    <PlusIcon className="w-5 h-5 text-text-secondary" />
-                  )}
-                </div>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {balls.map(({ ball }, idx) => {
-                  const { className: ballClass, text: ballText } =
-                    getBallDisplay(ball);
-                  return (
-                    <div
-                      key={idx}
-                      className={`${ballClass} flex-shrink-0 shadow-sm`}
-                      title={ballText}
-                    >
-                      {ballText}
-                    </div>
-                  );
-                })}
-              </div>
-            </button>
-
-            {isExpanded && (
-              <div className="p-4 border-t border-black/5 dark:border-white/5 bg-white/50 dark:bg-black/20 space-y-4">
-                {balls.map(({ ball, text, displayBallNumber }, index) => {
-                  const { className: ballClass, text: ballText } =
-                    getBallDisplay(ball);
-                  return (
-                    <div key={index} className="flex gap-4 items-start">
-                      <div className="flex flex-col items-center flex-shrink-0">
-                        <div className={`${ballClass} flex-shrink-0`}>
-                          {ballText}
-                        </div>
-                        <span className="text-caption text-text-secondary font-mono mt-1">
-                          {displayBallNumber}
-                        </span>
-                      </div>
-                      <p className="text-sm text-text-primary pt-1 leading-relaxed">
-                        {text}
-                      </p>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        );
-      })}
-    </div>
-  );
-};
 
 const LiveScoring: React.FC<LiveScoringProps> = ({
   match,
