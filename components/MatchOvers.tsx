@@ -38,15 +38,18 @@ const MatchOvers: React.FC<MatchOversProps> = ({ innings, battingTeam }) => {
     if (!innings || innings.balls.length === 0) {
          return <p className="text-gray-500 text-center py-8">No overs bowled yet.</p>;
     }
+    
+    const safeBattingTeamName = battingTeam?.name || 'Batting Team';
+    const safeBattingTeamLogo = battingTeam?.logo || '#3b82f6';
 
     return (
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
              <div className="p-4 bg-gray-50/80 border-b border-gray-100 flex items-center justify-between">
                  <h3 className="font-bold text-gray-900 flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-md flex items-center justify-center text-[10px] font-bold text-white shadow-sm" style={{ backgroundColor: battingTeam.logo }}>
-                        {battingTeam.name.substring(0,2).toUpperCase()}
+                    <div className="w-6 h-6 rounded-md flex items-center justify-center text-[10px] font-bold text-white shadow-sm" style={{ backgroundColor: safeBattingTeamLogo }}>
+                        {safeBattingTeamName.substring(0,2).toUpperCase()}
                     </div>
-                    {battingTeam.name} Overs
+                    {safeBattingTeamName} Overs
                  </h3>
                  <div className="text-sm font-mono font-medium text-gray-500">Overs: {innings.overs}</div>
             </div>

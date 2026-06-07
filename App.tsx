@@ -593,12 +593,29 @@ const AppUI: React.FC = () => {
     };
 
     const handleBackFromLive = useCallback(() => {
-        if (selectedMatch?.isQuickMatch) {
-            setActiveTab('tournament');
+        const leaveAction = () => {
+             if (selectedMatch?.isQuickMatch) {
+                 setActiveTab('tournament');
+             } else {
+                 setActiveTab('matches');
+             }
+        };
+
+        if (isMatchActuallyLive) {
+            setConfirmation({
+                title: 'Leave Live Match?',
+                message: 'Your match is still live. You can continue it later from the Live tab.',
+                confirmText: 'Leave',
+                confirmVariant: 'danger',
+                onConfirm: () => {
+                    leaveAction();
+                    setConfirmation(null);
+                }
+            });
         } else {
-            setActiveTab('matches');
+            leaveAction();
         }
-    }, [selectedMatch]);
+    }, [selectedMatch, isMatchActuallyLive]);
 
     const scorecardMatchToView = useMemo(() => {
         if (!viewingScorecardMatchId) return null;
@@ -913,25 +930,28 @@ const AppUI: React.FC = () => {
                 />
             )}
             <div className={`h-screen flex flex-col font-sans ${currentThemeClass} safe-pad-b safe-pad-l safe-pad-r`}>
-                <Header 
-                    title={getScreenTitle()}
-                    showMenu={!quickMatchSetupId && activeTab !== 'live' && !selectedTournamentId}
-                    onMenuClick={() => setIsDrawerOpen(true)}
-                    showBack={!!quickMatchSetupId || activeTab === 'live' || !!selectedTournamentId}
-                    onBackClick={() => {
-                        if (quickMatchSetupId) clearQuickMatchSetup();
-                        else if (activeTab === 'live') handleBackFromLive();
-                        else if (selectedTournamentId) handleBackToTournaments();
-                    }}
-                    showSettings={!quickMatchSetupId && activeTab !== 'live' && !selectedTournamentId}
-                    onSettingsClick={() => setIsSettingsOpen(true)}
-                    showLogout={!quickMatchSetupId && activeTab !== 'live' && !selectedTournamentId}
-                    onLogoutClick={handleLogout}
-                />
+                {activeTab !== 'live' && (
+                    <Header 
+                        title={getScreenTitle()}
+                        showMenu={!quickMatchSetupId && activeTab !== 'live' && !selectedTournamentId}
+                        onMenuClick={() => setIsDrawerOpen(true)}
+                        showBack={!!quickMatchSetupId || activeTab === 'live' || !!selectedTournamentId}
+                        onBackClick={() => {
+                            if (quickMatchSetupId) clearQuickMatchSetup();
+                            else if (activeTab === 'live') handleBackFromLive();
+                            else if (selectedTournamentId) handleBackToTournaments();
+                        }}
+                        showSettings={!quickMatchSetupId && activeTab !== 'live' && !selectedTournamentId}
+                        onSettingsClick={() => setIsSettingsOpen(true)}
+                        showLogout={!quickMatchSetupId && activeTab !== 'live' && !selectedTournamentId}
+                        onLogoutClick={handleLogout}
+                    />
+                )}
                 <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
                     {/* Desktop Sidebar */}
-                    <aside className="hidden md:flex flex-col w-64 bg-white border-r border-brand-blue/10 p-4 space-y-6">
-                        <nav className="flex-grow space-y-2 mt-2">
+                    {activeTab !== 'live' && (
+                        <aside className="hidden md:flex flex-col w-64 bg-white border-r border-brand-blue/10 p-4 space-y-6">
+                            <nav className="flex-grow space-y-2 mt-2">
                             {navItems.map(item => {
                                 const isActive = activeTab === item.id;
                                 return (
@@ -951,18 +971,20 @@ const AppUI: React.FC = () => {
                             })}
                         </nav>
                     </aside>
+                    )}
                 
                 <div className="flex-1 flex flex-col overflow-hidden">
-                    <main className="container mx-auto px-4 pb-24 md:pb-4 flex-grow overflow-y-auto no-scrollbar min-h-0">
+                    <main className={`container mx-auto flex-grow min-h-0 ${activeTab === 'live' ? 'px-2 lg:px-4 overflow-hidden flex flex-col' : 'px-4 pb-24 md:pb-4 overflow-y-auto no-scrollbar'}`}>
     
     
                         {renderContent()}
                     </main>
 
                     {/* Mobile Bottom Navigation */}
-                    <footer className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-secondary/95 backdrop-blur-md border-t border-black/5 dark:border-white/5 shadow-[0_-4px_20px_rgba(0,0,0,0.03)] z-40 safe-pad-b safe-pad-l safe-pad-r rounded-t-3xl">
-                        <nav className="flex justify-around items-center h-[72px]">
-                            {navItems.map(item => {
+                    {activeTab !== 'live' && (
+                        <footer className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-secondary/95 backdrop-blur-md border-t border-black/5 dark:border-white/5 shadow-[0_-4px_20px_rgba(0,0,0,0.03)] z-40 safe-pad-b safe-pad-l safe-pad-r rounded-t-3xl">
+                            <nav className="flex justify-around items-center h-[72px]">
+                                {navItems.map(item => {
                                 const isActive = activeTab === item.id;
                                 return (
                                 <button
@@ -981,6 +1003,7 @@ const AppUI: React.FC = () => {
                             })}
                         </nav>
                     </footer>
+                    )}
                 </div>
             </div>
 

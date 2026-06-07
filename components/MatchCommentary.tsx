@@ -41,21 +41,48 @@ const CommentaryFeedDisplay: React.FC<{ data: ReturnType<typeof generateCommenta
     );
 };
 
-const MatchCommentary: React.FC<MatchCommentaryProps> = ({ innings, match, teams }) => {
+const MatchCommentary: React.FC<MatchCommentaryProps> = ({ innings, battingTeam, match, teams }) => {
     const getPlayerName = useCallback((id: string) => {
         return getPlayerDisplayFromSnapshot(match, id, teams);
     }, [match, teams]);
 
     const commentaryData = useMemo(() => generateCommentaryData(innings, getPlayerName), [innings, getPlayerName]);
 
+    const getBattingTeamName = () => {
+        if (battingTeam?.name) return battingTeam.name;
+        
+        // Try finding by team1Id / team2Id
+        if (match) {
+            if (match.team1Id === innings.battingTeamId) {
+                const t = teams.find(t => t.id === match.team1Id);
+                if (t) return t.name;
+                return "Team 1";
+            }
+            if (match.team2Id === innings.battingTeamId) {
+                const t = teams.find(t => t.id === match.team2Id);
+                if (t) return t.name;
+                return "Team 2";
+            }
+        }
+        return "Batting Team";
+    };
+
+    const getBattingTeamLogo = () => {
+        if (battingTeam?.logo) return battingTeam.logo;
+        return '#3b82f6'; // Default brand blue
+    };
+
+    const safeBattingTeamName = getBattingTeamName();
+    const safeBattingTeamLogo = getBattingTeamLogo();
+
     return (
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
             <div className="p-4 bg-gray-50/80 border-b border-gray-100 flex items-center justify-between">
                  <h3 className="font-bold text-gray-900 flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-md flex items-center justify-center text-[10px] font-bold text-white shadow-sm" style={{ backgroundColor: battingTeam.logo }}>
-                        {battingTeam.name.substring(0,2).toUpperCase()}
+                    <div className="w-6 h-6 rounded-md flex items-center justify-center text-[10px] font-bold text-white shadow-sm" style={{ backgroundColor: safeBattingTeamLogo }}>
+                        {safeBattingTeamName.substring(0,2).toUpperCase()}
                     </div>
-                    {battingTeam.name} Innings
+                    {safeBattingTeamName} Innings
                  </h3>
                  <div className="text-sm font-mono font-medium text-gray-500">{innings.score}/{innings.wickets}</div>
             </div>
