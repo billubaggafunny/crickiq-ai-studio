@@ -2,13 +2,20 @@ import { Table, Thead, Tbody, Tr, Th, Td } from './CrickIQTable';
 import CrickIQCard from './CrickIQCard';
 import React, { useState, useMemo } from 'react';
 import type { UseCrickIQStateReturn } from '../hooks/useCrickIQState';
-import type { Team, Match, PointsTableData } from '../types';
+import type { Team, Match, PointsTableData, Tournament } from '../types';
 import { calculatePointsTable } from '../utils/cricketLogic';
 
+const getQualificationCutoff = (tournament: Tournament | null): number | null => {
+    if (!tournament) return null;
+    if (tournament.groups) return 2; // Two groups format, top 2 from each group qualify
+    if (tournament.format === 'Knockout' || tournament.format === 'Round Robin') return null;
+    return 4; // Assume 4 for 'Round Robin + Knockout' by default
+};
 
 interface PointsTableProps extends UseCrickIQStateReturn {
     tournamentId?: string; // If provided, shows only this tournament's table
 }
+
 
 const PointsTable = (props: PointsTableProps) => {
     const { tournaments, teams, matches, tournamentId } = props;
@@ -182,41 +189,60 @@ const PointsTable = (props: PointsTableProps) => {
                     </div>
                 )}
                 <CrickIQCard  className="! sm:!">
-                    {tableData.length > 0 ? (
-                        <Table >
-                                <Thead>
-                                    <Tr >
-                                        <Th className="w-full">Team</Th>
-                                        <Th className="text-right" title="Played">P</Th>
-                                        <Th className="text-right" title="Won">W</Th>
-                                        <Th className="text-right" title="Lost">L</Th>
-                                        <Th className="text-right" title="Drawn/No Result">D</Th>
-                                        <Th className="text-right" title="Points">Pts</Th>
-                                        {view === 'tournaments' && <Th className="text-right" title="Net Run Rate">NRR</Th>}
-                                    </Tr>
-                                </Thead>
-                                <Tbody>
-                                    {tableData.map(d => (
-                                        <Tr key={d.teamId} >
-                                            <Td >
-                                                <div className="flex items-center gap-2">
-                                                    <div className="w-6 h-6 flex items-center justify-center rounded-md text-button text-white text-caption" style={{ backgroundColor: d.logo }}>
-                                                        {d.teamName.substring(0, 2).toUpperCase()}
-                                                    </div>
-                                                    <span>{d.teamName}</span>
-                                                </div>
-                                            </Td>
-                                            <Td className="text-right">{d.played}</Td>
-                                            <Td className="text-right">{d.won}</Td>
-                                            <Td className="text-right">{d.lost}</Td>
-                                            <Td className="text-right">{d.drawn}</Td>
-                                            <Td className="text-right font-bold text-brand-blue">{d.points}</Td>
-                                            {view === 'tournaments' && <Td className="text-right">{d.nrr}</Td>}
-                                        </Tr>
-                                    ))}
-                                </Tbody>
-                            </Table>
-                    ) : (
+                                {tableData.length > 0 ? (
+                                    <Table >
+                                            <Thead>
+                                                <Tr >
+                                                    <Th className="w-full">Team</Th>
+                                                    <Th className="text-right" title="Played">P</Th>
+                                                    <Th className="text-right" title="Won">W</Th>
+                                                    <Th className="text-right" title="Lost">L</Th>
+                                                    <Th className="text-right" title="Drawn/No Result">D</Th>
+                                                    <Th className="text-right" title="Points">Pts</Th>
+                                                    {view === 'tournaments' && <Th className="text-right" title="Net Run Rate">NRR</Th>}
+                                                    {view === 'tournaments' && getQualificationCutoff(tournament) !== null && <Th className="text-right">Status</Th>}
+                                                </Tr>
+                                            </Thead>
+                                            <Tbody>
+                                                {tableData.map((d, index) => {
+                                                    const cutoff = getQualificationCutoff(tournament);
+                                                    const rank = index + 1;
+                                                    let badge = null;
+                                                    if (view === 'tournaments' && cutoff !== null) {
+                                                        const isQualified = rank <= cutoff;
+                                                        badge = isQualified ? (
+                                                            <span className="text-[10px] font-bold text-green-700 bg-green-100 dark:bg-green-900/30 dark:text-green-400 px-1.5 py-0.5 rounded-full uppercase whitespace-nowrap">
+                                                                🟢 Q
+                                                            </span>
+                                                        ) : (
+                                                            <span className="text-[10px] font-bold text-red-700 bg-red-100 dark:bg-red-900/30 dark:text-red-400 px-1.5 py-0.5 rounded-full uppercase whitespace-nowrap">
+                                                                🔴 E
+                                                            </span>
+                                                        );
+                                                    }
+                                                    return (
+                                                    <Tr key={d.teamId} className={cutoff !== null && rank === cutoff && rank < tableData.length ? 'border-b-2 border-dashed !border-brand-blue/40 dark:!border-brand-blue/40' : ''}>
+                                                        <Td >
+                                                            <div className="flex items-center gap-2">
+                                                                <div className="w-6 h-6 flex-shrink-0 flex items-center justify-center rounded-md text-button text-white text-caption" style={{ backgroundColor: d.logo }}>
+                                                                    {d.teamName.substring(0, 2).toUpperCase()}
+                                                                </div>
+                                                                <span className="truncate max-w-[120px] sm:max-w-xs">{d.teamName}</span>
+                                                            </div>
+                                                        </Td>
+                                                        <Td className="text-right">{d.played}</Td>
+                                                        <Td className="text-right">{d.won}</Td>
+                                                        <Td className="text-right">{d.lost}</Td>
+                                                        <Td className="text-right">{d.drawn}</Td>
+                                                        <Td className="text-right font-bold text-brand-blue">{d.points}</Td>
+                                                        {view === 'tournaments' && <Td className="text-right">{d.nrr}</Td>}
+                                                        {view === 'tournaments' && cutoff !== null && <Td className="text-right">{badge}</Td>}
+                                                    </Tr>
+                                                    );
+                                                })}
+                                            </Tbody>
+                                        </Table>
+                                ) : (
                         <p className="text-center text-text-secondary">
                             {view === 'tournaments' ? 'No completed matches for this tournament yet.' : 'No completed quick matches yet.'}
                         </p>

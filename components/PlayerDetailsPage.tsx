@@ -37,8 +37,7 @@ const PlayerDetailsView: React.FC<PlayerDetailsPageProps> = ({
     teams = [],
     archivePlayer,
     restorePlayer,
-    onBack,
-    updateTeam
+    onBack
 }) => {
     // Cast player as Player since view mode always has a player
     const safePlayer = player as Player;

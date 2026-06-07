@@ -1,6 +1,6 @@
 import React from 'react';
 
-export type View = 'tournaments' | 'schedule' | 'history' | 'teams' | 'stats' | 'points' | 'semifinals' | 'final';
+export type View = 'tournaments' | 'overview' | 'fixtures' | 'teams' | 'stats' | 'points' | 'schedule' | 'history' | 'semifinals' | 'final';
 
 export interface MatchFiltersProps {
     tabs: { id: View; label: string }[];
