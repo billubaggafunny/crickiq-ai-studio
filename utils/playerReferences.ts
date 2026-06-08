@@ -44,7 +44,7 @@ export function getPlayerReferenceSummary(playerId: string, matches: Match[]): P
             reasons.add("Man of the Match");
         }
 
-        const checkInnings = (innings: any) => {
+        const checkInnings = (innings: Innings) => {
             if (!innings) return;
             let inInnings = false;
 

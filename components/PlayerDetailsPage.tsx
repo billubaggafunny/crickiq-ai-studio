@@ -1,13 +1,13 @@
 import React, { useState, useMemo } from 'react';
 import { Player, Team, Match, PlayerRole, Tournament, Innings } from '../types';
-import { ChevronLeft, ChevronRight, X, Info, AlertCircle, Users, CheckCircle2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, X, Info, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { getRoleIcon, PLAYER_ROLES } from '../constants';
 import { validatePlayer } from '../utils/validation';
 import { useNotification } from '../hooks/useNotification';
 import { useTeamLock } from '../hooks/useTeamLock';
 import { getMaxPlayers } from '../utils/matchConfig';
 import { generateGlobalPlayerId } from '../utils/idGenerator';
-import { findExistingPlayerCandidates } from '../utils/playerLinking';
+import { getPlayerDuplicateWarnings } from '../utils/playerLinking';
 
 interface PlayerDetailsPageProps {
     player?: Player;
@@ -984,6 +984,7 @@ const PlayerDetailsForm: React.FC<PlayerDetailsPageProps> = ({
     isMatchLive = false,
     updateTeam,
     updateMatch,
+    restorePlayer,
     onBack,
     mode
 }) => {
@@ -1003,25 +1004,31 @@ const PlayerDetailsForm: React.FC<PlayerDetailsPageProps> = ({
     const [editIsViceCaptain, setEditIsViceCaptain] = useState(player ? player.id === team.viceCaptainId : false);
     const [errors, setErrors] = useState<{name: string | null, number: string | null, role: string | null}>({name: null, number: null, role: null});
 
-    // Linking support
+    // Linking & Duplicate support
     const [selectedExistingPlayer, setSelectedExistingPlayer] = useState<import('../utils/playerLinking').PlayerCandidate | null>(null);
 
-    const sameTeamDuplicates = useMemo(() => {
-        const trimmedName = editName.trim().toLowerCase();
-        if (isAdding && trimmedName.length >= 2) {
-            return team.players.filter(p => p.name.trim().toLowerCase() === trimmedName);
-        }
-        return [];
-    }, [editName, team.players, isAdding]);
+    const duplicateWarnings = useMemo(() => {
+        return getPlayerDuplicateWarnings({
+            player: {
+                ...player,
+                name: editName,
+                number: editNumber ? Number(editNumber) : undefined,
+                role: editRole as PlayerRole
+            },
+            currentTeam: team,
+            allTeams: teams,
+            mode: isAdding ? 'add' : 'edit',
+            editingPlayerId: player?.id
+        });
+    }, [editName, editNumber, editRole, team, teams, isAdding, player]);
 
-    const crossTeamCandidates = useMemo(() => {
-        if (!isAdding || !teams.length) return [];
-        return findExistingPlayerCandidates(editName, teams, team.id);
-    }, [editName, teams, team.id, isAdding]);
+    const isExclusivelyArchivedDuplicate = duplicateWarnings.hasArchivedBlockingDuplicate && 
+        !duplicateWarnings.sameTeamDuplicates.some(p => p.name.replace(/\s+/g, ' ').toLowerCase().trim() === editName.replace(/\s+/g, ' ').toLowerCase().trim());
 
-    const handleUseExisting = (candidate: import('../utils/playerLinking').PlayerCandidate) => {
+    const handleUseExisting = (candidate: { teamId: string; teamName: string; player: Player }) => {
         const p = candidate.player;
-        setSelectedExistingPlayer(candidate);
+        const mappedCandidate = { player: candidate.player, team: teams.find(t => t.id === candidate.teamId)! };
+        setSelectedExistingPlayer(mappedCandidate);
         setEditName(p.name);
         setEditRole(p.role);
         setEditNumber(p.number !== undefined && p.number !== -1 ? p.number : '');
@@ -1032,9 +1039,43 @@ const PlayerDetailsForm: React.FC<PlayerDetailsPageProps> = ({
         setSelectedExistingPlayer(null);
     };
 
+    const handleUnarchiveAndUse = (archivedPlayer: Player) => {
+        if (restorePlayer) {
+            restorePlayer(team.id, archivedPlayer.id);
+        } else if (updateTeam) {
+            const updatedTeam = {
+                ...team,
+                players: team.players.map(p => p.id === archivedPlayer.id ? { ...p, isArchived: false } : p)
+            };
+            updateTeam(updatedTeam);
+        }
+
+        // Auto add to match squad if there's space, matching the normal adding logic
+        if (isAdding && match && updateMatch) {
+            const maxPlayers = getMaxPlayers(match);
+            const isTeam1 = match.team1Id === team.id;
+            const currentSquadIds = isTeam1 ? (match.team1SquadIds || []) : (match.team2SquadIds || []);
+            
+            if (currentSquadIds.length < maxPlayers && !currentSquadIds.includes(archivedPlayer.id)) {
+                updateMatch(match.id, {
+                    [isTeam1 ? 'team1SquadIds' : 'team2SquadIds']: [...currentSquadIds, archivedPlayer.id]
+                });
+            }
+        }
+
+        showNotification('Archived player restored and added to roster.', 'success');
+        onBack();
+    };
+
     const handleSave = () => {
         if (isLocked) {
              showNotification('Team roster is locked.', 'error');
+             return;
+        }
+
+        // Check for blocking duplicates
+        if (!selectedExistingPlayer && duplicateWarnings.hasBlockingDuplicate) {
+             showNotification(isExclusivelyArchivedDuplicate ? 'Archived player already exists.' : (duplicateWarnings.warnings[0] || 'Player already exists.'), 'error');
              return;
         }
 
@@ -1119,66 +1160,69 @@ const PlayerDetailsForm: React.FC<PlayerDetailsPageProps> = ({
                     </div>
                  )}
 
-                 {/* Same-team Duplicates Warning segment */}
-                 {isAdding && sameTeamDuplicates.length > 0 && !selectedExistingPlayer && (
-                     <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-4 flex flex-col gap-3 dark:bg-red-500/5">
+                 {/* Duplicate Warnings segment */}
+                 {!selectedExistingPlayer && duplicateWarnings.warnings.length > 0 && (
+                     <div className={`p-4 flex flex-col gap-3 rounded-2xl border ${duplicateWarnings.hasBlockingDuplicate ? 'bg-red-500/10 border-red-500/20 dark:bg-red-500/5' : 'bg-amber-500/10 border-amber-500/20 dark:bg-amber-500/5'}`}>
                          <div className="flex items-start gap-2.5">
-                             <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
+                             <AlertCircle className={`w-5 h-5 shrink-0 mt-0.5 ${duplicateWarnings.hasBlockingDuplicate ? 'text-red-500' : 'text-amber-500'}`} />
                              <div>
-                                 <h4 className="text-sm font-bold text-red-500">Player already exists in this team</h4>
+                                 <h4 className={`text-sm font-bold ${duplicateWarnings.hasBlockingDuplicate ? 'text-red-500' : 'text-amber-500'}`}>
+                                     {duplicateWarnings.hasBlockingDuplicate ? (isExclusivelyArchivedDuplicate ? "Archived player found" : 'Exact Duplicate Detected') : 'Similar Player Detected'}
+                                 </h4>
                                  <p className="text-xs text-text-secondary mt-0.5">
-                                     A player named &ldquo;<span className="font-semibold text-text-primary">{sameTeamDuplicates[0].name}</span>&rdquo; is already in this team. Are you sure you want to add another?
+                                     {isExclusivelyArchivedDuplicate ? 'This player already exists in this team but is archived. Unarchive this player instead?' : duplicateWarnings.warnings.map((w, idx) => <span key={idx} className="block mb-1">{w}</span>)}
                                  </p>
                              </div>
                          </div>
-                     </div>
-                 )}
 
-                 {/* Cross-team Candidates Warning segment */}
-                 {crossTeamCandidates.length > 0 && !selectedExistingPlayer && sameTeamDuplicates.length === 0 && (
-                     <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4 flex flex-col gap-3 dark:bg-amber-500/5">
-                         <div className="flex items-start gap-2.5">
-                             <Users className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
-                             <div>
-                                 <h4 className="text-sm font-bold text-amber-500">Similar player found in another team</h4>
-                                 <p className="text-xs text-text-secondary mt-0.5">
-                                     Would you like to link to an existing profile to share stats?
-                                 </p>
+                         {isExclusivelyArchivedDuplicate && (
+                             <div className="space-y-2 mt-1">
+                                {duplicateWarnings.archivedSameTeamDuplicates.map((p) => (
+                                    <div key={p.id} className="flex justify-end gap-2">
+                                        <button type="button" onClick={() => setEditName('')} className="px-3.5 py-1.5 bg-secondary text-text-primary border border-gray-200 dark:border-gray-700/50 rounded-xl text-xs font-bold hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">Cancel</button>
+                                        <button type="button" onClick={() => handleUnarchiveAndUse(p)} className="px-3.5 py-1.5 bg-brand-blue text-white rounded-xl text-xs font-bold transition-all hover:bg-brand-blue/90 shadow-sm">
+                                            Unarchive & Use
+                                        </button>
+                                    </div>
+                                ))}
                              </div>
-                         </div>
+                         )}
                          
-                         <div className="space-y-2 mt-1">
-                             {crossTeamCandidates.slice(0, 3).map((candidate, idx) => {
-                                 const isArchived = "isArchived" in candidate.player && typeof (candidate.player as {isArchived?: boolean}).isArchived === "boolean" ? (candidate.player as {isArchived?: boolean}).isArchived : false;
-                                 return (
-                                     <div key={`${candidate.player.id}-${idx}`} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 bg-secondary rounded-xl border border-brand-blue/5">
-                                         <div>
-                                             <div className="flex items-center gap-2">
-                                                 <span className="text-sm font-bold text-text-primary">{candidate.player.name}</span>
-                                                 {isArchived && <span className="text-[10px] uppercase font-bold text-orange-500 bg-orange-50 dark:bg-orange-900/30 px-1.5 py-0.5 rounded">Archived</span>}
+                         {/* Optional Cross-team candidate list to link from */}
+                         {!duplicateWarnings.hasBlockingDuplicate && duplicateWarnings.crossTeamCandidates.length > 0 && (
+                             <div className="space-y-2 mt-1">
+                                 {duplicateWarnings.crossTeamCandidates.slice(0, 3).map((candidate, idx) => {
+                                     const isArchived = "isArchived" in candidate.player && typeof (candidate.player as {isArchived?: boolean}).isArchived === "boolean" ? (candidate.player as {isArchived?: boolean}).isArchived : false;
+                                     return (
+                                         <div key={`${candidate.player.id}-${idx}`} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 bg-secondary rounded-xl border border-brand-blue/5">
+                                             <div>
+                                                 <div className="flex items-center gap-2">
+                                                     <span className="text-sm font-bold text-text-primary">{candidate.player.name}</span>
+                                                     {isArchived && <span className="text-[10px] uppercase font-bold text-orange-500 bg-orange-50 dark:bg-orange-900/30 px-1.5 py-0.5 rounded">Archived</span>}
+                                                 </div>
+                                                 <p className="text-xs text-text-secondary mt-0.5 font-medium">
+                                                     {candidate.teamName} &bull; {candidate.player.role} {candidate.player.number !== undefined && candidate.player.number !== -1 ? `• #${candidate.player.number}` : ''}
+                                                 </p>
                                              </div>
-                                             <p className="text-xs text-text-secondary mt-0.5 font-medium">
-                                                 {candidate.team.name} &bull; {candidate.player.role} {candidate.player.number !== undefined && candidate.player.number !== -1 ? `• #${candidate.player.number}` : ''}
-                                             </p>
+                                             <div className="flex flex-row gap-2 shrink-0">
+                                                 <button
+                                                     type="button"
+                                                     onClick={() => handleUseExisting(candidate)}
+                                                     className="px-3.5 py-1.5 bg-brand-blue text-white rounded-xl text-xs font-bold transition-all hover:bg-brand-blue/90 cursor-pointer shadow-sm"
+                                                 >
+                                                     Link Existing
+                                                 </button>
+                                             </div>
                                          </div>
-                                         <div className="flex flex-row gap-2 shrink-0">
-                                             <button
-                                                 type="button"
-                                                 onClick={() => handleUseExisting(candidate)}
-                                                 className="px-3.5 py-1.5 bg-brand-blue text-white rounded-xl text-xs font-bold transition-all hover:bg-brand-blue/90 cursor-pointer shadow-sm"
-                                             >
-                                                 Use Existing
-                                             </button>
-                                         </div>
-                                     </div>
-                                 );
-                             })}
-                             {crossTeamCandidates.length > 3 && (
-                                 <p className="text-xs text-text-secondary text-center italic mt-2">
-                                     + {crossTeamCandidates.length - 3} more match(es)
-                                 </p>
-                             )}
-                         </div>
+                                     );
+                                 })}
+                                 {duplicateWarnings.crossTeamCandidates.length > 3 && (
+                                     <p className="text-xs text-text-secondary text-center italic mt-2">
+                                         + {duplicateWarnings.crossTeamCandidates.length - 3} more match(es)
+                                     </p>
+                                 )}
+                             </div>
+                         )}
                      </div>
                  )}
 

@@ -29,6 +29,7 @@ export interface MatchDetailsHubProps {
     deletePlayer?: (teamId: string, playerId: string) => void;
     getTournamentById?: (id: string) => Tournament | undefined;
     matches?: Match[];
+    onFixSquad?: (match: Match, teamId: string) => void;
 }
 
 const MatchDetailsHub: React.FC<MatchDetailsHubProps> = ({ 
@@ -49,7 +50,8 @@ const MatchDetailsHub: React.FC<MatchDetailsHubProps> = ({
     addPlayer,
     deletePlayer,
     getTournamentById,
-    matches
+    matches,
+    onFixSquad
 }) => {
     const [activeTab, setActiveTab] = useState<'overview' | 'matchCenter' | 'scorecard' | 'overs' | 'commentary'>(
         match.status === 'completed' && match.isQuickMatch ? 'scorecard' : 'overview'
@@ -162,14 +164,28 @@ const MatchDetailsHub: React.FC<MatchDetailsHubProps> = ({
 
         if (displayState.type === 'readyToToss' && onSetToss) {
             return (
-                <button 
-                    disabled={isMatchLive || !canToss}
-                    onClick={() => onSetToss(match)}
-                    title={!canToss ? playerMismatchTitle : (isMatchLive ? 'Another match is currently live' : 'Set Toss')}
-                    className="w-full mt-4 py-4 bg-brand-blue text-white rounded-xl font-bold uppercase tracking-wide shadow-md hover:bg-brand-blue/90 disabled:bg-gray-300 disabled:text-gray-500 transition-colors"
-                >
-                    {isMatchLive ? 'Another Match is Live' : (canToss ? 'Set Toss' : 'Squads Incomplete')}
-                </button>
+                <div className="mt-4 space-y-3">
+                    <button 
+                        disabled={isMatchLive || !canToss}
+                        onClick={() => onSetToss(match)}
+                        title={!canToss ? playerMismatchTitle : (isMatchLive ? 'Another match is currently live' : 'Set Toss')}
+                        className="w-full py-4 bg-brand-blue text-white rounded-xl font-bold uppercase tracking-wide shadow-md hover:bg-brand-blue/90 disabled:bg-gray-300 disabled:text-gray-500 transition-colors"
+                    >
+                        {isMatchLive ? 'Another Match is Live' : (canToss ? 'Set Toss' : 'Squads Incomplete')}
+                    </button>
+                    {!canToss && !isMatchLive && onFixSquad && (
+                        <div className="flex flex-col items-center gap-2 p-4 bg-red-50 dark:bg-red-900/10 rounded-xl border border-red-100 dark:border-red-900/30">
+                            <span className="text-sm font-bold text-red-600 dark:text-red-400">Match Squad must have exactly {requiredSquadSize} selected.</span>
+                            <span className="text-xs text-red-500 dark:text-red-400 text-center mb-1">{playerMismatchTitle}</span>
+                            <button
+                                onClick={() => onFixSquad(match, ((match.team1SquadIds || []).length !== requiredSquadSize) ? team1.id : team2.id)}
+                                className="px-6 py-2 bg-red-600 text-white font-bold text-sm uppercase tracking-wide rounded-lg shadow hover:bg-red-700 transition"
+                            >
+                                Fix Squad
+                            </button>
+                        </div>
+                    )}
+                </div>
             );
         }
 
@@ -697,6 +713,7 @@ const MatchDetailsHub: React.FC<MatchDetailsHubProps> = ({
                 }}
                 match={match}
                 team={impactModalTeamId ? (impactModalTeamId === team1.id ? team1 : team2) : undefined}
+                teams={teams}
                 updateTeam={updateTeam!}
                 addPlayerReplacement={addPlayerReplacement!}
             />

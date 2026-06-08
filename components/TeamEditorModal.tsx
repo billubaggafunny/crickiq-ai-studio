@@ -99,7 +99,6 @@ export const TeamEditorModal: React.FC<TeamEditorModalProps> = (props) => {
     };
 
     const teamValidation = useMemo(() => validateTeamRoster(teamToValidate, maxPlayers), [teamToValidate, maxPlayers]);
-    const isTeamFull = teamValidation.checks.withinMaxPlayers === false || teamToValidate.players.length === maxPlayers;
     const isKeeperMissing = !teamValidation.checks.hasWicketKeeper;
     const isCaptainMissing = !teamValidation.checks.hasCaptain;
     const isViceCaptainMissing = !teamValidation.checks.hasViceCaptain;
@@ -293,10 +292,19 @@ export const TeamEditorModal: React.FC<TeamEditorModalProps> = (props) => {
                         <div className="space-y-4">
                             <div className="p-4 bg-brand-blue/5 rounded-xl border border-brand-blue/20">
                                 <h3 className="text-h3 font-bold text-text-primary mb-2">Match Squad Builder</h3>
-                                <p className="text-body text-text-secondary mb-4">Select players from the team pool for this specific match.</p>
+                                <div className="text-body text-text-secondary mb-4 flex flex-col gap-1">
+                                    <span className="font-semibold">{team.players.length} Players in Team Pool</span>
+                                    {currentSquadIds.length === maxPlayers ? (
+                                        <span className="text-success font-bold">Ready</span>
+                                    ) : currentSquadIds.length < maxPlayers ? (
+                                        <span>Select {maxPlayers - currentSquadIds.length} {currentSquadIds.length === 0 ? `players for this match squad.` : `more players.`}</span>
+                                    ) : (
+                                        <span className="text-highlight font-bold">Remove {currentSquadIds.length - maxPlayers} player{currentSquadIds.length - maxPlayers > 1 ? 's' : ''}.</span>
+                                    )}
+                                </div>
                                 <div className="flex justify-between items-center text-sm font-semibold text-text-secondary mb-2">
                                     <span>Selected Squad:</span>
-                                    <span>{currentSquadIds.length} / {maxPlayers}</span>
+                                    <span>{currentSquadIds.length} / {maxPlayers} Match Squad Selected</span>
                                 </div>
                                 {team.players.length < maxPlayers && (
                                     <div className="mt-2 text-xs text-red-600 dark:text-red-400 font-bold p-2.5 bg-red-100/30 dark:bg-red-900/20 rounded-lg">
@@ -429,7 +437,7 @@ export const TeamEditorModal: React.FC<TeamEditorModalProps> = (props) => {
                                         <div className="space-y-4">
                                             <div className="flex justify-between items-center text-sm font-semibold text-text-secondary px-2">
                                                 <span>Team Players</span>
-                                                <span>{activePlayers.length} / {maxPlayers} Players Added</span>
+                                                <span>{activePlayers.length} Players in Team Pool</span>
                                             </div>
                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                                 {activePlayers.map(player => (
@@ -516,7 +524,7 @@ export const TeamEditorModal: React.FC<TeamEditorModalProps> = (props) => {
                 )}
                 
                 {/* Floating Add Player Button */}
-                {!isTeamLocked && (match ? currentSquadIds.length < maxPlayers : !isTeamFull) && (
+                {!isTeamLocked && (
                     <button
                         onClick={handleAddPlayerClick}
                         style={{ bottom: 'calc(5rem + env(safe-area-inset-bottom))' }}

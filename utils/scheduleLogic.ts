@@ -119,8 +119,7 @@ export function generateRoundRobinPlusKnockoutSchedule(
 
 export function canGenerateKnockouts(
   tournament: Tournament,
-  matches: Match[],
-  teams: Team[],
+  matches: Match[]
 ) {
   if (tournament.format !== "Round Robin + Knockout") {
     return {

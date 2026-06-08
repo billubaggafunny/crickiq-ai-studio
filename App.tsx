@@ -24,6 +24,7 @@ import Header from './components/Header';
 import AnalyticsWorkspace from './components/AnalyticsWorkspace';
 import TossModal from './components/TossModal';
 import MatchDetailsHub from './components/MatchDetailsHub';
+import { TeamEditorModal } from './components/TeamEditorModal';
 
 interface DrinksBreakOverlayProps {
     status: 'selecting' | 'active';
@@ -149,6 +150,7 @@ const AppUI: React.FC = () => {
     const [viewingScorecardMatchId, setViewingScorecardMatchId] = useState<string | null>(null);
     const [viewingMatchHubId, setViewingMatchHubId] = useState<string | null>(null);
     const [viewingTeamHubId, setViewingTeamHubId] = useState<string | null>(null);
+    const [fixSquadState, setFixSquadState] = useState<{ match: Match, teamId: string } | null>(null);
     const [teamHubReturnState, setTeamHubReturnState] = useState<{
         teamDetailsTab?: string;
         matchSearchQuery?: string;
@@ -782,8 +784,27 @@ const AppUI: React.FC = () => {
                             deletePlayer={tournamentState.deletePlayer}
                             getTournamentById={tournamentState.getTournamentById}
                             matches={tournamentState.matches}
+                            onFixSquad={(m, tid) => setFixSquadState({ match: m, teamId: tid })}
                         />
                     </ErrorBoundary>
+                    
+                    {fixSquadState && tournamentState.getTeamById(fixSquadState.teamId) && (
+                        <TeamEditorModal
+                            team={tournamentState.getTeamById(fixSquadState.teamId)!}
+                            tournamentId={fixSquadState.match.tournamentId}
+                            onClose={() => setFixSquadState(null)}
+                            onDone={() => setFixSquadState(null)}
+                            isMatchLive={false}
+                            updateTeam={tournamentState.updateTeam}
+                            addPlayerReplacement={tournamentState.addPlayerReplacement}
+                            addPlayer={tournamentState.addPlayer}
+                            deletePlayer={tournamentState.deletePlayer}
+                            getTournamentById={tournamentState.getTournamentById}
+                            matches={tournamentState.matches}
+                            match={fixSquadState.match}
+                            updateMatch={tournamentState.updateMatch}
+                        />
+                    )}
                 </div>
             );
         }

@@ -18,13 +18,14 @@ export function buildMatchPlayerSnapshots({
             const player = team.players.find(p => p.id === playerId);
             if (!player) return;
 
+            const pRecord = player as Record<string, unknown>;
             // Determine if player has wicketkeeper role or flag
             const isWicketKeeper = 
                 player.role === "Wicket Keeper" || 
-                (player as any).isWicketKeeper || 
-                (player as any).isWicketkeeper ||
-                ((player as any).role && (player as any).role.toLowerCase().includes('wk')) ||
-                ((player as any).role && (player as any).role.toLowerCase().includes('keeper'));
+                pRecord.isWicketKeeper || 
+                pRecord.isWicketkeeper ||
+                (typeof pRecord.role === 'string' && pRecord.role.toLowerCase().includes('wk')) ||
+                (typeof pRecord.role === 'string' && pRecord.role.toLowerCase().includes('keeper'));
 
             const snapshot: MatchPlayerSnapshot = {
                 playerId: player.id,
@@ -32,8 +33,8 @@ export function buildMatchPlayerSnapshots({
                 name: player.name,
                 number: player.number,
                 role: player.role,
-                battingStyle: (player as any).battingStyle,
-                bowlingStyle: (player as any).bowlingStyle,
+                battingStyle: pRecord.battingStyle as string | undefined,
+                bowlingStyle: pRecord.bowlingStyle as string | undefined,
                 isWicketKeeper: !!isWicketKeeper,
                 isCaptain: player.id === team.captainId,
                 isViceCaptain: player.id === team.viceCaptainId,

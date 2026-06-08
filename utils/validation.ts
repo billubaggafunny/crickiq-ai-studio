@@ -136,7 +136,7 @@ export function validatePlayer(
 
     if (!trimmedName) errors.name = "Name required.";
     else if (trimmedName.length > 30) errors.name = "Name too long.";
-    else if (existingPlayers.some(p => p.id !== currentPlayerId && p.name.trim().toLowerCase() === trimmedName.toLowerCase())) errors.name = "Name taken.";
+    // Duplicate name validation is now handled centrally by getPlayerDuplicateWarnings.
     
     if (playerNumber === '') errors.number = "Number required.";
     else if (!Number.isInteger(num) || num <= 0) errors.number = "Positive # required.";

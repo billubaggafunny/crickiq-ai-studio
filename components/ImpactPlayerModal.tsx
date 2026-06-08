@@ -7,6 +7,7 @@ import { PLAYER_ROLES, getShortRoleName, getRoleEmoji } from '../constants';
 import { useNotification } from '../hooks/useNotification';
 import { getEffectiveSquadIds, getEffectiveSquadPlayers } from '../utils/matchConfig';
 import { generateGlobalPlayerId } from '../utils/idGenerator';
+import { getPlayerDuplicateWarnings } from '../utils/playerLinking';
 
 const Button: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'primary' | 'secondary' | 'danger' | 'blue' }> = ({ children, className, variant = 'primary', ...props }) => {
     const baseClasses = 'px-4 py-2 rounded-2xl text-button transition-all duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-md';
@@ -45,11 +46,12 @@ interface ImpactPlayerModalProps {
     onClose: () => void;
     match: Match;
     team: Team | undefined;
+    teams?: Team[];
     updateTeam: (team: Team) => void;
     addPlayerReplacement: ReturnType<typeof useCrickIQState>['addPlayerReplacement'];
 }
 
-export const ImpactPlayerModal: React.FC<ImpactPlayerModalProps> = ({ isOpen, onClose, match, team, updateTeam, addPlayerReplacement }) => {
+export const ImpactPlayerModal: React.FC<ImpactPlayerModalProps> = ({ isOpen, onClose, match, team, teams = [], updateTeam, addPlayerReplacement }) => {
     const { showNotification } = useNotification();
     const [selectedOutgoingPlayer, setSelectedOutgoingPlayer] = useState<string>('');
     const [selectedIncomingPlayer, setSelectedIncomingPlayer] = useState<string>('');
@@ -61,6 +63,19 @@ export const ImpactPlayerModal: React.FC<ImpactPlayerModalProps> = ({ isOpen, on
     const [newName, setNewName] = useState('');
     const [newNumber, setNewNumber] = useState<number | ''>('');
     const [newRole, setNewRole] = useState<PlayerRoleEnum | ''>('');
+    const [acknowledgedWarning, setAcknowledgedWarning] = useState<boolean>(false);
+
+    const duplicateWarnings = useMemo(() => {
+        if (!team) return null;
+        return getPlayerDuplicateWarnings({
+            player: {
+                name: newName,
+            },
+            currentTeam: team,
+            allTeams: teams,
+            mode: 'add'
+        });
+    }, [newName, team, teams]);
 
     // Existing replaced players
     const replacedPlayerIds = useMemo(() => match.replacements?.map(r => r.outgoingPlayerId) || [], [match.replacements]);
@@ -88,10 +103,11 @@ export const ImpactPlayerModal: React.FC<ImpactPlayerModalProps> = ({ isOpen, on
     }, [team, match]);
 
     const filteredIncomingPlayers = useMemo(() => {
-        if (!searchQuery.trim()) return unusedIncomingPlayers;
+        const query = searchQuery.trim().toLowerCase();
+        if (!query) return unusedIncomingPlayers;
         return unusedIncomingPlayers.filter(p => 
-            p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-            p.number.toString().includes(searchQuery)
+            p.name.toLowerCase().includes(query) || 
+            p.number.toString().includes(query)
         );
     }, [unusedIncomingPlayers, searchQuery]);
 
@@ -133,6 +149,18 @@ export const ImpactPlayerModal: React.FC<ImpactPlayerModalProps> = ({ isOpen, on
             return;
         }
 
+        if (duplicateWarnings?.hasBlockingDuplicate) {
+            showNotification(duplicateWarnings.warnings[0] || 'Player already exists.', 'error');
+            return;
+        }
+
+        if (duplicateWarnings && duplicateWarnings.warnings.length > 0 && !acknowledgedWarning) {
+            // we will let the UI handle showing the warning before they click again or something,
+            // but just in case:
+            setAcknowledgedWarning(true);
+            return;
+        }
+
         const newPlayer: Player = {
             id: `p_${Date.now()}`,
             globalPlayerId: generateGlobalPlayerId(),
@@ -153,6 +181,18 @@ export const ImpactPlayerModal: React.FC<ImpactPlayerModalProps> = ({ isOpen, on
         setNewRole('');
 
         showNotification(`Player ${newPlayer.name} added to ${team.name} and selected as incoming`, "success");
+    };
+
+    const handleUseExisting = (p: Player) => {
+        if (!unusedIncomingPlayers.some(ip => ip.id === p.id)) {
+            showNotification("This player is not eligible as replacement.", "error");
+            return;
+        }
+        setIsAddingNewPlayer(false);
+        setSelectedIncomingPlayer(p.id);
+        setNewName('');
+        setNewNumber('');
+        setNewRole('');
     };
 
     const handleConfirmClick = () => {
@@ -299,17 +339,44 @@ export const ImpactPlayerModal: React.FC<ImpactPlayerModalProps> = ({ isOpen, on
                                         type="text" 
                                         placeholder="Player Name" 
                                         value={newName} 
-                                        onChange={e => setNewName(e.target.value)}
+                                        onChange={e => { setNewName(e.target.value); setAcknowledgedWarning(false); }}
                                         className="w-full p-2 border border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white text-sm rounded-lg"
                                     />
-                                    <Button 
-                                        type="button" 
-                                        onClick={handleSaveNewPlayer}
-                                        variant="blue"
-                                        className="w-full py-1.5 text-xs font-bold rounded-lg"
-                                    >
-                                        Save New Player
-                                    </Button>
+                                    
+                                    {duplicateWarnings && duplicateWarnings.warnings.length > 0 && (
+                                        <div className={`p-3 rounded-lg border text-xs space-y-2 ${duplicateWarnings.hasBlockingDuplicate ? 'bg-red-500/10 border-red-500/20 text-red-600 dark:bg-red-500/5 dark:text-red-400' : 'bg-amber-500/10 border-amber-500/20 text-amber-600 dark:bg-amber-500/5 dark:text-amber-400'}`}>
+                                            <div className="font-bold">
+                                                {duplicateWarnings.hasBlockingDuplicate ? 'Exact Duplicate Detected' : 'Similar Player Detected'}
+                                            </div>
+                                            <div>
+                                                {duplicateWarnings.warnings.map((w, i) => <div key={i}>{w}</div>)}
+                                            </div>
+                                            
+                                            {duplicateWarnings.sameTeamDuplicates.length > 0 && (
+                                                <div className="pt-2 flex flex-col gap-2">
+                                                    {duplicateWarnings.sameTeamDuplicates.map(dp => (
+                                                        <div key={dp.id} className="flex justify-between items-center bg-white/50 dark:bg-black/20 p-2 rounded">
+                                                            <span className="font-semibold text-gray-800 dark:text-gray-200">#{dp.number} {dp.name}</span>
+                                                            <Button type="button" onClick={() => handleUseExisting(dp)} className="py-1 px-2 text-[10px]">
+                                                                Use Existing
+                                                            </Button>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {!duplicateWarnings?.hasBlockingDuplicate && (
+                                        <Button 
+                                            type="button" 
+                                            onClick={handleSaveNewPlayer}
+                                            variant={duplicateWarnings && duplicateWarnings.warnings.length > 0 && !acknowledgedWarning ? 'danger' : 'blue'}
+                                            className="w-full py-1.5 text-xs font-bold rounded-lg"
+                                        >
+                                            {duplicateWarnings && duplicateWarnings.warnings.length > 0 && !acknowledgedWarning ? 'Create Anyway (Confirm)' : 'Save New Player'}
+                                        </Button>
+                                    )}
                                 </div>
                             ) : (
                                 <div className="space-y-2">
@@ -324,23 +391,31 @@ export const ImpactPlayerModal: React.FC<ImpactPlayerModalProps> = ({ isOpen, on
                                         <button
                                             type="button"
                                             onClick={() => setIsAddingNewPlayer(true)}
-                                            className="px-3 py-2 bg-brand-blue/10 dark:bg-brand-blue/20 text-brand-blue text-xs font-bold rounded-lg hover:bg-brand-blue hover:text-white transition-colors"
+                                            className="px-3 py-2 bg-brand-blue/10 dark:bg-brand-blue/20 text-brand-blue text-xs font-bold rounded-lg hover:bg-brand-blue hover:text-white transition-colors shrink-0"
                                         >
                                             + Add New Player
                                         </button>
                                     </div>
-                                    <select
-                                        value={selectedIncomingPlayer}
-                                        onChange={e => setSelectedIncomingPlayer(e.target.value)}
-                                        className="w-full p-2.5 border border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white rounded-xl text-sm bg-white"
-                                    >
-                                        <option value="">Select incoming player...</option>
-                                        {filteredIncomingPlayers.map(p => (
-                                            <option key={p.id} value={p.id}>
-                                                #{p.number} {p.name} ({getShortRoleName(p.role)})
-                                            </option>
-                                        ))}
-                                    </select>
+                                    
+                                    {filteredIncomingPlayers.length > 0 ? (
+                                        <select
+                                            value={selectedIncomingPlayer}
+                                            onChange={e => setSelectedIncomingPlayer(e.target.value)}
+                                            className="w-full p-2.5 border border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white rounded-xl text-sm bg-white"
+                                        >
+                                            <option value="">Select incoming player...</option>
+                                            {filteredIncomingPlayers.map(p => (
+                                                <option key={p.id} value={p.id}>
+                                                    #{p.number} {p.name} ({getShortRoleName(p.role)})
+                                                </option>
+                                            ))}
+                                        </select>
+                                    ) : (
+                                        <div className="p-3 bg-gray-50 dark:bg-gray-800/50 text-gray-500 dark:text-gray-400 text-sm text-center rounded-xl border border-gray-200 dark:border-gray-700">
+                                            No matching replacement player found.<br/>
+                                            You can add a new replacement player if allowed.
+                                        </div>
+                                    )}
                                 </div>
                             )}
                         </div>

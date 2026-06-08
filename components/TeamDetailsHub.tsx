@@ -473,7 +473,7 @@ const TeamDetailsHub: React.FC<TeamDetailsHubProps> = ({
         
         return roster.filter(player => {
             // Check archive status
-            const isArchived = (player as any).isArchived;
+            const isArchived = (player as Record<string, unknown>).isArchived;
             if (selectedRoleFilter === 'archived') {
                 if (!isArchived) return false;
             } else {

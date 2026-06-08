@@ -566,7 +566,7 @@ export const useMatchState = (
             const currentInnings = m[currentInningsKey];
             if (!currentInnings) return m;
 
-            let updatedMatch = { ...m };
+            const updatedMatch = { ...m };
             if (!updatedMatch.playerSnapshots) {
                 const team1 = teams.find(t => t.id === updatedMatch.team1Id);
                 const team2 = teams.find(t => t.id === updatedMatch.team2Id);

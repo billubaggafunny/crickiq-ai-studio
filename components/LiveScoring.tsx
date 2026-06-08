@@ -69,6 +69,7 @@ const LiveScoring: React.FC<LiveScoringProps> = ({
   onStartDrinksBreak,
   addPlayerReplacement,
   updateTeam,
+  teams,
   onBack,
 }) => {
   const { showNotification } = useNotification();
@@ -2109,6 +2110,7 @@ const LiveScoring: React.FC<LiveScoringProps> = ({
         }}
         match={match}
         team={impactModalTeamId ? getTeamById(impactModalTeamId) : undefined}
+        teams={teams}
         updateTeam={updateTeam}
         addPlayerReplacement={addPlayerReplacement}
       />

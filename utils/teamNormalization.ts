@@ -1,4 +1,4 @@
-import { Team, Player } from '../types';
+import { Team } from '../types';
 import { ensurePlayerHasGlobalId } from './idGenerator';
 
 /**
