@@ -132,7 +132,7 @@ const QuickMatchResults: React.FC<QuickMatchResultsProps> = ({ matchId, onClose,
 
     return (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex justify-center items-center p-2 sm:p-4 animate-fade-in" onClick={onClose}>
-            <div className="w-full max-w-md md:max-w-4xl lg:max-w-5xl flex flex-col md:flex-row shadow-2xl rounded-lg overflow-hidden bg-secondary" onClick={e => e.stopPropagation()}>
+            <div className="w-full max-w-md md:max-w-4xl lg:max-w-5xl flex flex-col md:flex-row shadow-2xl rounded-3xl overflow-hidden bg-secondary" onClick={e => e.stopPropagation()}>
                 {/* Vertical Team Bar - DESKTOP ONLY */}
                 <div className="hidden md:flex w-14 lg:w-16 bg-primary flex-col items-center justify-around py-8 shrink-0">
                     <h2 className="text-xl lg:text-2xl tracking-widest uppercase text-text-secondary" style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>{secondInningsBattingTeam?.name}</h2>

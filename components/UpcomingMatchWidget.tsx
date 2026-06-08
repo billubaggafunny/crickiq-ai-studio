@@ -27,7 +27,7 @@ export const UpcomingMatchWidget: React.FC<Props> = ({
 
   if (!match) {
     return (
-      <div className="bg-white dark:bg-slate-800 border border-brand-blue/15 shadow-sm rounded-xl p-4 mb-6">
+      <div className="bg-white dark:bg-slate-800 border border-brand-blue/15 shadow-sm rounded-3xl p-4 mb-6">
         <h3 className="font-semibold text-text-primary text-sm flex items-center gap-2 mb-2">
             Next Match
         </h3>
@@ -101,7 +101,7 @@ export const UpcomingMatchWidget: React.FC<Props> = ({
   const timeString = match.time ? ` • ${match.time}` : '';
 
   return (
-    <div className="bg-white dark:bg-slate-800 border border-brand-blue/15 shadow-sm rounded-xl p-4 mb-6">
+    <div className="bg-white dark:bg-slate-800 border border-brand-blue/15 shadow-sm rounded-3xl p-4 mb-6">
       <h3 className="font-semibold text-text-primary text-sm flex items-center gap-2 mb-4">
         Next Match
       </h3>

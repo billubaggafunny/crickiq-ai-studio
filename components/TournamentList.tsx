@@ -1,17 +1,11 @@
 import CrickIQCard from './CrickIQCard';
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState } from 'react';
 import type { Team, Match, Tournament } from '../types';
-import { TrashIcon, CalendarIcon, UserGroupIcon, TrophyIcon, BallIcon, EditIcon, ClipboardListIcon, PlusIcon } from '../constants';
+import { TrashIcon, TrophyIcon, EditIcon } from '../constants';
 import ConfirmationModal from './ConfirmationModal';
 import { useNotification } from '../hooks/useNotification';
-
-
-const Button: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'primary' | 'secondary' | 'blue' }> = ({ children, className = '', variant = 'primary', ...props }) => {
-    const baseClasses = 'px-4 py-2 rounded-2xl text-button transition-all duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-md';
-    const variantClasses = variant === 'secondary' ? 'bg-brand-lightblue text-white border-0' : variant === 'blue' ? 'bg-brand-blue text-white border-0' : 'bg-brand-gradient text-white border-0'; // primary
-
-    return <button {...props} className={`${baseClasses} ${variantClasses} ${className}`}>{children}</button>
-};
+import { CreateTournamentSheet } from './CreateTournamentSheet';
+import { Plus } from 'lucide-react';
 
 interface TournamentListProps {
     tournaments: Tournament[];
@@ -21,185 +15,44 @@ interface TournamentListProps {
     updateTournament: (tournamentId: string, updatedDetails: Partial<Pick<Tournament, 'name' | 'location' | 'defaultOvers' | 'numberOfPlayers' | 'startDate' | 'endDate' | 'format'>>) => void;
     deleteTournament: (tournamentId: string) => void;
     onViewTournament: (tournamentId: string) => void;
-    addTournament?: (name: string, location: string, defaultOvers: number, numberOfPlayers: number, startDate: string, endDate: string) => void;
+    addTournament?: (
+        name: string, 
+        location: string, 
+        defaultOvers: number, 
+        numberOfPlayers: number, 
+        startDate: string, 
+        endDate: string,
+        ownerId?: string,
+        organizerName?: string,
+        tournamentType?: string,
+        notes?: string,
+        theme?: string
+    ) => void;
 }
-
-
-
-const IconStatItem: React.FC<{ icon: React.ReactNode, label: string, value: string | number }> = ({ icon, label, value }) => (
-    <li className="flex items-center justify-between text-body py-1">
-        <div className="flex items-center gap-2 text-text-secondary">
-            {icon}
-            <span className="font-semibold">{label}</span>
-        </div>
-        <span className="font-bold text-text-primary text-right">{value}</span>
-    </li>
-);
-
 
 const TournamentList: React.FC<TournamentListProps> = ({ tournaments, teams, matches, isMatchLive, deleteTournament, updateTournament, onViewTournament, addTournament }) => {
     const [confirmation, setConfirmation] = useState<{ title: string; message: string; onConfirm: () => void; } | null>(null);
     const { showNotification } = useNotification();
-    const [editingTournament, setEditingTournament] = useState<Tournament | null>(null);
-    const [editFormData, setEditFormData] = useState({
-        name: '',
-        location: '',
-        defaultOvers: '' as number | '',
-        numberOfPlayers: '' as number | '',
-        startDate: '',
-        endDate: '',
-    });
-    const [editError, setEditError] = useState<string | null>(null);
-
-    // Create Tournament State
-    const [newTournamentName, setNewTournamentName] = useState('');
-    const [newTournamentLocation, setNewTournamentLocation] = useState('');
-    const [defaultOvers, setDefaultOvers] = useState<number | ''>(10);
-    const [numberOfPlayers, setNumberOfPlayers] = useState<number | ''>(11);
-    const [startDate, setStartDate] = useState('');
-    const [endDate, setEndDate] = useState('');
-    const [isSubmittingTournament, setIsSubmittingTournament] = useState(false);
-
-    const handleAddTournament = () => {
-        if (isSubmittingTournament || !addTournament) return;
-
-        const overs = Number(defaultOvers);
-        const players = Number(numberOfPlayers);
-
-        if (!newTournamentName.trim()) {
-            showNotification('Tournament name is required.', 'error');
-            return;
-        }
-
-        if (newTournamentName.trim().length > 30) {
-            showNotification('Tournament name is too long (max 30 chars).', 'error');
-            return;
-        }
-
-        if (!newTournamentLocation.trim()) {
-            showNotification('Tournament location is required.', 'error');
-            return;
-        }
-
-        if (newTournamentLocation.trim().length > 40) {
-            showNotification('Location name is too long (max 40 chars).', 'error');
-            return;
-        }
-
-        if (!Number.isInteger(overs) || overs <= 0 || overs > 100) {
-            showNotification('Overs must be a valid number between 1 and 100.', 'error');
-            return;
-        }
-
-        if (!Number.isInteger(players) || players < 2 || players > 11) {
-            showNotification('Players per team must be between 2 and 11.', 'error');
-            return;
-        }
-
-        if (!startDate || !endDate) {
-            showNotification('Please select both start and end dates.', 'error');
-            return;
-        }
-        
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const selectedStartDate = new Date(startDate.replace(/-/g, '/'));
-        const selectedEndDate = new Date(endDate.replace(/-/g, '/'));
-
-        if (selectedStartDate < today) {
-            showNotification('Start date cannot be in the past.', 'error');
-            return;
-        }
-        
-        if (selectedEndDate < selectedStartDate) {
-            showNotification('End date cannot be before the start date.', 'error');
-            return;
-        }
-
-        setIsSubmittingTournament(true);
-        addTournament(newTournamentName.trim(), newTournamentLocation.trim(), overs, players, startDate, endDate);
-        setNewTournamentName('');
-        setNewTournamentLocation('');
-        setDefaultOvers(10);
-        setNumberOfPlayers(11);
-        setStartDate('');
-        setEndDate('');
-        showNotification('Tournament created!', 'success');
-        
-        setTimeout(() => setIsSubmittingTournament(false), 500);
-    };
-
-    const handleNumberOfPlayersChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.value === '') {
-            setNumberOfPlayers('');
-            return;
-        }
-        const val = parseInt(e.target.value, 10);
-        if (!isNaN(val)) {
-            setNumberOfPlayers(val);
-        }
-    };
-
-    useEffect(() => {
-        if (editingTournament) {
-            const timeoutId = setTimeout(() => {
-                setEditFormData({
-                    name: editingTournament.name,
-                    location: editingTournament.location,
-                    defaultOvers: editingTournament.defaultOvers || '',
-                    numberOfPlayers: editingTournament.numberOfPlayers || '',
-                    startDate: editingTournament.startDate || '',
-                    endDate: editingTournament.endDate || '',
-                });
-                setEditError(null);
-            }, 0);
-            return () => clearTimeout(timeoutId);
-        }
-    }, [editingTournament]);
-
-    const isEditFormValid = useMemo(() => {
-        const overs = Number(editFormData.defaultOvers);
-        const players = Number(editFormData.numberOfPlayers);
-        if (!editFormData.name.trim() || !editFormData.location.trim() || !Number.isInteger(overs) || overs <= 0 || !Number.isInteger(players) || players <= 1 || !editFormData.startDate || !editFormData.endDate) {
-            return false;
-        }
-        const selectedStartDate = new Date(editFormData.startDate.replace(/-/g, '/'));
-        const selectedEndDate = new Date(editFormData.endDate.replace(/-/g, '/'));
-        return selectedEndDate >= selectedStartDate;
-    }, [editFormData]);
-
-    const handleUpdateTournament = () => {
-        setEditError(null);
-        if (!editingTournament) return;
-        if (!isEditFormValid) {
-            const overs = Number(editFormData.defaultOvers);
-            const players = Number(editFormData.numberOfPlayers);
-            if (!editFormData.name.trim() || !editFormData.location.trim() || !Number.isInteger(overs) || overs <= 0 || !Number.isInteger(players) || players <= 1 || !editFormData.startDate || !editFormData.endDate) {
-                setEditError('Please fill all fields correctly.');
-                return;
-            }
-            const selectedStartDate = new Date(editFormData.startDate.replace(/-/g, '/'));
-            const selectedEndDate = new Date(editFormData.endDate.replace(/-/g, '/'));
-            if (selectedEndDate < selectedStartDate) {
-                setEditError('End date cannot be before the start date.');
-                return;
-            }
-            setEditError('An unknown validation error occurred.');
-            return;
-        }
-
-        updateTournament(editingTournament.id, {
-            name: editFormData.name.trim(),
-            location: editFormData.location.trim(),
-            defaultOvers: Number(editFormData.defaultOvers),
-            numberOfPlayers: Number(editFormData.numberOfPlayers),
-            startDate: editFormData.startDate,
-            endDate: editFormData.endDate,
-        });
-        showNotification('Tournament updated successfully!', 'success');
-        setEditingTournament(null);
-    };
     
+    // Unified panel state
+    const [tournamentPanelOpen, setTournamentPanelOpen] = useState(false);
+    const [tournamentPanelMode, setTournamentPanelMode] = useState<'create' | 'edit' | 'readonly'>('create');
+    const [selectedTournamentForPanel, setSelectedTournamentForPanel] = useState<Tournament | null>(null);
+
+    const openCreateTournamentPanel = () => {
+        setSelectedTournamentForPanel(null);
+        setTournamentPanelMode('create');
+        setTournamentPanelOpen(true);
+    };
+
+    const openTournamentSettingsPanel = (e: React.MouseEvent, tournament: Tournament) => {
+        e.stopPropagation();
+        const hasTeams = (tournament.teamIds?.length ?? 0) > 0;
+        setSelectedTournamentForPanel(tournament);
+        setTournamentPanelMode(hasTeams ? 'readonly' : 'edit');
+        setTournamentPanelOpen(true);
+    };
+
     const handleDeleteTournament = (tournamentId: string) => {
         const tournament = tournaments.find(t => t.id === tournamentId);
         if (!tournament) return;
@@ -216,45 +69,30 @@ const TournamentList: React.FC<TournamentListProps> = ({ tournaments, teams, mat
     };
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 flex flex-col relative min-h-[50vh]">
+            <CreateTournamentSheet
+                isOpen={tournamentPanelOpen}
+                onClose={() => setTournamentPanelOpen(false)}
+                mode={tournamentPanelMode}
+                initialTournament={selectedTournamentForPanel}
+                addTournament={addTournament}
+                updateTournament={updateTournament}
+            />
+            
+            {/* Mobile/Global Floating Action Button (FAB) for Add Tournament */}
             {addTournament && (
-                <div className="space-y-6 animate-fade-in">
-                    <CrickIQCard>
-                        <h3 className="text-h3 text-text-primary flex items-center gap-2 mb-4">
-                            <TrophyIcon className="w-5 h-5" /> Create Tournament
-                        </h3>
-                        <div className="space-y-4">
-                            <input type="text" value={newTournamentName} onChange={e => setNewTournamentName(e.target.value)} placeholder="Tournament Name" className="w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" />
-                            <input type="text" value={newTournamentLocation} onChange={e => setNewTournamentLocation(e.target.value)} placeholder="Location" className="w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" />
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label htmlFor="start-date" className="text-caption text-text-secondary px-2">Start Date</label>
-                                    <input id="start-date" type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" />
-                                </div>
-                                <div>
-                                    <label htmlFor="end-date" className="text-caption text-text-secondary px-2">End Date</label>
-                                    <input id="end-date" type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" />
-                                </div>
-                            </div>
-                             <div className="grid grid-cols-2 gap-4">
-                                <input type="number" value={defaultOvers} onChange={e => setDefaultOvers(e.target.value === '' ? '' : parseInt(e.target.value, 10))} placeholder="Default Overs" className="w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" />
-                                <input type="number" value={numberOfPlayers} onChange={handleNumberOfPlayersChange} placeholder="Players/Team" className="w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" />
-                            </div>
-                            <Button
-                                onClick={handleAddTournament}
-                                disabled={!newTournamentName.trim() || !newTournamentLocation.trim() || !defaultOvers || !numberOfPlayers || !startDate || !endDate}
-                                variant="primary"
-                                className="w-full"
-                            >
-                                <PlusIcon /> Create
-                            </Button>
-                        </div>
-                    </CrickIQCard>
-                </div>
+                <button
+                    onClick={openCreateTournamentPanel}
+                    className="fixed bottom-24 right-6 z-40 flex items-center justify-center gap-2 px-5 h-14 bg-brand-blue hover:bg-brand-blue/90 text-white rounded-full font-bold shadow-lg shadow-brand-blue/20 transition-all active:scale-95 border border-brand-blue/10"
+                    aria-label="Create Tournament"
+                >
+                    <Plus className="w-6 h-6 shrink-0" />
+                    <span className="text-xs font-bold uppercase tracking-wider md:inline-block">Tournament</span>
+                </button>
             )}
             
             {tournaments.filter(t => t.id !== 't_quick_matches').length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full pb-20">
                     {[...tournaments].filter(t => t.id !== 't_quick_matches').reverse().map((tournament) => {
                         const tournamentMatchesList = matches.filter(m => m.tournamentId === tournament.id);
                         const tournamentTeams = tournament.teamIds.length;
@@ -269,88 +107,96 @@ const TournamentList: React.FC<TournamentListProps> = ({ tournaments, teams, mat
                         }
 
                         return (
-                            <div key={tournament.id} className="bg-secondary rounded-2xl shadow-lg overflow-hidden flex flex-col">
-                                <div className={`p-4 bg-brand-gradient text-white relative`}>
-                                    <h4 className="font-bold text-h2 pr-20 truncate">{tournament.name}</h4>
-                                    <p className="text-sm opacity-80 truncate">{tournament.location}</p>
-                                    <div className="absolute top-4 right-4 flex gap-2">
+                            <div 
+                                key={tournament.id} 
+                                onClick={() => onViewTournament(tournament.id)}
+                                className="bg-white dark:bg-secondary rounded-3xl shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] border border-brand-blue/10 p-4 flex flex-col relative transition-transform hover:-translate-y-1 duration-300 cursor-pointer overflow-hidden"
+                            >
+                                <div className="absolute top-0 left-0 bottom-0 w-1.5 opacity-80" style={{ backgroundColor: tournament.theme || '#4285F4' }}></div>
+                                <div className="flex justify-between items-start mb-3 pl-2">
+                                    <div className="pr-2 overflow-hidden flex-1">
+                                        <h4 className="font-semibold text-[15px] sm:text-[17px] text-text-primary tracking-tight truncate">{tournament.name}</h4>
+                                        <p className="text-[10px] sm:text-[11px] text-text-secondary font-bold tracking-wider uppercase mt-1 truncate">
+                                           {tournament.organizerName ? `${tournament.organizerName} • ` : ''} {tournament.tournamentType || 'LOCAL TOURNAMENT'}
+                                        </p>
+                                    </div>
+                                    <div className="flex gap-1 shrink-0 -mr-2 relative z-10">
                                         <button
-                                            onClick={() => setEditingTournament(tournament)}
+                                            onClick={(e) => openTournamentSettingsPanel(e, tournament)}
                                             title="Edit Tournament"
-                                            className="p-2 rounded-2xl bg-black/20 hover:bg-black/40 transition-colors"
+                                            className="p-1.5 rounded-full flex items-center justify-center transition-colors hover:bg-black/5 dark:hover:bg-white/5"
                                         >
-                                            <EditIcon className="w-5 h-5" />
+                                            <EditIcon className="w-4 h-4" style={{ color: tournament.theme || '#4285F4' }} />
                                         </button>
                                         <button
-                                            onClick={() => handleDeleteTournament(tournament.id)}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleDeleteTournament(tournament.id);
+                                            }}
                                             disabled={isMatchLive || hasDependencies}
                                             title={isMatchLive ? "Cannot delete while a match is live" : (hasDependencies ? "Cannot delete: Tournament has teams or matches." : "Delete Tournament")}
-                                            className="p-2 rounded-2xl bg-black/20 hover:bg-black/40 disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 disabled:cursor-not-allowed transition-colors"
+                                            className="p-1.5 rounded-full flex items-center justify-center text-text-secondary hover:text-red-500 hover:bg-red-500/10 disabled:opacity-40 disabled:hover:bg-transparent transition-colors"
                                         >
-                                            <TrashIcon className="w-5 h-5" />
+                                            <TrashIcon className="w-4 h-4" />
                                         </button>
                                     </div>
                                 </div>
                                 
-                                <div className="flex-grow flex flex-col">
-                                    {tournamentWinner && (
-                                        <div className="p-4 text-center  text-black shadow-inner">
-                                            <div className="flex items-center justify-center gap-2">
-                                                <TrophyIcon className="w-5 h-5" />
-                                                <span className="text-button uppercase tracking-wider">Winner: {tournamentWinner.name}</span>
-                                            </div>
-                                        </div>
-                                    )}
-                                    <div className="p-4 flex-grow">
-                                        <ul className="divide-y divide-border-color">
-                                            {tournament.format && (
-                                                <IconStatItem 
-                                                    icon={<ClipboardListIcon className="w-5 h-5" />} 
-                                                    label="Format" 
-                                                    value={tournament.format} 
-                                                />
-                                            )}
-                                            <IconStatItem 
-                                                icon={<CalendarIcon className="w-5 h-5" />} 
-                                                label="Dates" 
-                                                value={`${tournament.startDate ? new Date(tournament.startDate.replace(/-/g, '/')).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) : 'TBD'} - ${tournament.endDate ? new Date(tournament.endDate.replace(/-/g, '/')).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) : 'TBD'}`}
-                                            />
-                                            <IconStatItem 
-                                                icon={<UserGroupIcon className="w-5 h-5" />} 
-                                                label="Teams" 
-                                                value={tournamentTeams} 
-                                            />
-                                            <IconStatItem 
-                                                icon={<TrophyIcon className="w-5 h-5" />} 
-                                                label="Matches" 
-                                                value={tournamentMatchesCount} 
-                                            />
-                                            <IconStatItem 
-                                                icon={<BallIcon className="w-5 h-5" />} 
-                                                label="Overs" 
-                                                value={tournament.defaultOvers || 'N/A'} 
-                                            />
-                                            <IconStatItem 
-                                                icon={<UserGroupIcon className="w-5 h-5" />} 
-                                                label="Players/Team" 
-                                                value={tournament.numberOfPlayers || 'N/A'} 
-                                            />
-                                        </ul>
+                                <div className="flex flex-col gap-1.5 mt-1 pl-2 relative z-10">
+                                    <div className="flex items-center text-[12px] sm:text-[13px]">
+                                        <span className="w-[70px] font-semibold text-text-secondary">Ground</span>
+                                        <span className="opacity-40 text-text-secondary mx-1.5">-</span>
+                                        <span className="text-text-primary font-medium truncate">{tournament.location}</span>
                                     </div>
-    
-                                    <div className="p-4 border-t border-brand-blue/15">
-                                        <Button onClick={() => onViewTournament(tournament.id)} variant="primary" className="w-full">
-                                            Manage Tournament
-                                        </Button>
+                                    <div className="flex items-center text-[12px] sm:text-[13px]">
+                                        <span className="w-[70px] font-semibold text-text-secondary">Dates</span>
+                                        <span className="opacity-40 text-text-secondary mx-1.5">-</span>
+                                        <span className="text-text-primary font-medium truncate">
+                                            {`${tournament.startDate ? new Date(tournament.startDate.replace(/-/g, '/')).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) : 'TBD'} - ${tournament.endDate ? new Date(tournament.endDate.replace(/-/g, '/')).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) : 'TBD'}`}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center text-[12px] sm:text-[13px]">
+                                        <span className="w-[70px] font-semibold text-text-secondary">Overview</span>
+                                        <span className="opacity-40 text-text-secondary mx-1.5">-</span>
+                                        <span className="text-text-primary font-medium truncate">{tournament.defaultOvers || 'N/A'} Overs • {tournament.numberOfPlayers || 'N/A'}/team</span>
                                     </div>
                                 </div>
+
+                                <div className="mt-4 pt-3 border-t border-brand-blue/5 grid grid-cols-3 gap-2 pl-2 relative z-10">
+                                    <div className="flex flex-col items-center justify-center">
+                                        <span className="text-[9px] uppercase font-bold text-text-secondary tracking-widest">Teams</span>
+                                        <span className="text-[13px] font-bold text-text-primary mt-0.5">{tournamentTeams}</span>
+                                    </div>
+                                    <div className="flex flex-col items-center justify-center border-l border-brand-blue/5">
+                                        <span className="text-[9px] uppercase font-bold text-text-secondary tracking-widest">Matches</span>
+                                        <span className="text-[13px] font-bold text-text-primary mt-0.5">{tournamentMatchesCount}</span>
+                                    </div>
+                                    <div className="flex flex-col items-center justify-center border-l border-brand-blue/5">
+                                        <span className="text-[9px] uppercase font-bold text-text-secondary tracking-widest">Status</span>
+                                        <span className={`text-[9px] sm:text-[10px] mt-1 font-bold px-2 py-0.5 rounded-full uppercase border ${
+                                            tournamentWinner ? 'bg-brand-blue/10 text-brand-blue border-brand-blue/20' : 
+                                            (tournamentMatchesCount > 0 ? 'bg-emerald-50 dark:bg-emerald-950/45 text-emerald-700 dark:text-emerald-300 border-emerald-100 dark:border-emerald-900/30' : 
+                                            'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border-amber-100 dark:border-amber-900/30')
+                                        }`}>
+                                            {tournamentWinner ? 'Completed' : (tournamentMatchesCount > 0 ? 'Active' : 'Pending')}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {tournamentWinner && (
+                                    <div className="mt-4 ml-2 px-3 py-2 rounded-lg border border-brand-blue/10 bg-brand-blue/5 flex items-center justify-center gap-2 relative z-10">
+                                        <TrophyIcon className="w-3.5 h-3.5 text-brand-blue" />
+                                        <span className="text-[12px] font-bold uppercase tracking-wider text-text-primary">Winner: {tournamentWinner.name}</span>
+                                    </div>
+                                )}
                             </div>
                         );
                     })}
                 </div>
             ) : (
-                <CrickIQCard>
-                    <p className="text-text-secondary text-center">No tournaments created yet.</p>
+                <CrickIQCard className="flex flex-col items-center justify-center py-12 text-center my-auto">
+                    <h3 className="text-xl font-bold text-text-primary mb-2">No Tournaments Yet</h3>
+                    <p className="text-text-secondary text-sm">Tap + Tournament to create your first tournament.</p>
                 </CrickIQCard>
             )}
             {confirmation && (
@@ -360,36 +206,6 @@ const TournamentList: React.FC<TournamentListProps> = ({ tournaments, teams, mat
                     title={confirmation.title}
                     message={confirmation.message}
                 />
-            )}
-            {editingTournament && (
-                <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50 p-4">
-                    <CrickIQCard  className="w-full max-w-lg">
-                        <h3 className="text-h3 text-text-primary mb-4">Edit Tournament</h3>
-                        <div className="space-y-4">
-                            <input type="text" value={editFormData.name} onChange={e => setEditFormData(f => ({...f, name: e.target.value}))} placeholder="Tournament Name" className="w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" />
-                            <input type="text" value={editFormData.location} onChange={e => setEditFormData(f => ({...f, location: e.target.value}))} placeholder="Location" className="w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" />
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label htmlFor="start-date-edit" className="text-caption text-text-secondary px-2">Start Date</label>
-                                    <input id="start-date-edit" type="date" value={editFormData.startDate} onChange={e => setEditFormData(f => ({...f, startDate: e.target.value}))} className="w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" />
-                                </div>
-                                <div>
-                                    <label htmlFor="end-date-edit" className="text-caption text-text-secondary px-2">End Date</label>
-                                    <input id="end-date-edit" type="date" value={editFormData.endDate} onChange={e => setEditFormData(f => ({...f, endDate: e.target.value}))} className="w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" />
-                                </div>
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <input type="number" value={editFormData.defaultOvers} onChange={e => setEditFormData(f => ({...f, defaultOvers: e.target.value === '' ? '' : parseInt(e.target.value, 10)}))} placeholder="Default Overs" className="w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" />
-                                <input type="number" value={editFormData.numberOfPlayers} onChange={e => setEditFormData(f => ({...f, numberOfPlayers: e.target.value === '' ? '' : parseInt(e.target.value, 10)}))} placeholder="Players/Team" className="w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" />
-                            </div>
-                            {editError && <p className="text-highlight text-body text-center">{editError}</p>}
-                        </div>
-                        <div className="flex justify-end gap-4 mt-6">
-                            <button onClick={() => setEditingTournament(null)} className="py-1 px-4 bg-primary border border-brand-blue/15 rounded-2xl hover:bg-border-color font-semibold text-body">Cancel</button>
-                            <button onClick={handleUpdateTournament} disabled={!isEditFormValid} className="py-1 px-4 bg-brand-blue text-white font-bold rounded-2xl hover:bg-opacity-90 text-body disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400">Update</button>
-                        </div>
-                    </CrickIQCard>
-                </div>
             )}
         </div>
     );

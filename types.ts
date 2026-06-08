@@ -107,6 +107,12 @@ export interface Tournament {
     createdAt?: string;
     updatedAt?: string;
     syncStatus?: SyncStatus;
+    
+    // Phase 6 Metadata
+    organizerName?: string;
+    tournamentType?: string;
+    notes?: string;
+    theme?: string;
 }
 
 export type TossWinner = 'team1' | 'team2';

@@ -74,7 +74,7 @@ const QuickMatchHistory: React.FC<QuickMatchHistoryProps> = ({ matches, getTeamB
                     <CrickIQCard 
                             key={match.id}
                             accentColor={team1.logo}
-                            className="flex flex-col p-0 overflow-hidden shadow-sm hover:shadow-md bg-white rounded-xl transition-all duration-300"
+                            className="flex flex-col p-0 overflow-hidden shadow-sm hover:shadow-md bg-white rounded-3xl transition-all duration-300"
                         >
                             <div 
                                 onClick={() => {

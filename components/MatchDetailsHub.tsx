@@ -372,7 +372,7 @@ const MatchDetailsHub: React.FC<MatchDetailsHubProps> = ({
                     <div className="p-4 md:p-6 pb-24 max-w-4xl mx-auto space-y-6">
                         
                         {/* Lineups Card */}
-                        <CrickIQCard className="p-0 overflow-hidden shadow-sm bg-white rounded-xl">
+                        <CrickIQCard className="p-0 overflow-hidden shadow-sm bg-white rounded-3xl">
                             <div className="p-3 bg-gray-50 border-b border-gray-100 flex items-center justify-between">
                                 <h3 className="font-bold text-gray-900 border-l-4 border-brand-blue pl-3 text-sm uppercase tracking-wider">Lineups</h3>
                             </div>
@@ -411,7 +411,7 @@ const MatchDetailsHub: React.FC<MatchDetailsHubProps> = ({
                         </CrickIQCard>
 
                         {/* Match Info Card */}
-                        <CrickIQCard className="p-0 overflow-hidden shadow-sm bg-white rounded-xl">
+                        <CrickIQCard className="p-0 overflow-hidden shadow-sm bg-white rounded-3xl">
                             <div className="p-3 bg-gray-50 border-b border-gray-100 flex items-center justify-between">
                                 <h3 className="font-bold text-gray-900 border-l-4 border-brand-blue pl-3 text-sm uppercase tracking-wider">Match Info</h3>
                             </div>
@@ -500,7 +500,7 @@ const MatchDetailsHub: React.FC<MatchDetailsHubProps> = ({
                     <div className="p-4 md:p-6 pb-24 max-w-4xl mx-auto space-y-6">
                         
                         {/* Match Info Card */}
-                    <CrickIQCard className="p-0 overflow-hidden shadow-sm bg-white rounded-xl">
+                    <CrickIQCard className="p-0 overflow-hidden shadow-sm bg-white rounded-3xl">
                         <div className="p-5 flex flex-col gap-4">
                             
                             <div className="flex justify-between items-start mb-2">
@@ -545,7 +545,7 @@ const MatchDetailsHub: React.FC<MatchDetailsHubProps> = ({
 
                     {/* Result / Score Summary */}
                     {(displayState.type === 'completed' || displayState.type === 'abandoned' || displayState.type === 'live') && (
-                        <CrickIQCard className="p-0 overflow-hidden shadow-sm bg-white rounded-xl">
+                        <CrickIQCard className="p-0 overflow-hidden shadow-sm bg-white rounded-3xl">
                             <div className="p-5">
                                 <div className="flex items-center gap-2 mb-6">
                                     {displayState.type === 'live' ? (

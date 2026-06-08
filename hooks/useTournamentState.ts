@@ -10,7 +10,19 @@ export const useTournamentState = (
     createSnapshot: () => void
 ) => {
     
-    const addTournament = useCallback((name: string, location: string, defaultOvers: number, numberOfPlayers: number, startDate: string, endDate: string, ownerId?: string): string => {
+    const addTournament = useCallback((
+        name: string, 
+        location: string, 
+        defaultOvers: number, 
+        numberOfPlayers: number, 
+        startDate: string, 
+        endDate: string, 
+        ownerId?: string,
+        organizerName?: string,
+        tournamentType?: string,
+        notes?: string,
+        theme?: string
+    ): string => {
         const trimmedName = name.trim();
         if (!trimmedName || trimmedName.length > 50) {
             console.warn('[RuntimeValidation] Invalid tournament name rejected.');
@@ -38,8 +50,14 @@ export const useTournamentState = (
             startDate,
             endDate,
             teamIds: [],
+            stage: 'group',
+            format: 'Round Robin',
             createdAt: timestamp,
             updatedAt: timestamp,
+            organizerName,
+            tournamentType,
+            notes,
+            theme,
             ...createSyncMetadata()
         };
         setTournaments(prev => [...prev, newTournament]);

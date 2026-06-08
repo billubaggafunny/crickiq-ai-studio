@@ -115,7 +115,7 @@ const MatchTable: React.FC<MatchTableProps> = ({
                             <CrickIQCard 
                                 key={match.id}
                                 accentColor={team1.logo}
-                                className="flex flex-col p-0 overflow-hidden shadow-sm hover:shadow-md bg-white rounded-xl transition-all duration-300 relative"
+                                className="flex flex-col p-0 overflow-hidden shadow-sm hover:shadow-md bg-white rounded-3xl transition-all duration-300 relative"
                             >
                                 {handleDeleteMatch && isDeleteEligible && (
                                     <button
