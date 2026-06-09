@@ -144,7 +144,7 @@ const QuickMatchResults: React.FC<QuickMatchResultsProps> = ({ matchId, onClose,
                 <div className="flex-1 flex flex-col">
                     {/* Mobile Header */}
                     <div className="p-4 bg-primary text-text-primary text-center md:hidden">
-                        <h2 className="text-h3 uppercase tracking-wider">
+                        <h2 className="text-lg uppercase tracking-wider">
                             {firstInningsBattingTeam.name} vs {firstInningsBowlingTeam.name}
                         </h2>
                         <p className="text-caption text-text-secondary">{tournament?.location}</p>

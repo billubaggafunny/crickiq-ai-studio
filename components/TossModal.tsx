@@ -42,7 +42,7 @@ const TossModal: React.FC<TossModalProps> = ({ isOpen, onClose, onConfirm, team1
                 onClick={e => e.stopPropagation()}
             >
                 <div className="text-center">
-                    <h2 className="text-h2 text-text-primary">Coin Toss</h2>
+                    <h2 className="text-xl font-bold tracking-tight text-text-primary">Coin Toss</h2>
                     <p className="text-caption text-text-secondary">Who won and what did they choose?</p>
                 </div>
 

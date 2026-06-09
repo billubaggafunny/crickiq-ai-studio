@@ -81,7 +81,7 @@ const DrinksBreakOverlay: React.FC<DrinksBreakOverlayProps> = ({
                         <button
                             key={min}
                             onClick={() => onSelectDuration(min)}
-                            className="px-8 py-4 bg-white/20 hover:bg-white/30 rounded-2xl font-bold text-h3 transition-colors"
+                            className="px-8 py-4 bg-white/20 hover:bg-white/30 rounded-2xl font-bold text-lg transition-colors"
                         >
                             {min} MIN
                         </button>
@@ -688,7 +688,7 @@ const AppUI: React.FC = () => {
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    <h2 className="text-h2 text-text-primary">Loading CrickIQ...</h2>
+                    <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-text-primary">Loading CrickIQ...</h2>
                 </div>
             </div>
         );
@@ -971,7 +971,7 @@ const AppUI: React.FC = () => {
                 <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
                     {/* Desktop Sidebar */}
                     {activeTab !== 'live' && (
-                        <aside className="hidden md:flex flex-col w-64 bg-white border-r border-brand-blue/10 p-4 space-y-6">
+                        <aside className="hidden md:flex flex-col w-64 bg-secondary border-r border-brand-blue/10 p-4 space-y-6">
                             <nav className="flex-grow space-y-2 mt-2">
                             {navItems.map(item => {
                                 const isActive = activeTab === item.id;
@@ -1003,7 +1003,7 @@ const AppUI: React.FC = () => {
 
                     {/* Mobile Bottom Navigation */}
                     {activeTab !== 'live' && (
-                        <footer className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-secondary/95 backdrop-blur-md border-t border-black/5 dark:border-white/5 shadow-[0_-4px_20px_rgba(0,0,0,0.03)] z-40 safe-pad-b safe-pad-l safe-pad-r rounded-t-3xl">
+                        <footer className="md:hidden fixed bottom-0 left-0 right-0 bg-secondary/95 backdrop-blur-md border-t border-border z-40 safe-pad-b safe-pad-l safe-pad-r">
                             <nav className="flex justify-around items-center h-[72px]">
                                 {navItems.map(item => {
                                 const isActive = activeTab === item.id;
@@ -1012,7 +1012,7 @@ const AppUI: React.FC = () => {
                                     key={item.id}
                                     onClick={() => handleNavigate(item.id)}
                                     className={`flex flex-col items-center justify-center w-full h-full transition-colors duration-200 ${
-                                        isActive ? 'text-brand-blue' : 'text-text-secondary'
+                                        isActive ? 'text-accent' : 'text-text-secondary'
                                     }`}
                                 >
                                     <div className="flex items-center justify-center mb-1">

@@ -6,6 +6,7 @@ import type { UseCrickIQStateReturn } from '../hooks/useCrickIQState';
 import { calculatePlayerCareerStats } from '../utils/cricketLogic';
 import PlayerStatsModal from './PlayerStatsModal';
 import type { Player } from '../types';
+import { SafeChartWrapper } from './SafeChartWrapper';
 
 // FIX: Updated Card component to accept and spread additional props (e.g., onClick) to resolve type errors.
 
@@ -73,41 +74,41 @@ const QuickMatchStats: React.FC<UseCrickIQStateReturn> = ({ matches, teams }) =>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <CrickIQCard>
-                    <h2 className="text-h3 text-text-primary mb-4">Top Scorer</h2>
+                    <h2 className="text-sm uppercase tracking-widest font-bold text-text-secondary mb-4">Top Scorer</h2>
                     {topScorer && topScorer.runsScored > 0 ? (
                         <div className="flex items-center gap-4">
                              <div className="w-10 h-10 flex-shrink-0 flex items-center justify-center rounded-lg text-button text-white text-body" style={{ backgroundColor: topScorer.logo }}>
                                 {topScorer.teamName.substring(0, 2).toUpperCase()}
                             </div>
                             <div>
-                                <p className="text-base font-bold text-text-primary flex items-center gap-2">
+                                <p className="text-xl font-bold tracking-tight text-text-primary flex items-center gap-2">
                                     {topScorer.name}
                                 </p>
                                 <p className="text-sm text-text-secondary">{topScorer.teamName}</p>
                             </div>
                             <div className="ml-auto text-right selectable-text">
-                                <p className="text-3xl text-brand-teal">{topScorer.runsScored}</p>
-                                <p className="text-sm text-text-secondary">SR: {topScorer.strikeRate}</p>
+                                <p className="text-2xl font-bold text-text-primary">{topScorer.runsScored}</p>
+                                <p className="text-sm text-text-muted">SR: {topScorer.strikeRate}</p>
                             </div>
                         </div>
                     ) : <p className="text-text-secondary">No data yet.</p>}
                 </CrickIQCard>
                  <CrickIQCard>
-                    <h2 className="text-h3 text-text-primary mb-4">Top Wicket Taker</h2>
+                    <h2 className="text-sm uppercase tracking-widest font-bold text-text-secondary mb-4">Top Wicket Taker</h2>
                     {topBowler && topBowler.wicketsTaken > 0 ? (
                          <div className="flex items-center gap-4">
                             <div className="w-10 h-10 flex-shrink-0 flex items-center justify-center rounded-lg text-button text-white text-body" style={{ backgroundColor: topBowler.logo }}>
                                 {topBowler.teamName.substring(0, 2).toUpperCase()}
                             </div>
                             <div>
-                                <p className="text-base font-bold text-text-primary flex items-center gap-2">
+                                <p className="text-xl font-bold tracking-tight text-text-primary flex items-center gap-2">
                                     {topBowler.name}
                                 </p>
                                 <p className="text-sm text-text-secondary">{topBowler.teamName}</p>
                             </div>
                             <div className="ml-auto text-right selectable-text">
-                                <p className="text-3xl text-brand-lightblue">{topBowler.wicketsTaken}</p>
-                                <p className="text-sm text-text-secondary">Econ: {topBowler.economyRate}</p>
+                                <p className="text-2xl font-bold text-text-primary">{topBowler.wicketsTaken}</p>
+                                <p className="text-sm text-text-muted">Econ: {topBowler.economyRate}</p>
                             </div>
                         </div>
                     ) : <p className="text-text-secondary">No data yet.</p>}
@@ -116,53 +117,57 @@ const QuickMatchStats: React.FC<UseCrickIQStateReturn> = ({ matches, teams }) =>
             
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <CrickIQCard>
-                    <h3 className="text-h3 text-text-primary mb-4">Top Run Scorers</h3>
+                    <h3 className="text-xl font-bold text-text-primary mb-4">Top Run Scorers</h3>
                      
         <div style={{ width: '100%', height: 300, minHeight: 300, minWidth: 0 }}>
             {(!topBattersData || topBattersData.length === 0) ? (
                 <div className="flex items-center justify-center h-full w-full text-text-secondary">No data available</div>
             ) : (
-                <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={topBattersData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
-                        <XAxis dataKey="name" stroke="var(--color-text-secondary)" />
-                        <YAxis stroke="var(--color-text-secondary)" />
-                        <Tooltip
-                            contentStyle={{
-                                backgroundColor: 'var(--color-secondary)',
-                                border: '1px solid var(--color-border)',
-                                borderRadius: '0.25rem'
-                            }}
-                        />
-                        <Bar dataKey="runs" fill="var(--color-brand-teal)" name="Runs" />
-                    </BarChart>
-                </ResponsiveContainer>
+                <SafeChartWrapper>
+                    <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={topBattersData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
+                            <XAxis dataKey="name" stroke="var(--color-text-secondary)" />
+                            <YAxis stroke="var(--color-text-secondary)" />
+                            <Tooltip
+                                contentStyle={{
+                                    backgroundColor: 'var(--color-secondary)',
+                                    border: '1px solid var(--color-border)',
+                                    borderRadius: '0.25rem'
+                                }}
+                            />
+                            <Bar dataKey="runs" fill="var(--color-info)" name="Runs" />
+                        </BarChart>
+                    </ResponsiveContainer>
+                </SafeChartWrapper>
             )}
         </div>
         
                 </CrickIQCard>
                 <CrickIQCard>
-                    <h3 className="text-h3 text-text-primary mb-4">Top Wicket Takers</h3>
+                    <h3 className="text-xl font-bold text-text-primary mb-4">Top Wicket Takers</h3>
                      
         <div style={{ width: '100%', height: 300, minHeight: 300, minWidth: 0 }}>
             {(!topBowlersData || topBowlersData.length === 0) ? (
                 <div className="flex items-center justify-center h-full w-full text-text-secondary">No data available</div>
             ) : (
-                <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={topBowlersData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
-                        <XAxis dataKey="name" stroke="var(--color-text-secondary)" />
-                        <YAxis stroke="var(--color-text-secondary)" allowDecimals={false} />
-                        <Tooltip
-                            contentStyle={{
-                                backgroundColor: 'var(--color-secondary)',
-                                border: '1px solid var(--color-border)',
-                                borderRadius: '0.25rem'
-                            }}
-                        />
-                        <Bar dataKey="wickets" fill="var(--color-warning)" name="Wickets" />
-                    </BarChart>
-                </ResponsiveContainer>
+                <SafeChartWrapper>
+                    <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={topBowlersData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
+                            <XAxis dataKey="name" stroke="var(--color-text-secondary)" />
+                            <YAxis stroke="var(--color-text-secondary)" allowDecimals={false} />
+                            <Tooltip
+                                contentStyle={{
+                                    backgroundColor: 'var(--color-secondary)',
+                                    border: '1px solid var(--color-border)',
+                                    borderRadius: '0.25rem'
+                                }}
+                            />
+                            <Bar dataKey="wickets" fill="var(--color-danger)" name="Wickets" />
+                        </BarChart>
+                    </ResponsiveContainer>
+                </SafeChartWrapper>
             )}
         </div>
         
@@ -171,7 +176,7 @@ const QuickMatchStats: React.FC<UseCrickIQStateReturn> = ({ matches, teams }) =>
 
 
             <CrickIQCard>
-                <h2 className="text-h2 text-text-primary mb-4">Batting Leaderboard</h2>
+                <h2 className="text-xl font-bold tracking-tight text-text-primary mb-4">Batting Leaderboard</h2>
                 <Table >
                         <Thead>
                            <Tr className="border-b border-brand-blue/15">
@@ -208,7 +213,7 @@ const QuickMatchStats: React.FC<UseCrickIQStateReturn> = ({ matches, teams }) =>
             </CrickIQCard>
 
             <CrickIQCard>
-                <h2 className="text-h2 text-text-primary mb-4">Bowling Leaderboard</h2>
+                <h2 className="text-xl font-bold tracking-tight text-text-primary mb-4">Bowling Leaderboard</h2>
                 <Table >
                         <Thead>
                             <Tr className="border-b border-brand-blue/15">

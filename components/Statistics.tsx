@@ -18,6 +18,8 @@ import { ChartPieIcon } from "../constants";
 import WagonWheelModal from "./WagonWheelModal";
 
 
+import { SafeChartWrapper } from './SafeChartWrapper';
+
 interface StatisticsProps extends UseCrickIQStateReturn {
   tournamentId?: string;
 }
@@ -226,13 +228,13 @@ const Statistics: React.FC<StatisticsProps> = ({
             <div className="flex bg-primary/50 p-1 rounded-2xl flex-shrink-0">
               <button
                 onClick={() => setStatsSource("tournaments")}
-                className={`w-full sm:w-auto py-1.5 px-4 rounded-2xl font-semibold transition-colors duration-300 text-body ${statsSource === "tournaments" ? "bg-brand-blue text-white shadow-sm" : "hover:bg-secondary"}`}
+                className={`w-full sm:w-auto py-1.5 px-4 rounded-2xl font-bold transition-colors duration-300 text-body ${statsSource === "tournaments" ? "bg-accent text-white shadow-sm" : "text-text-secondary hover:bg-black/5 dark:hover:bg-white/5"}`}
               >
                 Tournaments
               </button>
               <button
                 onClick={() => setStatsSource("quick")}
-                className={`w-full sm:w-auto py-1.5 px-4 rounded-2xl font-semibold transition-colors duration-300 text-body ${statsSource === "quick" ? "bg-brand-blue text-white shadow-sm" : "hover:bg-secondary"}`}
+                className={`w-full sm:w-auto py-1.5 px-4 rounded-2xl font-bold transition-colors duration-300 text-body ${statsSource === "quick" ? "bg-accent text-white shadow-sm" : "text-text-secondary hover:bg-black/5 dark:hover:bg-white/5"}`}
               >
                 Quick Matches
               </button>
@@ -241,7 +243,7 @@ const Statistics: React.FC<StatisticsProps> = ({
               <select
                 value={selectedTournamentId}
                 onChange={(e) => setSelectedTournamentId(e.target.value)}
-                className="w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue text-body font-semibold"
+                className="w-full p-2 bg-primary text-text-primary border border-brand-blue/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue text-body font-semibold"
               >
                 <option value="all">All Tournaments</option>
                 {tournamentOptions.map((t) => (
@@ -284,34 +286,34 @@ const Statistics: React.FC<StatisticsProps> = ({
                 >
                   <ChartPieIcon />
                 </div>
-                <h2 className="text-h3 text-text-primary mb-4">
+                <h2 className="text-sm uppercase tracking-widest font-bold text-text-secondary mb-4">
                   Top Scorer
                 </h2>
                 {topScorer && topScorer.runsScored > 0 ? (
-                  <div className="flex items-center gap-4">
-                    <div
-                      className="w-10 h-10 flex-shrink-0 flex items-center justify-center rounded-lg text-button text-white text-body"
-                      style={{ backgroundColor: topScorer.logo }}
-                    >
-                      {topScorer.teamName.substring(0, 2).toUpperCase()}
-                    </div>
-                    <div>
-                      <p className="text-base font-bold text-text-primary flex items-center gap-2">
-                        {topScorer.name}
-                      </p>
-                      <p className="text-sm text-text-secondary">
-                        {topScorer.teamName}
-                      </p>
-                    </div>
-                    <div className="ml-auto text-right selectable-text">
-                      <p className="text-3xl text-brand-blue">
-                        {topScorer.runsScored}
-                      </p>
-                      <p className="text-sm text-text-secondary">
-                        SR: {topScorer.strikeRate}
-                      </p>
-                    </div>
-                  </div>
+                  <>
+        <div className="flex items-center gap-4">
+            <div className="w-10 h-10 flex-shrink-0 flex items-center justify-center rounded-lg text-button text-white text-body shadow-sm" style={{ backgroundColor: topScorer.logo }}>
+                {topScorer.teamName.substring(0, 2).toUpperCase()}
+            </div>
+            <div>
+                <p className="text-xl font-bold tracking-tight text-text-primary flex items-center gap-2">
+                    {topScorer.name}
+                </p>
+                <p className="text-sm text-text-secondary">{topScorer.teamName}</p>
+            </div>
+        </div>
+        <div className="mt-4 p-3 rounded-xl bg-tertiary flex justify-between items-center selectable-text">
+            <span className="text-xs text-text-secondary font-bold uppercase tracking-wider">Runs Scored</span>
+            <div className="text-right">
+                <p className="text-2xl font-bold text-text-primary leading-none">
+                    {topScorer.runsScored}
+                </p>
+                <p className="text-xs text-text-muted mt-1 font-semibold uppercase tracking-wider">
+                    SR: {topScorer.strikeRate}
+                </p>
+            </div>
+        </div>
+    </>
                 ) : (
                   <p className="text-text-secondary">No data yet.</p>
                 )}
@@ -330,34 +332,34 @@ const Statistics: React.FC<StatisticsProps> = ({
                 >
                   <ChartPieIcon />
                 </div>
-                <h2 className="text-h3 text-text-primary mb-4">
+                <h2 className="text-sm uppercase tracking-widest font-bold text-text-secondary mb-4">
                   Top Wicket Taker
                 </h2>
                 {topBowler && topBowler.wicketsTaken > 0 ? (
-                  <div className="flex items-center gap-4">
-                    <div
-                      className="w-10 h-10 flex-shrink-0 flex items-center justify-center rounded-lg text-button text-white text-body"
-                      style={{ backgroundColor: topBowler.logo }}
-                    >
-                      {topBowler.teamName.substring(0, 2).toUpperCase()}
-                    </div>
-                    <div>
-                      <p className="text-base font-bold text-text-primary flex items-center gap-2">
-                        {topBowler.name}
-                      </p>
-                      <p className="text-sm text-text-secondary">
-                        {topBowler.teamName}
-                      </p>
-                    </div>
-                    <div className="ml-auto text-right selectable-text">
-                      <p className="text-3xl text-brand-blue">
-                        {topBowler.wicketsTaken}
-                      </p>
-                      <p className="text-sm text-text-secondary">
-                        Econ: {topBowler.economyRate}
-                      </p>
-                    </div>
-                  </div>
+                  <>
+        <div className="flex items-center gap-4">
+            <div className="w-10 h-10 flex-shrink-0 flex items-center justify-center rounded-lg text-button text-white text-body shadow-sm" style={{ backgroundColor: topBowler.logo }}>
+                {topBowler.teamName.substring(0, 2).toUpperCase()}
+            </div>
+            <div>
+                <p className="text-xl font-bold tracking-tight text-text-primary flex items-center gap-2">
+                    {topBowler.name}
+                </p>
+                <p className="text-sm text-text-secondary">{topBowler.teamName}</p>
+            </div>
+        </div>
+        <div className="mt-4 p-3 rounded-xl bg-tertiary flex justify-between items-center selectable-text">
+            <span className="text-xs text-text-secondary font-bold uppercase tracking-wider">Wickets</span>
+            <div className="text-right">
+                <p className="text-2xl font-bold text-text-primary leading-none">
+                    {topBowler.wicketsTaken}
+                </p>
+                <p className="text-xs text-text-muted mt-1 font-semibold uppercase tracking-wider">
+                    Econ: {topBowler.economyRate}
+                </p>
+            </div>
+        </div>
+    </>
                 ) : (
                   <p className="text-text-secondary">No data yet.</p>
                 )}
@@ -367,7 +369,7 @@ const Statistics: React.FC<StatisticsProps> = ({
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
               <CrickIQCard  className="flex flex-col --color">
                 <div className="px-2 pt-2 pb-6">
-                  <h3 className="text-h3 text-text-primary mb-1">
+                  <h3 className="text-xl md:text-2xl font-bold tracking-tight text-text-primary">
                     Top Run Scorers
                   </h3>
                   <p className="text-caption text-text-secondary">
@@ -379,41 +381,43 @@ const Statistics: React.FC<StatisticsProps> = ({
             {(!topBattersData || topBattersData.length === 0) ? (
                 <div className="flex items-center justify-center h-full w-full text-text-secondary">No data available</div>
             ) : (
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart
-                      data={topBattersData}
-                      margin={{ top: 5, right: 10, left: -20, bottom: 5 }}
-                    >
-                      <CartesianGrid
-                        strokeDasharray="3 3"
-                        stroke="var(--color-border)"
-                      />
-                      <XAxis
-                        dataKey="name"
-                        stroke="var(--color-text-secondary)"
-                      />
-                      <YAxis stroke="var(--color-text-secondary)" />
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: "var(--color-secondary)",
-                          border: "1px solid var(--color-border)",
-                          borderRadius: '0.25rem',
-                        }}
-                      />
-                      <Bar
-                        dataKey="runs"
-                        fill="var(--color-brand-lavender)"
-                        name="Runs"
-                      />
-                    </BarChart>
-                  </ResponsiveContainer>
+                  <SafeChartWrapper>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart
+                        data={topBattersData}
+                        margin={{ top: 5, right: 10, left: -20, bottom: 5 }}
+                      >
+                        <CartesianGrid
+                          strokeDasharray="3 3"
+                          stroke="var(--color-border)"
+                        />
+                        <XAxis
+                          dataKey="name"
+                          stroke="var(--color-text-secondary)"
+                        />
+                        <YAxis stroke="var(--color-text-secondary)" />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: "var(--color-secondary)",
+                            border: "1px solid var(--color-border)",
+                            borderRadius: '0.25rem',
+                          }}
+                        />
+                        <Bar
+                          dataKey="runs"
+                          fill="var(--color-info)"
+                          name="Runs"
+                        />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </SafeChartWrapper>
             )}
         </div>
         
               </CrickIQCard>
               <CrickIQCard  className="flex flex-col --color">
                 <div className="px-2 pt-2 pb-6">
-                  <h3 className="text-h3 text-text-primary mb-1">
+                  <h3 className="text-xl md:text-2xl font-bold tracking-tight text-text-primary">
                     Top Wicket Takers
                   </h3>
                   <p className="text-caption text-text-secondary">
@@ -425,37 +429,39 @@ const Statistics: React.FC<StatisticsProps> = ({
             {(!topBowlersData || topBowlersData.length === 0) ? (
                 <div className="flex items-center justify-center h-full w-full text-text-secondary">No data available</div>
             ) : (
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart
-                      data={topBowlersData}
-                      margin={{ top: 5, right: 10, left: -20, bottom: 5 }}
-                    >
-                      <CartesianGrid
-                        strokeDasharray="3 3"
-                        stroke="var(--color-border)"
-                      />
-                      <XAxis
-                        dataKey="name"
-                        stroke="var(--color-text-secondary)"
-                      />
-                      <YAxis
-                        stroke="var(--color-text-secondary)"
-                        allowDecimals={false}
-                      />
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: "var(--color-secondary)",
-                          border: "1px solid var(--color-border)",
-                          borderRadius: '0.25rem',
-                        }}
-                      />
-                      <Bar
-                        dataKey="wickets"
-                        fill="var(--color-warning)"
-                        name="Wickets"
-                      />
-                    </BarChart>
-                  </ResponsiveContainer>
+                  <SafeChartWrapper>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart
+                        data={topBowlersData}
+                        margin={{ top: 5, right: 10, left: -20, bottom: 5 }}
+                      >
+                        <CartesianGrid
+                          strokeDasharray="3 3"
+                          stroke="var(--color-border)"
+                        />
+                        <XAxis
+                          dataKey="name"
+                          stroke="var(--color-text-secondary)"
+                        />
+                        <YAxis
+                          stroke="var(--color-text-secondary)"
+                          allowDecimals={false}
+                        />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: "var(--color-secondary)",
+                            border: "1px solid var(--color-border)",
+                            borderRadius: '0.25rem',
+                          }}
+                        />
+                        <Bar
+                          dataKey="wickets"
+                          fill="var(--color-danger)"
+                          name="Wickets"
+                        />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </SafeChartWrapper>
             )}
         </div>
         
@@ -463,9 +469,9 @@ const Statistics: React.FC<StatisticsProps> = ({
             </div>
 
             <CrickIQCard  className="overflow-hidden ">
-              <div className="p-6 sm:p-8 pb-4   border-b border-brand-blue/15/50">
-                <h2 className="text-h2 text-text-primary mb-1 flex items-center gap-2">
-                  <span className="text-brand-lavender text-h3">🏏</span> Batting
+              <div className="p-6 sm:p-8 pb-4   border-b border-brand-blue/8">
+                <h2 className="text-xl font-bold tracking-tight text-text-primary mb-1 flex items-center gap-2">
+                  <span className="text-brand-lavender text-lg">🏏</span> Batting
                   Leaderboard
                 </h2>
                 <p className="text-caption text-text-secondary pl-8">
@@ -474,7 +480,7 @@ const Statistics: React.FC<StatisticsProps> = ({
               </div>
               <Table >
                   <Thead>
-                    <Tr className="border-b border-brand-blue/15/50 bg-black/5 dark:bg-white/5">
+                    <Tr className="border-b border-brand-blue/8 bg-black/5 dark:bg-white/5">
                       <Th className="w-full sm:px-6 font-bold tracking-wider">Player</Th>
                       <Th className="text-right font-bold tracking-wider">
                         Runs
@@ -513,7 +519,7 @@ const Statistics: React.FC<StatisticsProps> = ({
                             <Tr
                               key={p.id}
                               onClick={() => setViewingPlayer(p)}
-                              className="border-b border-brand-blue/15 last:border-b-0 hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer transition-colors duration-200"
+                              className="border-b border-brand-blue/10 last:border-b-0 hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer transition-colors duration-200"
                             >
                               <Td className="sm:px-6">
                                 <div className="flex items-center gap-4">
@@ -560,7 +566,7 @@ const Statistics: React.FC<StatisticsProps> = ({
                             <Tr>
                               <Td
                                 colSpan={7}
-                                className="p-0 border-t border-brand-blue/15/50"
+                                className="p-0 border-t border-brand-blue/8"
                               >
                                 <button
                                   onClick={() =>
@@ -583,9 +589,9 @@ const Statistics: React.FC<StatisticsProps> = ({
             </CrickIQCard>
 
             <CrickIQCard  className="overflow-hidden -teal-500/10">
-              <div className="p-6 sm:p-8 pb-4   border-b border-brand-blue/15/50">
-                <h2 className="text-h2 text-text-primary mb-1 flex items-center gap-2">
-                  <span className="text-teal-500 text-h3">🥎</span> Bowling
+              <div className="p-6 sm:p-8 pb-4   border-b border-brand-blue/8">
+                <h2 className="text-xl font-bold tracking-tight text-text-primary mb-1 flex items-center gap-2">
+                  <span className="text-teal-500 text-lg">🥎</span> Bowling
                   Leaderboard
                 </h2>
                 <p className="text-caption text-text-secondary pl-8">
@@ -594,7 +600,7 @@ const Statistics: React.FC<StatisticsProps> = ({
               </div>
               <Table >
                   <Thead>
-                    <Tr className="border-b border-brand-blue/15/50 bg-black/5 dark:bg-white/5">
+                    <Tr className="border-b border-brand-blue/8 bg-black/5 dark:bg-white/5">
                       <Th className="w-full sm:px-6 font-bold tracking-wider">Player</Th>
                       <Th className="text-right font-bold tracking-wider">
                         Wickets
@@ -634,7 +640,7 @@ const Statistics: React.FC<StatisticsProps> = ({
                             <Tr
                               key={p.id}
                               onClick={() => setViewingPlayer(p)}
-                              className="border-b border-brand-blue/15/30 last:border-b-0 hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer transition-colors duration-200"
+                              className="border-b border-brand-blue/10/30 last:border-b-0 hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer transition-colors duration-200"
                             >
                               <Td className="sm:px-8">
                                 <div className="flex items-center gap-4">
@@ -678,7 +684,7 @@ const Statistics: React.FC<StatisticsProps> = ({
                             <Tr>
                               <Td
                                 colSpan={6}
-                                className="p-0 border-t border-brand-blue/15/50"
+                                className="p-0 border-t border-brand-blue/8"
                               >
                                 <button
                                   onClick={() =>

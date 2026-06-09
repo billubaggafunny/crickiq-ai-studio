@@ -4,6 +4,8 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 import type { Player, Match, Team, Innings, Ball } from '../types';
 import { WicketType } from '../types';
 
+import { SafeChartWrapper } from './SafeChartWrapper';
+
 interface WagonWheelModalProps {
     player: Player & { teamName?: string; teamId?: string; logo?: string, ballsFaced?: number, runsScored?: number, wicketsTaken?: number, strikeRate?: string, economyRate?: string, highScore?: number, bestBowlingInnings?: string };
     matches: Match[];
@@ -13,11 +15,11 @@ interface WagonWheelModalProps {
 }
 
 const RUN_COLORS: { [key: number]: string } = {
-    1: '#9CA3AF', // gray-400
-    2: '#60A5FA', // blue-400
-    3: '#A78BFA', // violet-400
-    4: '#FBBF24', // amber-400
-    6: 'var(--color-danger)', // red-500
+    1: 'var(--color-text-muted)',
+    2: 'var(--color-info)',
+    3: 'var(--color-purple)',
+    4: 'var(--color-warning)',
+    6: 'var(--color-danger)',
 };
 
 // Generates a random angle in degrees. 0 is straight down, 90 is square leg, 270 is point.
@@ -117,7 +119,7 @@ const DismissalAnalysis: React.FC<{ wickets: { type: WicketType }[] }> = ({ wick
             {sortedDismissals.map(([type, count]) => (
                  <div key={type} className="flex items-center justify-between p-4 bg-black/20 rounded-lg">
                     <span className="text-base font-semibold text-text-secondary">{type}</span>
-                    <span className="text-h2 text-white">{count}</span>
+                    <span className="text-2xl font-bold text-white">{count}</span>
                 </div>
             ))}
         </div>
@@ -130,26 +132,28 @@ const BowlingChart: React.FC<{ data: { matchName: string; wickets: number; runs:
     }
     return (
         <div style={{ width: '100%', height: 250, minHeight: 250, minWidth: 0 }}>
-            <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={data} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.1)" />
-                    <XAxis dataKey="matchName" stroke="rgba(255, 255, 255, 0.7)" fontSize={12} />
-                    <YAxis yAxisId="left" orientation="left" stroke="#FBBF24" allowDecimals={false} label={{ value: 'Wickets', angle: -90, position: 'insideLeft', fill: '#FBBF24', dy: 40, dx: 10, style: {fontSize: '12px'} }} />
-                    <YAxis yAxisId="right" orientation="right" stroke="#60A5FA" label={{ value: 'Runs Conceded', angle: 90, position: 'insideRight', fill: '#60A5FA', dy: -50, dx: -5, style: {fontSize: '12px'} }} />
-                    <Tooltip
-                        contentStyle={{
-                            backgroundColor: 'rgba(30, 30, 30, 0.9)',
-                            border: '1px solid rgba(255, 255, 255, 0.2)',
-                            borderRadius: '0.25rem',
-                            color: 'white'
-                        }}
-                        cursor={{ fill: 'rgba(255, 255, 255, 0.1)' }}
-                    />
-                    <Legend wrapperStyle={{fontSize: '12px'}}/>
-                    <Bar yAxisId="left" dataKey="wickets" fill="#FBBF24" name="Wickets" radius={[4, 4, 0, 0]} />
-                    <Bar yAxisId="right" dataKey="runs" fill="#60A5FA" name="Runs Conceded" radius={[4, 4, 0, 0]} />
-                </BarChart>
-            </ResponsiveContainer>
+            <SafeChartWrapper>
+                <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={data} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
+                        <XAxis dataKey="matchName" stroke="var(--color-text-secondary)" fontSize={12} />
+                        <YAxis yAxisId="left" orientation="left" stroke="var(--color-warning)" allowDecimals={false} label={{ value: 'Wickets', angle: -90, position: 'insideLeft', fill: 'var(--color-warning)', dy: 40, dx: 10, style: {fontSize: '12px'} }} />
+                        <YAxis yAxisId="right" orientation="right" stroke="var(--color-info)" label={{ value: 'Runs Conceded', angle: 90, position: 'insideRight', fill: 'var(--color-info)', dy: -50, dx: -5, style: {fontSize: '12px'} }} />
+                        <Tooltip
+                            contentStyle={{
+                                backgroundColor: 'var(--color-secondary)',
+                                border: '1px solid var(--color-border)',
+                                borderRadius: '0.25rem',
+                                color: 'var(--color-text-primary)'
+                            }}
+                            cursor={{ fill: 'var(--color-border)' }}
+                        />
+                        <Legend wrapperStyle={{fontSize: '12px'}}/>
+                        <Bar yAxisId="left" dataKey="wickets" fill="var(--color-warning)" name="Wickets" radius={[4, 4, 0, 0]} />
+                        <Bar yAxisId="right" dataKey="runs" fill="var(--color-info)" name="Runs Conceded" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                </ResponsiveContainer>
+            </SafeChartWrapper>
         </div>
     );
 };
@@ -299,7 +303,7 @@ const WagonWheelModal: React.FC<WagonWheelModalProps> = ({ player, matches, team
             >
                 <div className="p-4 text-center border-b border-white/10 flex-shrink-0 cursor-grab">
                     <div className="w-10 h-1.5 bg-zinc-600 rounded-2xl mx-auto mb-4"></div>
-                    <h2 className="text-h3">
+                    <h2 className="text-lg">
                         {type === 'batting' ? "Wagon Wheel" : "Dismissal Analysis"}
                     </h2>
                 </div>
@@ -309,12 +313,12 @@ const WagonWheelModal: React.FC<WagonWheelModalProps> = ({ player, matches, team
                         <>
                             <WagonWheelDisplay shots={shots} runsInSectors={runsInSectors} />
                             <div className="bg-white/10 p-4 rounded-xl backdrop-blur-sm border border-white/10 grid grid-cols-[1fr_1fr_1fr_2px_1fr_1fr] gap-x-3 text-center text-white">
-                                <div><div className="text-xs opacity-70">Runs</div><div className="font-bold text-h3">{player.runsScored}</div></div>
-                                <div><div className="text-xs opacity-70">Balls</div><div className="font-bold text-h3">{player.ballsFaced}</div></div>
-                                <div><div className="text-xs opacity-70">SR</div><div className="font-bold text-h3">{player.strikeRate}</div></div>
+                                <div><div className="text-xs opacity-70">Runs</div><div className="font-bold text-lg">{player.runsScored}</div></div>
+                                <div><div className="text-xs opacity-70">Balls</div><div className="font-bold text-lg">{player.ballsFaced}</div></div>
+                                <div><div className="text-xs opacity-70">SR</div><div className="font-bold text-lg">{player.strikeRate}</div></div>
                                 <div className="w-px h-full bg-white/20"></div>
-                                <div><div className="text-xs opacity-70">Off-S</div><div className="font-bold text-h3">{offSideRuns}</div></div>
-                                <div><div className="text-xs opacity-70">Leg-S</div><div className="font-bold text-h3">{legSideRuns}</div></div>
+                                <div><div className="text-xs opacity-70">Off-S</div><div className="font-bold text-lg">{offSideRuns}</div></div>
+                                <div><div className="text-xs opacity-70">Leg-S</div><div className="font-bold text-lg">{legSideRuns}</div></div>
                             </div>
                             <div className="bg-black/50 p-4 rounded-2xl flex justify-around items-center">
                                 {Object.entries(runsBreakdown).map(([run, count]) => {
@@ -334,7 +338,7 @@ const WagonWheelModal: React.FC<WagonWheelModalProps> = ({ player, matches, team
                     ) : (
                         <div className="space-y-4">
                             <div className="p-4 rounded-lg bg-black/20">
-                                <h3 className="text-h3 mb-2">Bowling Summary</h3>
+                                <h3 className="text-lg mb-2">Bowling Summary</h3>
                                 <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-body">
                                     <div className="font-semibold text-text-secondary">Total Wickets</div><div className="font-bold text-right text-brand-blue">{player.wicketsTaken}</div>
                                     <div className="font-semibold text-text-secondary">Best Bowling</div><div className="font-bold text-right text-text-primary">{player.bestBowlingInnings}</div>
@@ -344,13 +348,13 @@ const WagonWheelModal: React.FC<WagonWheelModalProps> = ({ player, matches, team
                             
                             {perMatchBowlingStats.length > 0 && (
                                 <div className="p-4 rounded-lg bg-black/20">
-                                    <h3 className="text-h3 mb-4">Runs vs Wickets (Match by Match)</h3>
+                                    <h3 className="text-lg mb-4">Runs vs Wickets (Match by Match)</h3>
                                     <BowlingChart data={perMatchBowlingStats} />
                                 </div>
                             )}
 
                              <div className="p-4 rounded-lg bg-black/20">
-                                <h3 className="text-h3 mb-4">Dismissal Types</h3>
+                                <h3 className="text-lg mb-4">Dismissal Types</h3>
                                 {wickets.length > 0 ? <DismissalAnalysis wickets={wickets} /> : <p className="text-text-secondary">No wickets to analyze.</p>}
                             </div>
                         </div>

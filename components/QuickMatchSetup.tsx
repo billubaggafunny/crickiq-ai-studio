@@ -29,7 +29,7 @@ interface QuickMatchSetupProps extends UseCrickIQStateReturn {
 
 const TeamPanel: React.FC<{ team: Team, isReady: boolean, onManage: () => void }> = ({ team, isReady, onManage }) => (
     <CrickIQCard  className="text-center">
-        <div className="text-h2 text-text-primary flex items-center justify-center gap-2">
+        <div className="text-2xl md:text-3xl font-bold tracking-tight text-text-primary flex items-center justify-center gap-2">
             <div className="w-8 h-8 flex items-center justify-center rounded-lg text-button text-white text-body" style={{ backgroundColor: team.logo }}>
                 {team.name.substring(0, 2).toUpperCase()}
             </div>
@@ -199,7 +199,7 @@ const QuickMatchSetup: React.FC<QuickMatchSetupProps> = ({ match: initialMatch, 
 
             {team1Ready && team2Ready && (
                 <CrickIQCard>
-                    <h3 className="text-h2 text-text-primary mb-4 text-center">Team Lineups</h3>
+                    <h3 className="text-2xl md:text-3xl font-bold tracking-tight text-text-primary mb-4 text-center">Team Lineups</h3>
                     <div className="border-b border-brand-blue/15 flex items-center justify-center gap-4 mb-4">
                         <button
                             onClick={() => setActiveLineupTab('team1')}
@@ -285,7 +285,7 @@ const QuickMatchSetup: React.FC<QuickMatchSetupProps> = ({ match: initialMatch, 
                                 </div>
                                 <button 
                                     onClick={() => onStartMatch(match)}
-                                    className="mt-6 w-full sm:w-auto px-8 py-1.5 rounded-2xl font-bold text-h3 bg-brand-gradient text-white shadow-lg"
+                                    className="mt-6 w-full sm:w-auto px-8 py-1.5 rounded-2xl font-bold text-lg bg-brand-gradient text-white shadow-lg"
                                 >
                                     Start Match
                                 </button>
@@ -317,7 +317,7 @@ const QuickMatchSetup: React.FC<QuickMatchSetupProps> = ({ match: initialMatch, 
                     <div className="w-full max-w-lg" onClick={e => e.stopPropagation()}>
                         <CrickIQCard>
                             <div className="flex justify-between items-center mb-4">
-                                <h3 className="text-h2 text-text-primary">Team Preview</h3>
+                                <h3 className="text-2xl md:text-3xl font-bold tracking-tight text-text-primary">Team Preview</h3>
                                 <button onClick={() => setPreviewingTeamId(null)} className="text-3xl leading-none text-text-secondary hover:text-text-primary">&times;</button>
                             </div>
                             <LineupPreview team={getTeamById(previewingTeamId)!} playerStats={previewingTeamId === team1?.id ? team1Stats : team2Stats} match={match} />

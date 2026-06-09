@@ -15,9 +15,9 @@ const Button: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement>> = ({ child
 
 const StatRow: React.FC<{ label: string, value1: string | number, value2: string | number }> = ({ label, value1, value2 }) => (
     <div className="grid grid-cols-3 items-center text-center py-2 border-b border-brand-blue/15 last:border-b-0">
-        <span className="font-bold text-h3" style={{color: 'var(--color-brand-teal)'}}>{value1}</span>
+        <span className="font-bold text-lg" style={{color: 'var(--color-brand-teal)'}}>{value1}</span>
         <span className="text-table-header text-text-secondary">{label}</span>
-        <span className="font-bold text-h3" style={{color: 'var(--color-brand-blue)'}}>{value2}</span>
+        <span className="font-bold text-lg" style={{color: 'var(--color-brand-blue)'}}>{value2}</span>
     </div>
 );
 
@@ -237,7 +237,7 @@ const Comparison: React.FC<UseCrickIQStateReturn> = ({ teams, matches, getTourna
             {mode === 'team' && (
                 <div className="space-y-6 animate-fade-in">
                     <CrickIQCard>
-                        <h3 className="text-h3 text-text-primary mb-4">Select Teams to Compare</h3>
+                        <h3 className="text-xl font-bold text-text-primary mb-4">Select Teams to Compare</h3>
                         <div className="grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-4 items-end">
                             <select value={team1Id} onChange={e => { setTeam1Id(e.target.value); setTeamResult(null); }} className="w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue">
                                 <option value="" disabled>Select Team 1</option>
@@ -252,7 +252,7 @@ const Comparison: React.FC<UseCrickIQStateReturn> = ({ teams, matches, getTourna
                     </CrickIQCard>
                     {teamResult && (
                         <CrickIQCard>
-                            <h3 className="text-h3 text-text-primary mb-4">Head-to-Head Result</h3>
+                            <h3 className="text-xl font-bold text-text-primary mb-4">Head-to-Head Result</h3>
                             {teamResult.totalMatches > 0 ? (
                                 <div className="space-y-6">
                                     <div>
@@ -281,7 +281,7 @@ const Comparison: React.FC<UseCrickIQStateReturn> = ({ teams, matches, getTourna
             {mode === 'player' && (
                 <div className="space-y-6 animate-fade-in">
                     <CrickIQCard>
-                        <h3 className="text-h3 text-text-primary mb-4">Select Players to Compare</h3>
+                        <h3 className="text-xl font-bold text-text-primary mb-4">Select Players to Compare</h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
                             <div className="space-y-2">
                                 <select value={p1TeamId} onChange={e => { setP1TeamId(e.target.value); setPlayer1Id(''); setPlayerResult(null); }} className="w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue">
@@ -310,7 +310,7 @@ const Comparison: React.FC<UseCrickIQStateReturn> = ({ teams, matches, getTourna
                     </CrickIQCard>
                     {playerResult && (
                         <CrickIQCard>
-                            <h3 className="text-h3 text-text-primary mb-4">Player Comparison</h3>
+                            <h3 className="text-xl font-bold text-text-primary mb-4">Player Comparison</h3>
                             {(playerResult.player1.stats.matches > 0 || playerResult.player2.stats.matches > 0) && p1TeamId !== p2TeamId ? (
                                 <div className="space-y-6">
                                     {playerResult.totalScore > 0 && (

@@ -54,7 +54,7 @@ const InningsScorecard: React.FC<{ innings: Innings; teams: Team[]; match: Match
     return (
         <div className="space-y-4">
                 <div className="flex justify-between items-baseline mb-4">
-                <h3 className="text-h2 text-slate-800 dark:text-text-primary flex items-center gap-2">
+                <h3 className="text-xl md:text-2xl font-bold tracking-tight text-text-primary flex items-center gap-2 mb-2">
                     <div className="w-8 h-8 flex items-center justify-center rounded-lg text-button text-white text-body" style={{ backgroundColor: battingTeam.logo }}>
                         {battingTeam.name.substring(0, 2).toUpperCase()}
                     </div>
@@ -96,16 +96,16 @@ const InningsScorecard: React.FC<{ innings: Innings; teams: Team[]; match: Match
 
                                 return (
                                     <Tr key={player.id} className="hover:bg-secondary/30 dark:hover:bg-black/20">
-                                        <Td className="font-bold text-slate-800 dark:">
+                                        <Td className="font-semibold text-text-primary">
                                             {player.name}
                                             {replacementTag}
                                         </Td>
-                                        <Td >{statusText}</Td>
-                                        <Td className="text-right font-bold text-brand-blue">{stats.runs}</Td>
-                                        <Td className="text-right">{stats.balls}</Td>
-                                        <Td className="text-right">{stats.fours}</Td>
-                                        <Td className="text-right">{stats.sixes}</Td>
-                                        <Td className="text-right">{calculateStrikeRate(stats.runs, stats.balls)}</Td>
+                                        <Td className="text-sm text-text-secondary font-normal">{statusText}</Td>
+                                        <Td className="text-right font-bold text-text-primary">{stats.runs}</Td>
+                                        <Td className="text-right text-sm text-text-secondary font-normal">{stats.balls}</Td>
+                                        <Td className="text-right text-sm text-text-secondary font-normal">{stats.fours}</Td>
+                                        <Td className="text-right text-sm text-text-secondary font-normal">{stats.sixes}</Td>
+                                        <Td className="text-right text-sm text-text-secondary font-normal">{calculateStrikeRate(stats.runs, stats.balls)}</Td>
                                     </Tr>
                                 );
                             })}
@@ -115,7 +115,7 @@ const InningsScorecard: React.FC<{ innings: Innings; teams: Team[]; match: Match
             <div className="space-y-1">
             {innings.exceptions && innings.exceptions.length > 0 && (
             <div className='mb-6 mt-4'>
-                 <h4 className='text-h3 text-slate-700 dark:text-text-primary mb-4'>Exceptions</h4>
+                 <h4 className="text-lg font-bold tracking-tight text-text-primary mb-4">Exceptions</h4>
                  <div className='text-caption text-orange-600 bg-orange-50 dark:bg-orange-950/30 p-4 rounded-lg h-full overflow-x-auto no-scrollbar'>
                     {innings.exceptions.map((exc, idx) => {
                         let readable = '';
@@ -137,9 +137,9 @@ const InningsScorecard: React.FC<{ innings: Innings; teams: Team[]; match: Match
                  </div>
             </div>
             )}
-                <h4 className="text-h3 text-slate-700 dark:text-text-primary">Extras</h4>
+                <h4 className="text-lg font-bold tracking-tight text-text-primary">Extras</h4>
                 <div className="p-4 bg-primary/50 rounded-lg flex justify-between items-center">
-                    <span className="font-bold text-h3 text-text-primary">{extras.total}</span>
+                    <span className="font-bold text-xl font-bold text-text-primary">{extras.total}</span>
                     <p className="text-caption text-text-secondary leading-tight text-right">
                         (wd {extras.wides}, nb {extras.noBalls}, b {extras.byes}, lb {extras.legByes})
                     </p>
@@ -147,7 +147,7 @@ const InningsScorecard: React.FC<{ innings: Innings; teams: Team[]; match: Match
             </div>
 
             <div>
-                 <h4 className="text-h3 text-slate-700 dark:text-text-primary mb-4">Bowling</h4>
+                 <h4 className="text-lg font-bold tracking-tight text-text-primary mb-4">Bowling</h4>
                  <Table >
                         <Thead >
                             <Tr>
@@ -171,15 +171,15 @@ const InningsScorecard: React.FC<{ innings: Innings; teams: Team[]; match: Match
 
                                 return (
                                     <Tr key={stats.playerId} className="hover:bg-secondary/30 dark:hover:bg-black/20">
-                                        <Td className="font-bold text-slate-800 dark:">
+                                        <Td className="font-semibold text-text-primary">
                                             {bowlerName}
                                             {replacementTag}
                                         </Td>
-                                        <Td className="text-right">{stats.overs}</Td>
-                                        <Td className="text-right">{stats.maidens}</Td>
-                                        <Td className="text-right">{stats.runsConceded}</Td>
-                                        <Td className="text-right font-bold text-brand-blue">{stats.wickets}</Td>
-                                        <Td className="text-right">{calculateRunRate(stats.runsConceded, stats.overs)}</Td>
+                                        <Td className="text-right text-sm text-text-secondary font-normal">{stats.overs}</Td>
+                                        <Td className="text-right text-sm text-text-secondary font-normal">{stats.maidens}</Td>
+                                        <Td className="text-right text-sm text-text-secondary font-normal">{stats.runsConceded}</Td>
+                                        <Td className="text-right font-bold text-text-primary">{stats.wickets}</Td>
+                                        <Td className="text-right text-sm text-text-secondary font-normal">{calculateRunRate(stats.runsConceded, stats.overs)}</Td>
                                     </Tr>
                                 )
                             })}
@@ -451,21 +451,21 @@ const MatchScorecard: React.FC<MatchScorecardProps> = ({ match, tournament, team
                     </div>
                     <p className="text-sm text-text-secondary mb-1">{new Date(match.date).toDateString()}</p>
                     <div className="flex justify-center items-center gap-4 my-2">
-                        <h2 className="text-xl text-slate-800 dark:text-text-primary flex items-center justify-center gap-4">
+                        <h2 className="text-xl font-bold tracking-tight text-text-primary flex items-center justify-center gap-4">
                             <div className="w-10 h-10 flex items-center justify-center rounded-lg text-button text-white text-body" style={{ backgroundColor: team1.logo }}>
                                 {team1.name.substring(0, 2).toUpperCase()}
                             </div>
                             {team1.name}
                         </h2>
                         <span className="text-lg text-text-secondary">vs</span>
-                        <h2 className="text-xl text-slate-800 dark:text-text-primary flex items-center justify-center gap-4">
+                        <h2 className="text-xl font-bold tracking-tight text-text-primary flex items-center justify-center gap-4">
                             {team2.name}
                             <div className="w-10 h-10 flex items-center justify-center rounded-lg text-button text-white text-body" style={{ backgroundColor: team2.logo }}>
                                 {team2.name.substring(0, 2).toUpperCase()}
                             </div>
                         </h2>
                     </div>
-                    <p className="font-bold text-brand-blue text-h3 bg-brand-blue/10 py-1 px-4 rounded-2xl inline-block">{winnerMessage}</p>
+                    <p className="font-bold text-brand-blue text-lg bg-brand-blue/10 py-1 px-4 rounded-2xl inline-block">{winnerMessage}</p>
                     {match.toss && (
                         <p className="text-caption text-text-secondary mt-2">
                             {teams.find(t => t.id === match.toss!.winner)?.name} won the toss and chose to {match.toss.decision}.
@@ -504,7 +504,7 @@ const MatchScorecard: React.FC<MatchScorecardProps> = ({ match, tournament, team
                     </div>
                  ) : topPerformers.length > 0 && (
                     <div>
-                         <h3 className="text-h3 text-slate-700 dark:text-text-primary mb-4 text-center">Select Man of the Match</h3>
+                         <h3 className="text-xl font-bold tracking-tight text-text-primary mb-4 text-center">Select Man of the Match</h3>
                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             {topPerformers.map(p => {
                                 const team = teams.find(t=>t.name === p.teamName);
@@ -514,7 +514,7 @@ const MatchScorecard: React.FC<MatchScorecardProps> = ({ match, tournament, team
                                     onClick={() => setManOfTheMatch(match.id, p.playerId)}
                                     className="text-left p-4 bg-primary rounded-lg hover:shadow-xl transition-all duration-200 border-2 border-[#DCE3F0] dark:border-brand-blue/15 hover:border-brand-blue"
                                 >
-                                    <p className="font-bold text-h3 text-slate-800 dark:text-text-primary">{p.name}</p>
+                                    <p className="font-bold text-lg text-text-primary">{p.name}</p>
                                     <div className="text-sm text-text-secondary mb-2 flex items-center gap-2">
                                          <div className="w-5 h-5 flex items-center justify-center rounded-sm text-button text-white text-[10px]" style={{ backgroundColor: team?.logo }}>
                                             {p.teamName.substring(0, 2).toUpperCase()}
@@ -522,11 +522,11 @@ const MatchScorecard: React.FC<MatchScorecardProps> = ({ match, tournament, team
                                         {p.teamName}
                                     </div>
                                     <div className="flex justify-between text-body">
-                                        <span className="font-semibold text-slate-700 dark:text-text-primary">Batting:</span>
+                                        <span className="font-semibold text-text-primary">Batting:</span>
                                         <span className="text-text-secondary">{p.battingStats || 'DNB'}</span>
                                     </div>
                                      <div className="flex justify-between text-body">
-                                        <span className="font-semibold text-slate-700 dark:text-text-primary">Bowling:</span>
+                                        <span className="font-semibold text-text-primary">Bowling:</span>
                                         <span className="text-text-secondary">{p.bowlingStats || 'DNB'}</span>
                                     </div>
                                 </button>
@@ -572,7 +572,7 @@ const MatchScorecard: React.FC<MatchScorecardProps> = ({ match, tournament, team
 
                  {match.replacements && match.replacements.length > 0 && (
                      <div className="bg-primary p-4 rounded-xl shadow-sm border border-brand-blue/10">
-                         <h3 className="font-bold text-gray-900 dark:text-text-primary border-l-4 border-brand-blue pl-3 text-sm uppercase tracking-wider mb-3">Match Notes</h3>
+                         <h3 className="text-lg font-bold tracking-tight text-text-primary mb-3">Match Notes</h3>
                          <ul className="space-y-2">
                              {match.replacements.map((r, idx) => {
                                  const incomingPlayer = getPlayerName(r.incomingPlayerId);

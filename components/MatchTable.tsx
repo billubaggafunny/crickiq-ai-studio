@@ -6,297 +6,297 @@ import { getRequiredSquadSize } from '../utils/matchConfig';
 import { canEnableSetToss } from '../utils/validation';
 
 export interface MatchTableProps {
-    list: Match[];
-    title: string;
-    emptyMessage: string;
-    today: Date;
-    getTeamById: (id: string) => Team | undefined;
-    getTournamentById: (id: string) => Tournament | undefined;
-    isMatchLive: boolean;
-    setEditingMatch: (match: Match) => void;
-    onViewMatchResult: (id: string) => void;
-    onContinueMatch: (match: Match) => void;
-    onStartMatch: (match: Match) => void;
-    setTossMatch: (match: Match) => void;
-    onOpenMatchHub?: (matchId: string, returnLocation?: Record<string, unknown>) => void;
-    handleDeleteMatch?: (id: string) => void;
-    focusTeamId?: string;
+ list: Match[];
+ title: string;
+ emptyMessage: string;
+ today: Date;
+ getTeamById: (id: string) => Team | undefined;
+ getTournamentById: (id: string) => Tournament | undefined;
+ isMatchLive: boolean;
+ setEditingMatch: (match: Match) => void;
+ onViewMatchResult: (id: string) => void;
+ onContinueMatch: (match: Match) => void;
+ onStartMatch: (match: Match) => void;
+ setTossMatch: (match: Match) => void;
+ onOpenMatchHub?: (matchId: string, returnLocation?: Record<string, unknown>) => void;
+ handleDeleteMatch?: (id: string) => void;
+ focusTeamId?: string;
 }
 
 const MatchTable: React.FC<MatchTableProps> = ({
-    list,
-    title,
-    emptyMessage,
-    today,
-    getTeamById,
-    getTournamentById,
-    isMatchLive,
-    setEditingMatch,
-    onViewMatchResult,
-    onContinueMatch,
-    onStartMatch,
-    setTossMatch,
-    onOpenMatchHub,
-    handleDeleteMatch,
-    focusTeamId
+ list,
+ title,
+ emptyMessage,
+ today,
+ getTeamById,
+ getTournamentById,
+ isMatchLive,
+ setEditingMatch,
+ onViewMatchResult,
+ onContinueMatch,
+ onStartMatch,
+ setTossMatch,
+ onOpenMatchHub,
+ handleDeleteMatch,
+ focusTeamId
 }) => {
-    const [matchToDelete, setMatchToDelete] = React.useState<Match | null>(null);
-    const dayAfterTomorrow = new Date(today);
-    dayAfterTomorrow.setDate(today.getDate() + 2);
-    dayAfterTomorrow.setHours(23, 59, 59, 999);
+ const [matchToDelete, setMatchToDelete] = React.useState<Match | null>(null);
+ const dayAfterTomorrow = new Date(today);
+ dayAfterTomorrow.setDate(today.getDate() + 2);
+ dayAfterTomorrow.setHours(23, 59, 59, 999);
 
-    const getMatchDisplayState = (match: Match) => {
-        const matchDateObj = new Date(match.date.replace(/-/g, '/'));
-        matchDateObj.setHours(0, 0, 0, 0);
-        const todayNoTime = new Date(today);
-        todayNoTime.setHours(0, 0, 0, 0);
-        
-        const isToday = matchDateObj.getTime() === todayNoTime.getTime();
-        const isFuture = matchDateObj.getTime() > todayNoTime.getTime();
+ const getMatchDisplayState = (match: Match) => {
+ const matchDateObj = new Date(match.date.replace(/-/g, '/'));
+ matchDateObj.setHours(0, 0, 0, 0);
+ const todayNoTime = new Date(today);
+ todayNoTime.setHours(0, 0, 0, 0);
+ 
+ const isToday = matchDateObj.getTime() === todayNoTime.getTime();
+ const isFuture = matchDateObj.getTime() > todayNoTime.getTime();
 
-        if (match.status === 'completed') return { type: 'completed', label: match.winnerId === 'draw' ? 'Match Drawn / Tied' : 'Completed' };
-        if (match.wasAbandoned) return { type: 'abandoned', label: 'Abandoned' };
-        if (match.status === 'live') return { type: 'live', label: 'Live Match' };
-        if (match.isDraft) return { type: 'draft', label: 'Setup Pending' };
-        
-        if (isToday) {
-            if (!match.toss) return { type: 'readyToToss', label: 'Ready for Toss' };
-            return { type: 'readyToStart', label: 'Ready to Start' };
-        }
-        
-        if (isFuture) return { type: 'upcoming', label: 'Upcoming Match' };
-        
-        return { type: 'pastUnplayed', label: 'Not Started' };
-    };
+ if (match.status === 'completed') return { type: 'completed', label: match.winnerId === 'draw' ? 'Match Drawn / Tied' : 'Completed' };
+ if (match.wasAbandoned) return { type: 'abandoned', label: 'Abandoned' };
+ if (match.status === 'live') return { type: 'live', label: 'Live Match' };
+ if (match.isDraft) return { type: 'draft', label: 'Setup Pending' };
+ 
+ if (isToday) {
+ if (!match.toss) return { type: 'readyToToss', label: 'Ready for Toss' };
+ return { type: 'readyToStart', label: 'Ready to Start' };
+ }
+ 
+ if (isFuture) return { type: 'upcoming', label: 'Upcoming Match' };
+ 
+ return { type: 'pastUnplayed', label: 'Not Started' };
+ };
 
-    return (
-        <div className="space-y-6">
-            <h3 className="text-h3 text-text-primary flex items-center gap-2">
-                <CalendarIcon className="w-5 h-5" />
-                {title}
-            </h3>
-            {list.length === 0 ? (
-                <CrickIQCard  className="text-center">
-                    <p className="text-text-secondary">{emptyMessage}</p>
-                </CrickIQCard>
-            ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {list.map(match => {
-                        const team1 = getTeamById(match.team1Id);
-                        const team2 = getTeamById(match.team2Id);
-                        const tournament = getTournamentById(match.tournamentId || '');
-                        if (!team1 || !team2) return null;
+ return (
+ <div className="space-y-6">
+ <h3 className="text-xl md:text-2xl font-bold tracking-tight text-text-primary">
+ <CalendarIcon className="w-5 h-5" />
+ {title}
+ </h3>
+ {list.length === 0 ? (
+ <CrickIQCard className="text-center">
+ <p className="text-text-secondary">{emptyMessage}</p>
+ </CrickIQCard>
+ ) : (
+ <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+ {list.map(match => {
+ const team1 = getTeamById(match.team1Id);
+ const team2 = getTeamById(match.team2Id);
+ const tournament = getTournamentById(match.tournamentId || '');
+ if (!team1 || !team2) return null;
 
-                        const requiredSquadSize = getRequiredSquadSize(match, tournament);
-                        const t1Selected = { ...team1, players: team1.players.filter(p => (match.team1SquadIds || []).includes(p.id)) };
-                        const t2Selected = { ...team2, players: team2.players.filter(p => (match.team2SquadIds || []).includes(p.id)) };
-                        const setTossValidation = canEnableSetToss(t1Selected, t2Selected, match.oversPerInnings, requiredSquadSize, requiredSquadSize);
-                        const canToss = setTossValidation.canEnable;
+ const requiredSquadSize = getRequiredSquadSize(match, tournament);
+ const t1Selected = { ...team1, players: team1.players.filter(p => (match.team1SquadIds || []).includes(p.id)) };
+ const t2Selected = { ...team2, players: team2.players.filter(p => (match.team2SquadIds || []).includes(p.id)) };
+ const setTossValidation = canEnableSetToss(t1Selected, t2Selected, match.oversPerInnings, requiredSquadSize, requiredSquadSize);
+ const canToss = setTossValidation.canEnable;
 
-                        let playerMismatchTitle = "Set Toss";
-                        if (!canToss) {
-                            if ((match.team1SquadIds || []).length !== requiredSquadSize) {
-                                playerMismatchTitle = `${team1.name} squad must have ${requiredSquadSize} players (currently ${(match.team1SquadIds || []).length}/${requiredSquadSize})`;
-                            } else if ((match.team2SquadIds || []).length !== requiredSquadSize) {
-                                playerMismatchTitle = `${team2.name} squad must have ${requiredSquadSize} players (currently ${(match.team2SquadIds || []).length}/${requiredSquadSize})`;
-                            } else if (!setTossValidation.teamAValid) {
-                                playerMismatchTitle = `${team1.name} squad rules incomplete: ${setTossValidation.teamAErrors[0] || 'Check roles'}`;
-                            } else if (!setTossValidation.teamBValid) {
-                                playerMismatchTitle = `${team2.name} squad rules incomplete: ${setTossValidation.teamBErrors[0] || 'Check roles'}`;
-                            } else {
-                                playerMismatchTitle = "Roster or overs count validation failed.";
-                            }
-                        }
-                        
-                        const displayState = getMatchDisplayState(match);
-                        const isDeleteEligible = match.status !== 'live' && match.status !== 'completed' && !match.wasAbandoned;
+ let playerMismatchTitle = "Set Toss";
+ if (!canToss) {
+ if ((match.team1SquadIds || []).length !== requiredSquadSize) {
+ playerMismatchTitle = `${team1.name} squad must have ${requiredSquadSize} players (currently ${(match.team1SquadIds || []).length}/${requiredSquadSize})`;
+ } else if ((match.team2SquadIds || []).length !== requiredSquadSize) {
+ playerMismatchTitle = `${team2.name} squad must have ${requiredSquadSize} players (currently ${(match.team2SquadIds || []).length}/${requiredSquadSize})`;
+ } else if (!setTossValidation.teamAValid) {
+ playerMismatchTitle = `${team1.name} squad rules incomplete: ${setTossValidation.teamAErrors[0] || 'Check roles'}`;
+ } else if (!setTossValidation.teamBValid) {
+ playerMismatchTitle = `${team2.name} squad rules incomplete: ${setTossValidation.teamBErrors[0] || 'Check roles'}`;
+ } else {
+ playerMismatchTitle = "Roster or overs count validation failed.";
+ }
+ }
+ 
+ const displayState = getMatchDisplayState(match);
+ const isDeleteEligible = match.status !== 'live' && match.status !== 'completed' && !match.wasAbandoned;
 
-                        return (
-                            <CrickIQCard 
-                                key={match.id}
-                                accentColor={team1.logo}
-                                className="flex flex-col p-0 overflow-hidden shadow-sm hover:shadow-md bg-white rounded-3xl transition-all duration-300 relative"
-                            >
-                                {handleDeleteMatch && isDeleteEligible && (
-                                    <button
-                                        type="button"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            setMatchToDelete(match);
-                                        }}
-                                        className="absolute top-4 right-4 z-10 w-7 h-7 bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 dark:bg-red-950/40 dark:text-red-400 dark:hover:bg-red-900/40 flex items-center justify-center rounded-full transition-colors border border-red-100 shadow-sm"
-                                        title="Delete Match"
-                                    >
-                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
-                                        </svg>
-                                    </button>
-                                )}
-                                <div 
-                                    className="p-5 cursor-pointer hover:bg-gray-50 flex-grow" 
-                                    onClick={() => {
-                                        if (displayState.type === 'draft') {
-                                            setEditingMatch(match);
-                                        } else {
-                                            onOpenMatchHub?.(match.id);
-                                        }
-                                    }}
-                                >
-                                    <div className="flex justify-between items-center mb-4">
-                                        <div className="flex gap-1.5 items-center">
-                                            <span className="bg-gray-100 px-2 py-0.5 rounded font-bold text-[10px] uppercase text-gray-600 tracking-wider">
-                                                {displayState.label}
-                                            </span>
-                                            {match.tournamentId && match.tournamentId !== 't_quick_matches' && match.matchNumber !== undefined && match.matchNumber !== null && (
-                                                <span className="bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-300 px-2 py-0.5 rounded font-bold text-[10px] uppercase tracking-wider border border-sky-100 dark:border-sky-900/30">
-                                                    Match {match.matchNumber}
-                                                </span>
-                                            )}
-                                            {(!match.tournamentId || match.tournamentId === 't_quick_matches' || match.isQuickMatch) && match.rivalryMatchNumber !== undefined && match.rivalryMatchNumber !== null && (
-                                                <span className="bg-emerald-50 dark:bg-emerald-950/45 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded font-bold text-[10px] uppercase tracking-wider border border-emerald-100 dark:border-emerald-900/30">
-                                                    Match - {match.rivalryMatchNumber}
-                                                </span>
-                                            )}
-                                            {focusTeamId && (match.team1Id === focusTeamId || match.team2Id === focusTeamId) && (
-                                                <span className="bg-brand-blue/10 text-brand-blue px-2 py-0.5 rounded font-bold text-[10px] uppercase tracking-wider border border-brand-blue/20">
-                                                    Team Match
-                                                </span>
-                                            )}
-                                        </div>
-                                        <span className={`text-sm font-medium text-gray-500 ${isDeleteEligible && handleDeleteMatch ? 'mr-7' : ''}`}>
-                                            {match.oversPerInnings} Overs
-                                        </span>
-                                    </div>
-                                    <div className="text-gray-500 text-xs text-center -mt-3 mb-3">
-                                        {new Date(match.date).toLocaleDateString()} {match.time ? `• ${match.time}` : ''}
-                                    </div>
-                                    
-                                    <h3 className="text-center font-bold text-gray-900 text-lg mb-4">
-                                        {team1.name} vs {team2.name}
-                                    </h3>
-                                    
-                                    {tournament && (
-                                        <div className="text-center text-xs font-semibold text-brand-blue mb-4">
-                                            {tournament.name} • {match.knockoutType ? (match.knockoutType === 'semifinal' ? 'Semi Final' : 'Final') : match.groupId ? `Group ${match.groupId.toUpperCase()}` : 'League Match'}
-                                        </div>
-                                    )}
-                                    {!tournament && !match.isDraft && (
-                                        <div className="text-center text-xs font-medium text-gray-400 mb-4 uppercase tracking-wider">
-                                            Quick Match
-                                        </div>
-                                    )}
-                                    
-                                    {displayState.type === 'live' ? (
-                                        <div className="flex justify-center mb-4">
-                                            <span className="text-xs font-bold text-red-600 bg-red-100 px-3 py-1 rounded-full flex items-center gap-1.5 animate-pulse">
-                                                <span className="flex h-2 w-2 rounded-full bg-red-500"></span>
-                                                LIVE
-                                            </span>
-                                        </div>
-                                    ) : match.toss ? (
-                                        <p className="text-sm text-center text-gray-600 mb-4 px-2">
-                                            {getTeamById(match.toss.winner)?.name} won the toss and chose to {match.toss.decision}.
-                                        </p>
-                                    ) : null}
-                                    
-                                    <div className="space-y-3 mb-4">
-                                        <div className="flex justify-between items-center text-gray-900 font-bold">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-8 h-8 flex items-center justify-center rounded-lg text-white font-bold text-xs" style={{ backgroundColor: team1.logo }}>
-                                                    {team1.name.substring(0, 2).toUpperCase()}
-                                                </div>
-                                                <span className="text-base">{team1.name}</span>
-                                            </div>
-                                            <span className="font-mono text-base">
-                                                {(match.status !== 'scheduled' && !match.isDraft) ? `${team1.id === match.innings1?.battingTeamId ? (match.innings1?.score ?? 0) : (match.innings2?.score ?? 0)}/${team1.id === match.innings1?.battingTeamId ? (match.innings1?.wickets ?? 0) : (match.innings2?.wickets ?? 0)}` : 'DNB'}
-                                            </span>
-                                        </div>
-                                        <div className="flex justify-between items-center text-gray-900 font-bold">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-8 h-8 flex items-center justify-center rounded-lg text-white font-bold text-xs" style={{ backgroundColor: team2.logo }}>
-                                                    {team2.name.substring(0, 2).toUpperCase()}
-                                                </div>
-                                                <span className="text-base">{team2.name}</span>
-                                            </div>
-                                            <span className="font-mono text-base">
-                                                {(match.status !== 'scheduled' && !match.isDraft) ? `${team2.id === match.innings1?.battingTeamId ? (match.innings1?.score ?? 0) : (match.innings2?.score ?? 0)}/${team2.id === match.innings1?.battingTeamId ? (match.innings1?.wickets ?? 0) : (match.innings2?.wickets ?? 0)}` : 'DNB'}
-                                            </span>
-                                        </div>
-                                    </div>
-                                    
-                                    <div className="mt-4 text-center text-md font-bold text-gray-900 pt-3 border-t border-gray-100 uppercase tracking-wider">
-                                        {displayState.type === 'completed' ? (
-                                            <div className="text-center text-sm font-semibold text-gray-900">
-                                                <p className="font-bold">{getTeamById(match.winnerId)?.name} won</p>
-                                                {match.manOfTheMatchId && (
-                                                    <p className="text-xs text-gray-500 mt-1 normal-case">MOM: {getTeamById(match.team1Id)?.players.find(p => p.id === match.manOfTheMatchId)?.name || getTeamById(match.team2Id)?.players.find(p => p.id === match.manOfTheMatchId)?.name}</p>
-                                                )}
-                                            </div>
-                                        ) : displayState.type === 'abandoned' ? 'Match Abandoned' : displayState.label}
-                                    </div>
-                                    
-                                    <div className="mt-4">
-                                        {displayState.type === 'completed' ? (
-                                            <button onClick={(e) => { e.stopPropagation(); onViewMatchResult(match.id); }} className="w-full px-4 py-3 text-sm rounded-xl font-bold bg-gray-100 text-gray-900 shadow-sm hover:bg-gray-200">
-                                                View Scorecard
-                                            </button>
-                                        ) : displayState.type === 'live' ? (
-                                            <button onClick={(e) => { e.stopPropagation(); onContinueMatch(match); }} className="w-full px-4 py-3 text-sm rounded-xl font-bold bg-brand-blue text-white shadow-md">Continue Live Match</button>
-                                        ) : displayState.type === 'draft' ? (
-                                            <button onClick={(e) => { e.stopPropagation(); setEditingMatch(match); }} className="w-full px-4 py-3 text-sm rounded-xl font-bold bg-brand-blue text-white shadow-md">Setup Teams</button>
-                                        ) : displayState.type === 'readyToToss' ? (
-                                            <button disabled={isMatchLive || !canToss} onClick={(e) => { e.stopPropagation(); setTossMatch(match); }} className="w-full px-4 py-3 text-sm rounded-xl font-bold bg-brand-blue text-white shadow-md disabled:bg-gray-300" title={!canToss ? playerMismatchTitle : (isMatchLive ? 'Another match is live' : 'Set Toss')}>{isMatchLive ? 'Match Live' : (canToss ? 'Set Toss' : 'Squads Incomplete')}</button>
-                                        ) : displayState.type === 'readyToStart' ? (
-                                            <button onClick={(e) => { e.stopPropagation(); onStartMatch(match); }} className="w-full px-4 py-3 text-sm rounded-xl font-bold bg-brand-blue text-white shadow-md">Start Match</button>
-                                        ) : null}
-                                    </div>
-                                </div>
-                            </CrickIQCard>
-                        )
-                    })}
-                </div>
-            )}
+ return (
+ <CrickIQCard 
+ key={match.id}
+ accentColor={team1.logo}
+ className="flex flex-col p-0 overflow-hidden shadow-sm hover:shadow-md bg-secondary rounded-3xl transition-all duration-300 relative"
+ >
+ {handleDeleteMatch && isDeleteEligible && (
+ <button
+ type="button"
+ onClick={(e) => {
+ e.stopPropagation();
+ setMatchToDelete(match);
+ }}
+ className="absolute top-4 right-4 z-10 w-7 h-7 bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 dark:bg-red-950/40 dark:text-red-400 dark:hover:bg-red-900/40 flex items-center justify-center rounded-full transition-colors border border-red-100 shadow-sm"
+ title="Delete Match"
+ >
+ <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+ <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+ </svg>
+ </button>
+ )}
+ <div 
+ className="p-5 cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 flex-grow" 
+ onClick={() => {
+ if (displayState.type === 'draft') {
+ setEditingMatch(match);
+ } else {
+ onOpenMatchHub?.(match.id);
+ }
+ }}
+ >
+ <div className="flex justify-between items-center mb-4">
+ <div className="flex gap-1.5 items-center">
+ <span className="bg-tertiary px-2 py-0.5 rounded font-bold text-[10px] uppercase text-text-secondary tracking-wider">
+ {displayState.label}
+ </span>
+ {match.tournamentId && match.tournamentId !== 't_quick_matches' && match.matchNumber !== undefined && match.matchNumber !== null && (
+ <span className="bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-300 px-2 py-0.5 rounded font-bold text-[10px] uppercase tracking-wider border border-sky-100 dark:border-sky-900/30">
+ Match {match.matchNumber}
+ </span>
+ )}
+ {(!match.tournamentId || match.tournamentId === 't_quick_matches' || match.isQuickMatch) && match.rivalryMatchNumber !== undefined && match.rivalryMatchNumber !== null && (
+ <span className="bg-emerald-50 dark:bg-emerald-950/45 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded font-bold text-[10px] uppercase tracking-wider border border-emerald-100 dark:border-emerald-900/30">
+ Match - {match.rivalryMatchNumber}
+ </span>
+ )}
+ {focusTeamId && (match.team1Id === focusTeamId || match.team2Id === focusTeamId) && (
+ <span className="bg-brand-blue/10 text-brand-blue px-2 py-0.5 rounded font-bold text-[10px] uppercase tracking-wider border border-brand-blue/20">
+ Team Match
+ </span>
+ )}
+ </div>
+ <span className={`text-xs font-medium text-text-secondary ${isDeleteEligible && handleDeleteMatch ? 'mr-7' : ''}`}>
+ {match.oversPerInnings} Overs
+ </span>
+ </div>
+ <div className="text-text-secondary text-xs text-center -mt-3 mb-3">
+ {new Date(match.date).toLocaleDateString()} {match.time ? `• ${match.time}` : ''}
+ </div>
+ 
+ <h3 className="text-center font-bold tracking-tight text-text-primary text-2xl mb-4">
+ {team1.name} vs {team2.name}
+ </h3>
+ 
+ {tournament && (
+ <div className="text-center text-sm font-bold text-text-primary mt-4 mb-2">
+ {tournament.name} • {match.knockoutType ? (match.knockoutType === 'semifinal' ? 'Semi Final' : 'Final') : match.groupId ? `Group ${match.groupId.toUpperCase()}` : 'League Match'}
+ </div>
+ )}
+ {!tournament && !match.isDraft && (
+ <div className="text-center text-xs font-medium text-text-secondary mb-4 uppercase tracking-wider">
+ Quick Match
+ </div>
+ )}
+ 
+ {displayState.type === 'live' ? (
+ <div className="flex justify-center mb-4">
+ <span className="text-xs font-bold text-red-600 bg-red-100 px-3 py-1 rounded-full flex items-center gap-1.5 animate-pulse">
+ <span className="flex h-2 w-2 rounded-full bg-red-500"></span>
+ LIVE
+ </span>
+ </div>
+ ) : match.toss ? (
+ <p className="text-sm text-center text-text-secondary mb-4 px-2">
+ {getTeamById(match.toss.winner)?.name} won the toss and chose to {match.toss.decision}.
+ </p>
+ ) : null}
+ 
+ <div className="space-y-3 mb-4">
+ <div className="flex justify-between items-center text-text-primary font-bold">
+ <div className="flex items-center gap-3">
+ <div className="w-8 h-8 flex items-center justify-center rounded-lg text-white font-bold text-xs" style={{ backgroundColor: team1.logo }}>
+ {team1.name.substring(0, 2).toUpperCase()}
+ </div>
+ <span className="text-lg font-bold text-text-primary">{team1.name}</span>
+ </div>
+ <span className="font-extrabold text-2xl tracking-tighter text-text-primary">
+ {(match.status !== 'scheduled' && !match.isDraft) ? `${team1.id === match.innings1?.battingTeamId ? (match.innings1?.score ?? 0) : (match.innings2?.score ?? 0)}/${team1.id === match.innings1?.battingTeamId ? (match.innings1?.wickets ?? 0) : (match.innings2?.wickets ?? 0)}` : 'DNB'}
+ </span>
+ </div>
+ <div className="flex justify-between items-center text-text-primary font-bold">
+ <div className="flex items-center gap-3">
+ <div className="w-8 h-8 flex items-center justify-center rounded-lg text-white font-bold text-xs" style={{ backgroundColor: team2.logo }}>
+ {team2.name.substring(0, 2).toUpperCase()}
+ </div>
+ <span className="text-lg font-bold text-text-primary">{team2.name}</span>
+ </div>
+ <span className="font-extrabold text-2xl tracking-tighter text-text-primary">
+ {(match.status !== 'scheduled' && !match.isDraft) ? `${team2.id === match.innings1?.battingTeamId ? (match.innings1?.score ?? 0) : (match.innings2?.score ?? 0)}/${team2.id === match.innings1?.battingTeamId ? (match.innings1?.wickets ?? 0) : (match.innings2?.wickets ?? 0)}` : 'DNB'}
+ </span>
+ </div>
+ </div>
+ 
+ <div className="mt-4 text-center text-md font-bold text-text-primary pt-3 border-t border-border uppercase tracking-wider">
+ {displayState.type === 'completed' ? (
+ <div className="text-center text-base font-bold text-text-primary tracking-tight">
+ <p className="font-bold">{getTeamById(match.winnerId)?.name} won</p>
+ {match.manOfTheMatchId && (
+ <p className="text-sm font-medium text-text-secondary mt-1 normal-case">MOM: {getTeamById(match.team1Id)?.players.find(p => p.id === match.manOfTheMatchId)?.name || getTeamById(match.team2Id)?.players.find(p => p.id === match.manOfTheMatchId)?.name}</p>
+ )}
+ </div>
+ ) : displayState.type === 'abandoned' ? 'Match Abandoned' : displayState.label}
+ </div>
+ 
+ <div className="mt-4">
+ {displayState.type === 'completed' ? (
+ <button onClick={(e) => { e.stopPropagation(); onViewMatchResult(match.id); }} className="w-full px-4 py-3 text-sm rounded-xl font-bold bg-tertiary text-text-primary shadow-sm hover:bg-black/5 dark:hover:bg-white/5">
+ View Scorecard
+ </button>
+ ) : displayState.type === 'live' ? (
+ <button onClick={(e) => { e.stopPropagation(); onContinueMatch(match); }} className="w-full px-4 py-3 text-sm rounded-xl font-bold bg-brand-blue text-white shadow-md">Continue Live Match</button>
+ ) : displayState.type === 'draft' ? (
+ <button onClick={(e) => { e.stopPropagation(); setEditingMatch(match); }} className="w-full px-4 py-3 text-sm rounded-xl font-bold bg-brand-blue text-white shadow-md">Setup Teams</button>
+ ) : displayState.type === 'readyToToss' ? (
+ <button disabled={isMatchLive || !canToss} onClick={(e) => { e.stopPropagation(); setTossMatch(match); }} className="w-full px-4 py-3 text-sm rounded-xl font-bold bg-brand-blue text-white shadow-md disabled:opacity-60" title={!canToss ? playerMismatchTitle : (isMatchLive ? 'Another match is live' : 'Set Toss')}>{isMatchLive ? 'Match Live' : (canToss ? 'Set Toss' : 'Squads Incomplete')}</button>
+ ) : displayState.type === 'readyToStart' ? (
+ <button onClick={(e) => { e.stopPropagation(); onStartMatch(match); }} className="w-full px-4 py-3 text-sm rounded-xl font-bold bg-brand-blue text-white shadow-md">Start Match</button>
+ ) : null}
+ </div>
+ </div>
+ </CrickIQCard>
+ )
+ })}
+ </div>
+ )}
 
-            {/* Delete Match Confirmation Dialog */}
-            {matchToDelete && (
-                <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200">
-                    <CrickIQCard className="max-w-md w-full p-6 bg-white dark:bg-gray-900 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-800 space-y-5 animate-in zoom-in-95 duration-200">
-                        <div className="flex flex-col items-center text-center space-y-3">
-                            <div className="w-12 h-12 bg-red-50 dark:bg-red-950/30 rounded-full flex items-center justify-center text-red-600 dark:text-red-400">
-                                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                </svg>
-                            </div>
-                            <h3 className="text-xl font-bold text-gray-900 dark:text-white">⚠️ Delete Match?</h3>
-                            <p className="text-sm text-gray-650 dark:text-gray-350">
-                                This match will be deleted.
-                            </p>
-                        </div>
-                        
-                        <div className="flex gap-3 justify-end pt-2">
-                            <button 
-                                onClick={() => setMatchToDelete(null)}
-                                className="flex-1 py-3 px-4 rounded-xl font-bold bg-green-600 hover:bg-green-700 text-white shadow-md transition duration-200 cursor-pointer text-center text-button"
-                            >
-                                Cancel
-                            </button>
-                            <button 
-                                onClick={() => {
-                                    if (handleDeleteMatch && matchToDelete) {
-                                        handleDeleteMatch(matchToDelete.id);
-                                    }
-                                    setMatchToDelete(null);
-                                }}
-                                className="flex-1 py-3 px-4 rounded-xl font-bold bg-red-600 hover:bg-red-700 text-white shadow-md transition duration-200 cursor-pointer text-center text-button"
-                            >
-                                Delete
-                            </button>
-                        </div>
-                    </CrickIQCard>
-                </div>
-            )}
-        </div>
-    );
+ {/* Delete Match Confirmation Dialog */}
+ {matchToDelete && (
+ <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200">
+ <CrickIQCard className="max-w-md w-full p-6 bg-secondary rounded-3xl shadow-xl border-none space-y-5 animate-in zoom-in-95 duration-200">
+ <div className="flex flex-col items-center text-center space-y-3">
+ <div className="w-12 h-12 bg-red-50 dark:bg-red-950/30 rounded-full flex items-center justify-center text-red-600 dark:text-red-400">
+ <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+ <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+ </svg>
+ </div>
+ <h3 className="text-xl font-bold text-text-primary dark:text-white">⚠️ Delete Match?</h3>
+ <p className="text-sm text-text-primary dark:text-text-secondary">
+ This match will be deleted.
+ </p>
+ </div>
+ 
+ <div className="flex gap-3 justify-end pt-2">
+ <button 
+ onClick={() => setMatchToDelete(null)}
+ className="flex-1 py-3 px-4 rounded-xl font-bold bg-green-600 hover:bg-green-700 text-white shadow-md transition duration-200 cursor-pointer text-center text-button"
+ >
+ Cancel
+ </button>
+ <button 
+ onClick={() => {
+ if (handleDeleteMatch && matchToDelete) {
+ handleDeleteMatch(matchToDelete.id);
+ }
+ setMatchToDelete(null);
+ }}
+ className="flex-1 py-3 px-4 rounded-xl font-bold bg-red-600 hover:bg-red-700 text-white shadow-md transition duration-200 cursor-pointer text-center text-button"
+ >
+ Delete
+ </button>
+ </div>
+ </CrickIQCard>
+ </div>
+ )}
+ </div>
+ );
 };
 
 export default MatchTable;

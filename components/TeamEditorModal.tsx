@@ -13,557 +13,557 @@ import { usePlayerNavigation } from '../contexts/PlayerNavigationContext';
 import { getRequiredSquadSize } from '../utils/matchConfig';
 
 const Button: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'primary' | 'secondary' | 'blue' }> = ({ children, className, variant = 'primary', ...props }) => {
-    const baseClasses = 'px-4 py-2 rounded-2xl text-button transition-all duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-md';
-    const variantClasses =
-        variant === 'secondary' ? ' text-gray-800  dark:text-text-primary hover:brightness-105 border border-brand-blue/15'
-        : variant === 'blue' ? 'bg-brand-blue text-white'
-        : ' text-white';
+ const baseClasses = 'px-4 py-2 rounded-2xl text-button transition-all duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-md';
+ const variantClasses =
+ variant === 'secondary' ? ' text-gray-800 dark:text-text-primary hover:brightness-105 border border-brand-blue/15'
+ : variant === 'blue' ? 'bg-brand-blue text-white'
+ : ' text-white';
 
-    return <button {...props} className={`${baseClasses} ${variantClasses} ${className}`}>{children}</button>
+ return <button {...props} className={`${baseClasses} ${variantClasses} ${className}`}>{children}</button>
 }
 
 interface TeamEditorModalProps extends Pick<UseCrickIQStateReturn, 'updateTeam' | 'getTournamentById' | 'addPlayer' | 'deletePlayer' | 'matches'> {
-    team: Team;
-    tournamentId: string;
-    onClose: () => void;
-    onDone?: (teamId: string) => void;
-    isMatchLive: boolean;
-    addPlayerReplacement?: UseCrickIQStateReturn['addPlayerReplacement'];
-    match?: Match;
-    updateMatch?: (matchId: string, updates: Partial<Match>) => void;
+ team: Team;
+ tournamentId: string;
+ onClose: () => void;
+ onDone?: (teamId: string) => void;
+ isMatchLive: boolean;
+ addPlayerReplacement?: UseCrickIQStateReturn['addPlayerReplacement'];
+ match?: Match;
+ updateMatch?: (matchId: string, updates: Partial<Match>) => void;
 }
 
 export const TeamEditorModal: React.FC<TeamEditorModalProps> = (props) => {
-    const { team, onClose, onDone, isMatchLive, updateTeam, getTournamentById, matches, tournamentId, addPlayerReplacement, match, updateMatch } = props;
-    const { showNotification } = useNotification();
-    
-    // Instead of deep copy, we edit team name/logo by directly calling updateTeam.
-    // Or we keep local state for name/logo to avoid key press lag, but sync players from props.
-    const [teamName, setTeamName] = useState(team.name);
-    const [teamLogo, setTeamLogo] = useState(team.logo);
-    const [searchQuery, setSearchQuery] = useState('');
+ const { team, onClose, onDone, isMatchLive, updateTeam, getTournamentById, matches, tournamentId, addPlayerReplacement, match, updateMatch } = props;
+ const { showNotification } = useNotification();
+ 
+ // Instead of deep copy, we edit team name/logo by directly calling updateTeam.
+ // Or we keep local state for name/logo to avoid key press lag, but sync players from props.
+ const [teamName, setTeamName] = useState(team.name);
+ const [teamLogo, setTeamLogo] = useState(team.logo);
+ const [searchQuery, setSearchQuery] = useState('');
 
-    const isTeam1 = match?.team1Id === team.id;
-    const currentSquadIds = useMemo(() => isTeam1 ? (match?.team1SquadIds || []) : (match?.team2SquadIds || []), [isTeam1, match?.team1SquadIds, match?.team2SquadIds]);
+ const isTeam1 = match?.team1Id === team.id;
+ const currentSquadIds = useMemo(() => isTeam1 ? (match?.team1SquadIds || []) : (match?.team2SquadIds || []), [isTeam1, match?.team1SquadIds, match?.team2SquadIds]);
 
-    const handleTeamInfoBlur = () => {
-        if (teamName !== team.name || teamLogo !== team.logo) {
-            updateTeam({ ...team, name: teamName.trim() || team.name, logo: teamLogo });
-        }
-    };
-    
-    const [confirmDeletePlayer, setConfirmDeletePlayer] = useState<Player | null>(null);
-    const [confirmDone, setConfirmDone] = useState(false);
-    const [dontAskAgain, setDontAskAgain] = useState(() => localStorageAdapter.load('dontAskDeletePlayer') === 'true');
+ const handleTeamInfoBlur = () => {
+ if (teamName !== team.name || teamLogo !== team.logo) {
+ updateTeam({ ...team, name: teamName.trim() || team.name, logo: teamLogo });
+ }
+ };
+ 
+ const [confirmDeletePlayer, setConfirmDeletePlayer] = useState<Player | null>(null);
+ const [confirmDone, setConfirmDone] = useState(false);
+ const [dontAskAgain, setDontAskAgain] = useState(() => localStorageAdapter.load('dontAskDeletePlayer') === 'true');
 
-    const tournament = useMemo(() => getTournamentById(tournamentId), [tournamentId, getTournamentById]);
-    const maxPlayers = useMemo(() => {
-        if (match) {
-            return getRequiredSquadSize(match, tournament);
-        }
-        const foundMatch = matches.find(m => m.tournamentId === tournamentId && (m.team1Id === team.id || m.team2Id === team.id));
-        return getRequiredSquadSize(foundMatch, tournament);
-    }, [match, tournament, matches, tournamentId, team.id]);
+ const tournament = useMemo(() => getTournamentById(tournamentId), [tournamentId, getTournamentById]);
+ const maxPlayers = useMemo(() => {
+ if (match) {
+ return getRequiredSquadSize(match, tournament);
+ }
+ const foundMatch = matches.find(m => m.tournamentId === tournamentId && (m.team1Id === team.id || m.team2Id === team.id));
+ return getRequiredSquadSize(foundMatch, tournament);
+ }, [match, tournament, matches, tournamentId, team.id]);
 
-    const { openPlayerDetails } = usePlayerNavigation();
+ const { openPlayerDetails } = usePlayerNavigation();
 
-    const { isLocked: isTeamLocked, activeMatch: activeMatchForLock } = useTeamLock(team.id, match ? [match] : matches, tournamentId, isMatchLive);
+ const { isLocked: isTeamLocked, activeMatch: activeMatchForLock } = useTeamLock(team.id, match ? [match] : matches, tournamentId, isMatchLive);
 
-    const [isImpactPlayerModalOpen, setIsImpactPlayerModalOpen] = useState(false);
+ const [isImpactPlayerModalOpen, setIsImpactPlayerModalOpen] = useState(false);
 
-    const isAutoGeneratedTeam = useMemo(() => {
-        return team.players.length > 0 && team.players.some(p => p.name.match(/^Player \d+$/));
-    }, [team.players]);
+ const isAutoGeneratedTeam = useMemo(() => {
+ return team.players.length > 0 && team.players.some(p => p.name.match(/^Player \d+$/));
+ }, [team.players]);
 
-    const teamToValidate = useMemo(() => {
-        if (match) {
-            return {
-                ...team,
-                players: team.players.filter(p => currentSquadIds.includes(p.id))
-            };
-        }
-        return team;
-    }, [team, match, currentSquadIds]);
+ const teamToValidate = useMemo(() => {
+ if (match) {
+ return {
+ ...team,
+ players: team.players.filter(p => currentSquadIds.includes(p.id))
+ };
+ }
+ return team;
+ }, [team, match, currentSquadIds]);
 
-    const handleToggleSquadPlayer = (playerId: string, e?: React.MouseEvent) => {
-        if (e) e.stopPropagation();
-        if (!match || !updateMatch) return;
-        
-        let newSquadIds = [...currentSquadIds];
-        if (newSquadIds.includes(playerId)) {
-            newSquadIds = newSquadIds.filter(id => id !== playerId);
-        } else {
-            if (newSquadIds.length >= maxPlayers) return;
-            newSquadIds.push(playerId);
-        }
-        
-        updateMatch(match.id, {
-            [isTeam1 ? 'team1SquadIds' : 'team2SquadIds']: newSquadIds
-        });
-    };
+ const handleToggleSquadPlayer = (playerId: string, e?: React.MouseEvent) => {
+ if (e) e.stopPropagation();
+ if (!match || !updateMatch) return;
+ 
+ let newSquadIds = [...currentSquadIds];
+ if (newSquadIds.includes(playerId)) {
+ newSquadIds = newSquadIds.filter(id => id !== playerId);
+ } else {
+ if (newSquadIds.length >= maxPlayers) return;
+ newSquadIds.push(playerId);
+ }
+ 
+ updateMatch(match.id, {
+ [isTeam1 ? 'team1SquadIds' : 'team2SquadIds']: newSquadIds
+ });
+ };
 
-    const teamValidation = useMemo(() => validateTeamRoster(teamToValidate, maxPlayers), [teamToValidate, maxPlayers]);
-    const isKeeperMissing = !teamValidation.checks.hasWicketKeeper;
-    const isCaptainMissing = !teamValidation.checks.hasCaptain;
-    const isViceCaptainMissing = !teamValidation.checks.hasViceCaptain;
-    const hasEnoughPlayers = teamToValidate.players.length === maxPlayers;
+ const teamValidation = useMemo(() => validateTeamRoster(teamToValidate, maxPlayers), [teamToValidate, maxPlayers]);
+ const isKeeperMissing = !teamValidation.checks.hasWicketKeeper;
+ const isCaptainMissing = !teamValidation.checks.hasCaptain;
+ const isViceCaptainMissing = !teamValidation.checks.hasViceCaptain;
+ const hasEnoughPlayers = teamToValidate.players.length === maxPlayers;
 
-    const searchResults = useMemo(() => {
-        if (!searchQuery.trim()) return [];
-        const query = searchQuery.trim().toLowerCase();
-        return team.players.filter(p => {
-             if (p.name.toLowerCase().includes(query)) return true;
-             
-             const roleMappings: Record<string, string[]> = {
-                 [PlayerRole.BATSMAN]: ['bat', 'bats', 'batsman', 'batter'],
-                 [PlayerRole.BOWLER]: ['bowl', 'bowler'],
-                 [PlayerRole.ALL_ROUNDER]: ['all', 'allrounder', 'all rounder', 'ar', 'al'],
-                 [PlayerRole.WICKET_KEEPER]: ['wk', 'keeper', 'wicket keeper', 'wicketkeeper', 'wik', 'weeket keeper']
-             };
-             
-             for (const [role, keywords] of Object.entries(roleMappings)) {
-                 if (p.role === role && keywords.some(k => k.startsWith(query) || query === k)) {
-                     return true;
-                 }
-             }
-             return false;
-        });
-    }, [team.players, searchQuery]);
+ const searchResults = useMemo(() => {
+ if (!searchQuery.trim()) return [];
+ const query = searchQuery.trim().toLowerCase();
+ return team.players.filter(p => {
+ if (p.name.toLowerCase().includes(query)) return true;
+ 
+ const roleMappings: Record<string, string[]> = {
+ [PlayerRole.BATSMAN]: ['bat', 'bats', 'batsman', 'batter'],
+ [PlayerRole.BOWLER]: ['bowl', 'bowler'],
+ [PlayerRole.ALL_ROUNDER]: ['all', 'allrounder', 'all rounder', 'ar', 'al'],
+ [PlayerRole.WICKET_KEEPER]: ['wk', 'keeper', 'wicket keeper', 'wicketkeeper', 'wik', 'weeket keeper']
+ };
+ 
+ for (const [role, keywords] of Object.entries(roleMappings)) {
+ if (p.role === role && keywords.some(k => k.startsWith(query) || query === k)) {
+ return true;
+ }
+ }
+ return false;
+ });
+ }, [team.players, searchQuery]);
 
-    const handleDeletePlayerLocal = (playerId: string) => {
-        const updatedPlayers = team.players.filter(p => p.id !== playerId);
-        const updatedTeam = { ...team, players: updatedPlayers };
-        if (updatedTeam.captainId === playerId) updatedTeam.captainId = null;
-        if (updatedTeam.viceCaptainId === playerId) updatedTeam.viceCaptainId = null;
-        updateTeam(updatedTeam);
-        showNotification('Player deleted', 'delete');
-    };
-    
-    const handleConfirmDelete = () => {
-        if (confirmDeletePlayer) {
-            handleDeletePlayerLocal(confirmDeletePlayer.id);
-            setConfirmDeletePlayer(null);
-        }
-    };
+ const handleDeletePlayerLocal = (playerId: string) => {
+ const updatedPlayers = team.players.filter(p => p.id !== playerId);
+ const updatedTeam = { ...team, players: updatedPlayers };
+ if (updatedTeam.captainId === playerId) updatedTeam.captainId = null;
+ if (updatedTeam.viceCaptainId === playerId) updatedTeam.viceCaptainId = null;
+ updateTeam(updatedTeam);
+ showNotification('Player deleted', 'delete');
+ };
+ 
+ const handleConfirmDelete = () => {
+ if (confirmDeletePlayer) {
+ handleDeletePlayerLocal(confirmDeletePlayer.id);
+ setConfirmDeletePlayer(null);
+ }
+ };
 
-    const isSaveDisabled = isTeamLocked || isKeeperMissing || isCaptainMissing || isViceCaptainMissing || !hasEnoughPlayers || !teamName.trim();
-    
-    const saveButtonTitle = useMemo(() => {
-        if (isTeamLocked) {
-            return 'Team editing is disabled because this match has already started or toss has been set.';
-        }
-        if (!hasEnoughPlayers) {
-            return `Please add required number of players (${maxPlayers}).`;
-        }
-        if (isKeeperMissing) {
-            return `A team of ${maxPlayers} must have a Wicket Keeper.`;
-        }
-        if (isCaptainMissing) {
-            return 'Please assign a Captain for the team.';
-        }
-        if (isViceCaptainMissing) {
-            return 'Please assign a Vice-Captain for the team.';
-        }
-        if (!teamName.trim()) {
-            return "Fix errors before saving";
-        }
-        return "";
-    }, [isTeamLocked, hasEnoughPlayers, isKeeperMissing, isCaptainMissing, isViceCaptainMissing, teamName, maxPlayers]);
+ const isSaveDisabled = isTeamLocked || isKeeperMissing || isCaptainMissing || isViceCaptainMissing || !hasEnoughPlayers || !teamName.trim();
+ 
+ const saveButtonTitle = useMemo(() => {
+ if (isTeamLocked) {
+ return 'Team editing is disabled because this match has already started or toss has been set.';
+ }
+ if (!hasEnoughPlayers) {
+ return `Please add required number of players (${maxPlayers}).`;
+ }
+ if (isKeeperMissing) {
+ return `A team of ${maxPlayers} must have a Wicket Keeper.`;
+ }
+ if (isCaptainMissing) {
+ return 'Please assign a Captain for the team.';
+ }
+ if (isViceCaptainMissing) {
+ return 'Please assign a Vice-Captain for the team.';
+ }
+ if (!teamName.trim()) {
+ return "Fix errors before saving";
+ }
+ return "";
+ }, [isTeamLocked, hasEnoughPlayers, isKeeperMissing, isCaptainMissing, isViceCaptainMissing, teamName, maxPlayers]);
 
-    const handleUpdate = () => {
-        if (isSaveDisabled) {
-             if (!hasEnoughPlayers) {
-                 showNotification(`Please add required number of players (${maxPlayers}).`, 'error');
-             } else if (isKeeperMissing) {
-                showNotification(`A team of ${maxPlayers} must have a Wicket Keeper.`, 'error');
-            } else if (isCaptainMissing) {
-                showNotification('Please assign a Captain.', 'error');
-            } else if (isViceCaptainMissing) {
-                showNotification('Please assign a Vice-Captain.', 'error');
-            } else {
-                showNotification('Please fix the errors before updating', 'error');
-            }
-            return;
-        }
+ const handleUpdate = () => {
+ if (isSaveDisabled) {
+ if (!hasEnoughPlayers) {
+ showNotification(`Please add required number of players (${maxPlayers}).`, 'error');
+ } else if (isKeeperMissing) {
+ showNotification(`A team of ${maxPlayers} must have a Wicket Keeper.`, 'error');
+ } else if (isCaptainMissing) {
+ showNotification('Please assign a Captain.', 'error');
+ } else if (isViceCaptainMissing) {
+ showNotification('Please assign a Vice-Captain.', 'error');
+ } else {
+ showNotification('Please fix the errors before updating', 'error');
+ }
+ return;
+ }
 
-        if (teamName.trim().length > 30) {
-            showNotification('Team name is too long (max 30 chars).', 'error');
-            return;
-        }
-        
-        setConfirmDone(true);
-    };
+ if (teamName.trim().length > 30) {
+ showNotification('Team name is too long (max 30 chars).', 'error');
+ return;
+ }
+ 
+ setConfirmDone(true);
+ };
 
-    const handleConfirmDone = () => {
-        // Apply final changes if blur was missed
-        if (teamName !== team.name || teamLogo !== team.logo) {
-            updateTeam({ ...team, name: teamName.trim() || team.name, logo: teamLogo });
-        }
+ const handleConfirmDone = () => {
+ // Apply final changes if blur was missed
+ if (teamName !== team.name || teamLogo !== team.logo) {
+ updateTeam({ ...team, name: teamName.trim() || team.name, logo: teamLogo });
+ }
 
-        showNotification('Team updated', 'success');
-        if (onDone) onDone(team.id);
-        setConfirmDone(false);
-        onClose();
-    };
+ showNotification('Team updated', 'success');
+ if (onDone) onDone(team.id);
+ setConfirmDone(false);
+ onClose();
+ };
 
-    const handlePlayerClick = (player: Player) => {
-        const contextMatch = match || matches.find(m => m.tournamentId === tournamentId && (m.team1Id === team.id || m.team2Id === team.id));
-        openPlayerDetails({
-            sourceScreen: contextMatch && contextMatch.isQuickMatch ? 'QuickMatchSetup' : 'TournamentTeamSetup',
-            teamId: team.id,
-            playerId: player.id,
-            matchId: contextMatch?.id,
-            tournamentId: tournamentId,
-            returnTo: 'team_editor',
-            mode: isTeamLocked ? 'view' : 'edit'
-        });
-    };
+ const handlePlayerClick = (player: Player) => {
+ const contextMatch = match || matches.find(m => m.tournamentId === tournamentId && (m.team1Id === team.id || m.team2Id === team.id));
+ openPlayerDetails({
+ sourceScreen: contextMatch && contextMatch.isQuickMatch ? 'QuickMatchSetup' : 'TournamentTeamSetup',
+ teamId: team.id,
+ playerId: player.id,
+ matchId: contextMatch?.id,
+ tournamentId: tournamentId,
+ returnTo: 'team_editor',
+ mode: isTeamLocked ? 'view' : 'edit'
+ });
+ };
 
-    const handleAddPlayerClick = () => {
-        const contextMatch = match || matches.find(m => m.tournamentId === tournamentId && (m.team1Id === team.id || m.team2Id === team.id));
-        openPlayerDetails({
-            sourceScreen: contextMatch && contextMatch.isQuickMatch ? 'QuickMatchSetup' : 'TournamentTeamSetup',
-            teamId: team.id,
-            matchId: contextMatch?.id,
-            tournamentId: tournamentId,
-            returnTo: 'team_editor',
-            mode: 'add'
-        });
-    };
+ const handleAddPlayerClick = () => {
+ const contextMatch = match || matches.find(m => m.tournamentId === tournamentId && (m.team1Id === team.id || m.team2Id === team.id));
+ openPlayerDetails({
+ sourceScreen: contextMatch && contextMatch.isQuickMatch ? 'QuickMatchSetup' : 'TournamentTeamSetup',
+ teamId: team.id,
+ matchId: contextMatch?.id,
+ tournamentId: tournamentId,
+ returnTo: 'team_editor',
+ mode: 'add'
+ });
+ };
 
-    const deleteConfirmationMessage = (
-        <div>
-            Are you sure you want to delete the player "{confirmDeletePlayer?.name}"?
-            <div className="mt-4">
-                <label className="custom-checkbox highlight">
-                    <input type="checkbox" checked={dontAskAgain} onChange={(e) => {
-                        setDontAskAgain(e.target.checked);
-                        localStorageAdapter.save('dontAskDeletePlayer', String(e.target.checked));
-                    }} />
-                    <span className="checkmark"></span>
-                    <span className="text-sm">Don't ask me again</span>
-                </label>
-            </div>
-        </div>
-    );
+ const deleteConfirmationMessage = (
+ <div>
+ Are you sure you want to delete the player "{confirmDeletePlayer?.name}"?
+ <div className="mt-4">
+ <label className="custom-checkbox highlight">
+ <input type="checkbox" checked={dontAskAgain} onChange={(e) => {
+ setDontAskAgain(e.target.checked);
+ localStorageAdapter.save('dontAskDeletePlayer', String(e.target.checked));
+ }} />
+ <span className="checkmark"></span>
+ <span className="text-sm">Don't ask me again</span>
+ </label>
+ </div>
+ </div>
+ );
 
-    return (
-        <div className="fixed inset-0 bg-black bg-opacity-70 backdrop-blur-sm flex justify-center items-center z-50 md:p-4">
-            <div className="bg-secondary w-full h-full md:max-w-4xl md:max-h-[85vh] flex flex-col md:rounded-2xl shadow-xl">
-                <div className="relative p-4 md:p-6 text-center border-b border-gray-300 dark:border-gray-700">
-                    <div className="flex items-center justify-center gap-4">
-                         <div className="relative w-12 h-12 flex-shrink-0">
-                            <div
-                                className="w-full h-full flex items-center justify-center rounded-lg text-button text-white text-h3"
-                                style={{ backgroundColor: teamLogo }}
-                            >
-                                {teamName.substring(0, 2).toUpperCase()}
-                            </div>
-                            {!isTeamLocked && (
-                                <input
-                                    type="color"
-                                    value={teamLogo}
-                                    onBlur={handleTeamInfoBlur}
-                                    onChange={e => setTeamLogo(e.target.value)}
-                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                    title="Change team color"
-                                />
-                            )}
-                        </div>
-                        <input disabled={isTeamLocked} value={teamName} onBlur={handleTeamInfoBlur} onChange={e => setTeamName(e.target.value)} className={`w-full max-w-xs text-h2 font-bold text-center text-text-primary bg-primary/50 p-1.5 rounded-lg focus:outline-none border-2 transition-colors ${!teamName.trim() ? 'border-highlight focus:border-highlight' : 'border-brand-blue/15 focus:border-brand-blue'} ${isTeamLocked ? 'opacity-90' : ''}`} placeholder="Team Name" />
-                    </div>
-                    <button onClick={onClose} className="absolute text-h1 leading-none transform -translate-y-1/2 top-1/2 right-4 md:right-6 text-text-secondary hover:text-text-primary">&times;</button>
-                </div>
-                <div className="flex-grow px-4 py-4 md:px-6 md:py-6 pb-32 md:pb-32 overflow-y-auto no-scrollbar relative min-h-0">
-                    {isTeamLocked && (
-                        <div className="p-3 mb-6 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800 text-sm font-bold rounded-lg flex flex-col md:flex-row items-center justify-between gap-4 text-center text-balance">
-                            <div className="flex items-center justify-center gap-2">
-                                <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
-                                <span>Lineup locked after toss or match start.</span>
-                            </div>
-                            {activeMatchForLock && activeMatchForLock.status !== 'completed' && !activeMatchForLock.wasAbandoned && addPlayerReplacement && (
-                                <button 
-                                    onClick={() => setIsImpactPlayerModalOpen(true)}
-                                    className="px-3 py-1.5 bg-red-100 hover:bg-red-200 dark:bg-red-800/40 dark:hover:bg-red-800/60 text-red-800 dark:text-red-200 rounded-md whitespace-nowrap border border-red-300 dark:border-red-700 transition-colors"
-                                >
-                                    Emergency Replacement
-                                </button>
-                            )}
-                        </div>
-                    )}
-                    
-                    {match ? (
-                        <div className="space-y-4">
-                            {isAutoGeneratedTeam && (
-                                <div className="p-3 bg-brand-blue/5 border border-brand-blue/20 rounded-xl flex items-start gap-3">
-                                    <svg className="w-5 h-5 text-brand-blue shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                    <div>
-                                        <p className="text-sm font-bold text-text-primary">Default players created for quick start</p>
-                                        <p className="text-xs text-text-secondary mt-0.5">You can edit names, roles, jersey numbers, captain, vice-captain and wicketkeeper before starting the match.</p>
-                                    </div>
-                                </div>
-                            )}
-                            <div className="p-4 bg-brand-blue/5 rounded-xl border border-brand-blue/20">
-                                <h3 className="text-h3 font-bold text-text-primary mb-2">
-                                    {isAutoGeneratedTeam ? 'Placeholder Players' : 'Match Squad Builder'}
-                                </h3>
-                                <div className="text-body text-text-secondary mb-4 flex flex-col gap-1">
-                                    <span className="font-semibold">{team.players.length} Players in Team Pool</span>
-                                    {currentSquadIds.length === maxPlayers ? (
-                                        <span className="text-success font-bold">Ready</span>
-                                    ) : currentSquadIds.length < maxPlayers ? (
-                                        <span>Select {maxPlayers - currentSquadIds.length} {currentSquadIds.length === 0 ? `players for this match squad.` : `more players.`}</span>
-                                    ) : (
-                                        <span className="text-highlight font-bold">Remove {currentSquadIds.length - maxPlayers} player{currentSquadIds.length - maxPlayers > 1 ? 's' : ''}.</span>
-                                    )}
-                                </div>
-                                <div className="flex justify-between items-center text-sm font-semibold text-text-secondary mb-2">
-                                    <span>{isAutoGeneratedTeam ? 'Players:' : 'Selected Squad:'}</span>
-                                    <span>{currentSquadIds.length} / {maxPlayers} {isAutoGeneratedTeam ? 'Players' : 'Match Squad Selected'}</span>
-                                </div>
-                                {team.players.length < maxPlayers && (
-                                    <div className="mt-2 text-xs text-red-600 dark:text-red-400 font-bold p-2.5 bg-red-100/30 dark:bg-red-900/20 rounded-lg">
-                                        Only {team.players.length} saved players available. Add {maxPlayers - team.players.length} more players or reduce match player count.
-                                    </div>
-                                )}
-                                <input 
-                                    type="text" 
-                                    placeholder="Search saved players..."
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="w-full text-body font-semibold text-text-primary bg-primary/50 p-2.5 rounded-lg focus:outline-none border-2 border-brand-blue/15 focus:border-brand-blue transition-colors mb-4"
-                                />
-                            </div>
+ return (
+ <div className="fixed inset-0 bg-black bg-opacity-70 backdrop-blur-sm flex justify-center items-center z-50 md:p-4">
+ <div className="bg-secondary w-full h-full md:max-w-4xl md:max-h-[85vh] flex flex-col md:rounded-2xl shadow-xl">
+ <div className="relative p-4 md:p-6 text-center border-b border-border">
+ <div className="flex items-center justify-center gap-4">
+ <div className="relative w-12 h-12 flex-shrink-0">
+ <div
+ className="w-full h-full flex items-center justify-center rounded-lg text-button text-white text-lg"
+ style={{ backgroundColor: teamLogo }}
+ >
+ {teamName.substring(0, 2).toUpperCase()}
+ </div>
+ {!isTeamLocked && (
+ <input
+ type="color"
+ value={teamLogo}
+ onBlur={handleTeamInfoBlur}
+ onChange={e => setTeamLogo(e.target.value)}
+ className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+ title="Change team color"
+ />
+ )}
+ </div>
+ <input disabled={isTeamLocked} value={teamName} onBlur={handleTeamInfoBlur} onChange={e => setTeamName(e.target.value)} className={`w-full max-w-xs text-2xl font-bold font-bold text-center text-text-primary bg-primary/50 p-1.5 rounded-lg focus:outline-none border-2 transition-colors ${!teamName.trim() ? 'border-highlight focus:border-highlight' : 'border-brand-blue/15 focus:border-brand-blue'} ${isTeamLocked ? 'opacity-90' : ''}`} placeholder="Team Name" />
+ </div>
+ <button onClick={onClose} className="absolute text-h1 leading-none transform -translate-y-1/2 top-1/2 right-4 md:right-6 text-text-secondary hover:text-text-primary">&times;</button>
+ </div>
+ <div className="flex-grow px-4 py-4 md:px-6 md:py-6 pb-32 md:pb-32 overflow-y-auto no-scrollbar relative min-h-0">
+ {isTeamLocked && (
+ <div className="p-3 mb-6 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800 text-sm font-bold rounded-lg flex flex-col md:flex-row items-center justify-between gap-4 text-center text-balance">
+ <div className="flex items-center justify-center gap-2">
+ <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+ <span>Lineup locked after toss or match start.</span>
+ </div>
+ {activeMatchForLock && activeMatchForLock.status !== 'completed' && !activeMatchForLock.wasAbandoned && addPlayerReplacement && (
+ <button 
+ onClick={() => setIsImpactPlayerModalOpen(true)}
+ className="px-3 py-1.5 bg-red-100 hover:bg-red-200 dark:bg-red-800/40 dark:hover:bg-red-800/60 text-red-800 dark:text-red-200 rounded-md whitespace-nowrap border border-red-300 dark:border-red-700 transition-colors"
+ >
+ Emergency Replacement
+ </button>
+ )}
+ </div>
+ )}
+ 
+ {match ? (
+ <div className="space-y-4">
+ {isAutoGeneratedTeam && (
+ <div className="p-3 bg-brand-blue/5 border border-brand-blue/20 rounded-xl flex items-start gap-3">
+ <svg className="w-5 h-5 text-brand-blue shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+ <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+ </svg>
+ <div>
+ <p className="text-sm font-bold text-text-primary">Default players created for quick start</p>
+ <p className="text-xs text-text-secondary mt-0.5">You can edit names, roles, jersey numbers, captain, vice-captain and wicketkeeper before starting the match.</p>
+ </div>
+ </div>
+ )}
+ <div className="p-4 bg-brand-blue/5 rounded-xl border border-brand-blue/20">
+ <h3 className="text-xl font-bold text-text-primary mb-2">
+ {isAutoGeneratedTeam ? 'Placeholder Players' : 'Match Squad Builder'}
+ </h3>
+ <div className="text-body text-text-secondary mb-4 flex flex-col gap-1">
+ <span className="font-semibold">{team.players.length} Players in Team Pool</span>
+ {currentSquadIds.length === maxPlayers ? (
+ <span className="text-success font-bold">Ready</span>
+ ) : currentSquadIds.length < maxPlayers ? (
+ <span>Select {maxPlayers - currentSquadIds.length} {currentSquadIds.length === 0 ? `players for this match squad.` : `more players.`}</span>
+ ) : (
+ <span className="text-highlight font-bold">Remove {currentSquadIds.length - maxPlayers} player{currentSquadIds.length - maxPlayers > 1 ? 's' : ''}.</span>
+ )}
+ </div>
+ <div className="flex justify-between items-center text-sm font-semibold text-text-secondary mb-2">
+ <span>{isAutoGeneratedTeam ? 'Players:' : 'Selected Squad:'}</span>
+ <span>{currentSquadIds.length} / {maxPlayers} {isAutoGeneratedTeam ? 'Players' : 'Match Squad Selected'}</span>
+ </div>
+ {team.players.length < maxPlayers && (
+ <div className="mt-2 text-xs text-red-600 dark:text-red-400 font-bold p-2.5 bg-red-100/30 dark:bg-red-900/20 rounded-lg">
+ Only {team.players.length} saved players available. Add {maxPlayers - team.players.length} more players or reduce match player count.
+ </div>
+ )}
+ <input 
+ type="text" 
+ placeholder="Search saved players..."
+ value={searchQuery}
+ onChange={(e) => setSearchQuery(e.target.value)}
+ className="w-full text-body font-semibold text-text-primary bg-primary/50 p-2.5 rounded-lg focus:outline-none border-2 border-brand-blue/15 focus:border-brand-blue transition-colors mb-4"
+ />
+ </div>
 
-                            {searchQuery.trim() ? (
-                                <div className="space-y-3 mb-6">
-                                    <h4 className="text-sm font-bold text-text-secondary uppercase tracking-wider">Search Results</h4>
-                                    {searchResults.length > 0 ? searchResults.map(player => {
-                                        const isSelected = currentSquadIds.includes(player.id);
-                                        const canAdd = currentSquadIds.length < maxPlayers;
-                                        return (
-                                            <div key={player.id} className="flex items-center justify-between p-3 bg-primary rounded-xl shadow-sm border border-brand-blue/20">
-                                                <div className="flex flex-col">
-                                                    <span className="font-bold text-text-primary text-body">{player.name}</span>
-                                                    <span className="text-xs text-text-secondary flex items-center gap-1 mt-1">
-                                                        {getRoleEmoji(player.role)} {getShortRoleName(player.role)}
-                                                    </span>
-                                                </div>
-                                                <button 
-                                                    disabled={isSelected || (!isSelected && !canAdd)}
-                                                    onClick={() => handleToggleSquadPlayer(player.id)}
-                                                    className={`px-4 py-1.5 text-sm font-bold rounded-lg transition-colors ${isSelected ? 'bg-gray-200 text-gray-500 cursor-not-allowed dark:bg-gray-700 dark:text-gray-400' : (canAdd ? 'bg-brand-blue text-white hover:bg-brand-blue/90' : 'bg-gray-200 text-gray-400 cursor-not-allowed')}`}
-                                                >
-                                                    {isSelected ? (isAutoGeneratedTeam ? 'Already in Roster' : 'Already Selected') : (isAutoGeneratedTeam ? '+ Add Player' : '+ Add to Squad')}
-                                                </button>
-                                            </div>
-                                        )
-                                    }) : (
-                                        <div className="p-4 text-center text-text-secondary bg-primary/50 text-sm font-bold rounded-xl border border-brand-blue/10">
-                                            Player not found. Please add your player.
-                                        </div>
-                                    )}
-                                </div>
-                            ) : null}
+ {searchQuery.trim() ? (
+ <div className="space-y-3 mb-6">
+ <h4 className="text-sm font-bold text-text-secondary uppercase tracking-wider">Search Results</h4>
+ {searchResults.length > 0 ? searchResults.map(player => {
+ const isSelected = currentSquadIds.includes(player.id);
+ const canAdd = currentSquadIds.length < maxPlayers;
+ return (
+ <div key={player.id} className="flex items-center justify-between p-3 bg-primary rounded-xl shadow-sm border border-brand-blue/20">
+ <div className="flex flex-col">
+ <span className="font-bold text-text-primary text-body">{player.name}</span>
+ <span className="text-xs text-text-secondary flex items-center gap-1 mt-1">
+ {getRoleEmoji(player.role)} {getShortRoleName(player.role)}
+ </span>
+ </div>
+ <button 
+ disabled={isSelected || (!isSelected && !canAdd)}
+ onClick={() => handleToggleSquadPlayer(player.id)}
+ className={`px-4 py-1.5 text-sm font-bold rounded-lg transition-colors ${isSelected ? 'bg-gray-200 text-gray-500 cursor-not-allowed dark:bg-gray-700 dark:text-gray-400' : (canAdd ? 'bg-brand-blue text-white hover:bg-brand-blue/90' : 'bg-gray-200 text-gray-400 cursor-not-allowed')}`}
+ >
+ {isSelected ? (isAutoGeneratedTeam ? 'Already in Roster' : 'Already Selected') : (isAutoGeneratedTeam ? '+ Add Player' : '+ Add to Squad')}
+ </button>
+ </div>
+ )
+ }) : (
+ <div className="p-4 text-center text-text-secondary bg-primary/50 text-sm font-bold rounded-xl border border-brand-blue/10">
+ Player not found. Please add your player.
+ </div>
+ )}
+ </div>
+ ) : null}
 
-                            {!isTeamLocked && isKeeperMissing && currentSquadIds.length > 0 && (
-                                <div className="p-2 mb-4 bg-warning/20 dark:bg-warning/20 text-yellow-800 dark:text-yellow-300 text-body font-semibold rounded-md text-center">
-                                    A team of {maxPlayers} must have one designated Wicket Keeper.
-                                </div>
-                            )}
-                            {!isTeamLocked && (isCaptainMissing || isViceCaptainMissing) && currentSquadIds.length > 0 && (
-                                <div className="p-2 mb-4 bg-warning/20 dark:bg-warning/20 text-yellow-800 dark:text-yellow-300 text-body font-semibold rounded-md text-center">
-                                    {isCaptainMissing && isViceCaptainMissing ? "A Captain and Vice-Captain must be assigned." : (isCaptainMissing ? "A Captain must be assigned." : "A Vice-Captain must be assigned.")}
-                                </div>
-                            )}
+ {!isTeamLocked && isKeeperMissing && currentSquadIds.length > 0 && (
+ <div className="p-2 mb-4 bg-warning/20 dark:bg-warning/20 text-yellow-800 dark:text-yellow-300 text-body font-semibold rounded-md text-center">
+ A team of {maxPlayers} must have one designated Wicket Keeper.
+ </div>
+ )}
+ {!isTeamLocked && (isCaptainMissing || isViceCaptainMissing) && currentSquadIds.length > 0 && (
+ <div className="p-2 mb-4 bg-warning/20 dark:bg-warning/20 text-yellow-800 dark:text-yellow-300 text-body font-semibold rounded-md text-center">
+ {isCaptainMissing && isViceCaptainMissing ? "A Captain and Vice-Captain must be assigned." : (isCaptainMissing ? "A Captain must be assigned." : "A Vice-Captain must be assigned.")}
+ </div>
+ )}
 
-                            <div>
-                                <h4 className="text-sm font-bold text-text-secondary uppercase tracking-wider mb-3">
-                                    {isAutoGeneratedTeam ? 'Players' : 'Selected Squad'}
-                                </h4>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                    {teamToValidate.players.map(player => (
-                                        <div 
-                                            key={player.id} 
-                                            onClick={() => handlePlayerClick(player)}
-                                            className="flex items-center justify-between p-3 bg-primary rounded-xl shadow-sm border border-brand-blue/10 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
-                                        >
-                                            <div className="flex items-center gap-3 truncate">
-                                                <div className="w-10 h-10 flex flex-shrink-0 items-center justify-center rounded-lg bg-secondary text-text-primary overflow-hidden shadow-inner font-bold text-h3">
-                                                    {player.number}
-                                                </div>
-                                                <div className="truncate">
-                                                    <div className="font-bold text-text-primary text-body flex flex-wrap items-center gap-1">
-                                                        <span className="truncate">{player.name}</span>
-                                                        {team.captainId === player.id && <span className="text-[10px] bg-brand-blue/20 text-brand-blue px-1.5 py-0.5 rounded-full font-bold">C</span>}
-                                                        {team.viceCaptainId === player.id && <span className="text-[10px] bg-warning/20 text-yellow-700 dark:text-yellow-400 px-1.5 py-0.5 rounded-full font-bold">VC</span>}
-                                                        {player.role === PlayerRole.WICKET_KEEPER && <span className="text-[10px] bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 px-1.5 py-0.5 rounded-full font-bold">WK</span>}
-                                                    </div>
-                                                    <div className="text-xs text-text-secondary flex items-center gap-1 mt-0.5">
-                                                        {getRoleEmoji(player.role)} {getShortRoleName(player.role)}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div className="flex flex-shrink-0 ml-2">
-                                                <button 
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        handleToggleSquadPlayer(player.id, e);
-                                                    }}
-                                                    className="p-1.5 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg text-xs font-bold transition-colors dark:bg-red-900/30 dark:hover:bg-red-900/50 dark:text-red-400"
-                                                >
-                                                    Remove
-                                                </button>
-                                            </div>
-                                        </div>
-                                    ))}
-                                    {teamToValidate.players.length === 0 && (
-                                        <div className="col-span-full p-6 text-center text-text-secondary text-sm bg-primary/30 rounded-xl border border-dashed border-brand-blue/30">
-                                            No players {isAutoGeneratedTeam ? 'in roster' : 'selected'}. Search and add players above.
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    ) : (() => {
-                            const activePlayers = team.players.filter(p => !p.isArchived);
-                            return (
-                                <>
-                                    {isAutoGeneratedTeam && (
-                                        <div className="p-3 mb-4 bg-brand-blue/5 border border-brand-blue/20 rounded-xl flex items-start gap-3">
-                                            <svg className="w-5 h-5 text-brand-blue shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                            </svg>
-                                            <div>
-                                                <p className="text-sm font-bold text-text-primary">Team roster placeholders</p>
-                                                <p className="text-xs text-text-secondary mt-0.5">Edit these placeholder players or replace them with real player details before fixtures begin.</p>
-                                            </div>
-                                        </div>
-                                    )}
-                                    {!isTeamLocked && isKeeperMissing && activePlayers.length > 0 && (
-                                        <div className="p-2 mb-4 bg-warning/20 dark:bg-warning/20 text-yellow-800 dark:text-yellow-300 text-body font-semibold rounded-md text-center">
-                                            A team of {maxPlayers} must have one designated Wicket Keeper.
-                                        </div>
-                                    )}
-                                    {!isTeamLocked && (isCaptainMissing || isViceCaptainMissing) && activePlayers.length > 0 && (
-                                        <div className="p-2 mb-4 bg-warning/20 dark:bg-warning/20 text-yellow-800 dark:text-yellow-300 text-body font-semibold rounded-md text-center">
-                                            {isCaptainMissing && isViceCaptainMissing ? "A Captain and Vice-Captain must be assigned." : (isCaptainMissing ? "A Captain must be assigned." : "A Vice-Captain must be assigned.")}
-                                        </div>
-                                    )}
+ <div>
+ <h4 className="text-sm font-bold text-text-secondary uppercase tracking-wider mb-3">
+ {isAutoGeneratedTeam ? 'Players' : 'Selected Squad'}
+ </h4>
+ <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+ {teamToValidate.players.map(player => (
+ <div 
+ key={player.id} 
+ onClick={() => handlePlayerClick(player)}
+ className="flex items-center justify-between p-3 bg-primary rounded-xl shadow-sm border border-brand-blue/10 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+ >
+ <div className="flex items-center gap-3 truncate">
+ <div className="w-10 h-10 flex flex-shrink-0 items-center justify-center rounded-lg bg-secondary text-text-primary overflow-hidden shadow-inner font-bold text-lg">
+ {player.number}
+ </div>
+ <div className="truncate">
+ <div className="font-bold text-text-primary text-body flex flex-wrap items-center gap-1">
+ <span className="truncate">{player.name}</span>
+ {team.captainId === player.id && <span className="text-[10px] bg-brand-blue/20 text-brand-blue px-1.5 py-0.5 rounded-full font-bold">C</span>}
+ {team.viceCaptainId === player.id && <span className="text-[10px] bg-warning/20 text-yellow-700 dark:text-yellow-400 px-1.5 py-0.5 rounded-full font-bold">VC</span>}
+ {player.role === PlayerRole.WICKET_KEEPER && <span className="text-[10px] bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 px-1.5 py-0.5 rounded-full font-bold">WK</span>}
+ </div>
+ <div className="text-xs text-text-secondary flex items-center gap-1 mt-0.5">
+ {getRoleEmoji(player.role)} {getShortRoleName(player.role)}
+ </div>
+ </div>
+ </div>
+ <div className="flex flex-shrink-0 ml-2">
+ <button 
+ onClick={(e) => {
+ e.stopPropagation();
+ handleToggleSquadPlayer(player.id, e);
+ }}
+ className="p-1.5 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg text-xs font-bold transition-colors dark:bg-red-900/30 dark:hover:bg-red-900/50 dark:text-red-400"
+ >
+ Remove
+ </button>
+ </div>
+ </div>
+ ))}
+ {teamToValidate.players.length === 0 && (
+ <div className="col-span-full p-6 text-center text-text-secondary text-sm bg-primary/30 rounded-xl border border-dashed border-brand-blue/30">
+ No players {isAutoGeneratedTeam ? 'in roster' : 'selected'}. Search and add players above.
+ </div>
+ )}
+ </div>
+ </div>
+ </div>
+ ) : (() => {
+ const activePlayers = team.players.filter(p => !p.isArchived);
+ return (
+ <>
+ {isAutoGeneratedTeam && (
+ <div className="p-3 mb-4 bg-brand-blue/5 border border-brand-blue/20 rounded-xl flex items-start gap-3">
+ <svg className="w-5 h-5 text-brand-blue shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+ <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+ </svg>
+ <div>
+ <p className="text-sm font-bold text-text-primary">Team roster placeholders</p>
+ <p className="text-xs text-text-secondary mt-0.5">Edit these placeholder players or replace them with real player details before fixtures begin.</p>
+ </div>
+ </div>
+ )}
+ {!isTeamLocked && isKeeperMissing && activePlayers.length > 0 && (
+ <div className="p-2 mb-4 bg-warning/20 dark:bg-warning/20 text-yellow-800 dark:text-yellow-300 text-body font-semibold rounded-md text-center">
+ A team of {maxPlayers} must have one designated Wicket Keeper.
+ </div>
+ )}
+ {!isTeamLocked && (isCaptainMissing || isViceCaptainMissing) && activePlayers.length > 0 && (
+ <div className="p-2 mb-4 bg-warning/20 dark:bg-warning/20 text-yellow-800 dark:text-yellow-300 text-body font-semibold rounded-md text-center">
+ {isCaptainMissing && isViceCaptainMissing ? "A Captain and Vice-Captain must be assigned." : (isCaptainMissing ? "A Captain must be assigned." : "A Vice-Captain must be assigned.")}
+ </div>
+ )}
 
-                                    {activePlayers.length === 0 ? (
-                                        <div className="flex flex-col items-center justify-center p-8 text-center text-balance space-y-4">
-                                            <h4 className="text-h3 font-bold text-text-primary">No Players Added Yet</h4>
-                                            <p className="text-body text-text-secondary">Build your team before the toss.</p>
-                                            {!isTeamLocked && (
-                                                <Button onClick={handleAddPlayerClick} variant="blue" className="mt-4">
-                                                    <PlusIcon /> Add Player
-                                                </Button>
-                                            )}
-                                        </div>
-                                    ) : (
-                                        <div className="space-y-4">
-                                            <div className="flex justify-between items-center text-sm font-semibold text-text-secondary px-2">
-                                                <span>Team Players</span>
-                                                <span>{activePlayers.length} Players in Team Pool</span>
-                                            </div>
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                                {activePlayers.map(player => (
-                                            <div 
-                                                key={player.id} 
-                                                onClick={() => handlePlayerClick(player)}
-                                                className="flex items-center justify-between p-3 bg-primary rounded-xl shadow-sm border border-brand-blue/10 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
-                                            >
-                                                <div className="flex items-center gap-3 truncate">
-                                                    <div className="w-10 h-10 flex flex-shrink-0 items-center justify-center rounded-lg bg-secondary text-text-primary overflow-hidden shadow-inner font-bold text-h3">
-                                                        {player.number}
-                                                    </div>
-                                                    <div className="truncate">
-                                                        <div className="font-bold text-text-primary text-body flex flex-wrap items-center gap-1">
-                                                            <span className="truncate">{player.name}</span>
-                                                            {team.captainId === player.id && <span className="text-[10px] bg-brand-blue/20 text-brand-blue px-1.5 py-0.5 rounded-full font-bold">C</span>}
-                                                            {team.viceCaptainId === player.id && <span className="text-[10px] bg-warning/20 text-yellow-700 dark:text-yellow-400 px-1.5 py-0.5 rounded-full font-bold">VC</span>}
-                                                            {player.role === PlayerRole.WICKET_KEEPER && <span className="text-[10px] bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 px-1.5 py-0.5 rounded-full font-bold">WK</span>}
-                                                        </div>
-                                                        <div className="text-xs text-text-secondary flex items-center gap-1 mt-0.5">
-                                                            {getRoleEmoji(player.role)} {getShortRoleName(player.role)}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div className="flex items-center flex-shrink-0">
-                                                    {/* Delete button removed as requested for now */}
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                    {/* Add player button moved to floating footer */}
-                                </div>
-                            )}
-                        </>
-                            );
-                        })()}
-                </div>
-                <div className="p-4 md:p-6 border-t border-gray-300 dark:border-gray-700 flex justify-between items-center gap-4 bg-primary/80 backdrop-blur-md rounded-b-2xl safe-pad-b">
-                    <div className="flex-1 flex gap-2">
-                         {/* Add player button moved to floating action button */}
-                    </div>
-                    <div className="flex gap-2">
-                        <button onClick={onClose} className="py-2 px-4 rounded-2xl font-semibold text-body bg-primary/80 border border-brand-blue/15 hover:bg-primary">Cancel</button>
-                        {onDone && (
-                            <Button onClick={handleUpdate} disabled={isSaveDisabled} title={saveButtonTitle}>
-                                Done
-                            </Button>
-                        )}
-                    </div>
-                </div>
+ {activePlayers.length === 0 ? (
+ <div className="flex flex-col items-center justify-center p-8 text-center text-balance space-y-4">
+ <h4 className="text-xl font-bold text-text-primary">No Players Added Yet</h4>
+ <p className="text-body text-text-secondary">Build your team before the toss.</p>
+ {!isTeamLocked && (
+ <Button onClick={handleAddPlayerClick} variant="blue" className="mt-4">
+ <PlusIcon /> Add Player
+ </Button>
+ )}
+ </div>
+ ) : (
+ <div className="space-y-4">
+ <div className="flex justify-between items-center text-sm font-semibold text-text-secondary px-2">
+ <span>Team Players</span>
+ <span>{activePlayers.length} Players in Team Pool</span>
+ </div>
+ <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+ {activePlayers.map(player => (
+ <div 
+ key={player.id} 
+ onClick={() => handlePlayerClick(player)}
+ className="flex items-center justify-between p-3 bg-primary rounded-xl shadow-sm border border-brand-blue/10 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+ >
+ <div className="flex items-center gap-3 truncate">
+ <div className="w-10 h-10 flex flex-shrink-0 items-center justify-center rounded-lg bg-secondary text-text-primary overflow-hidden shadow-inner font-bold text-lg">
+ {player.number}
+ </div>
+ <div className="truncate">
+ <div className="font-bold text-text-primary text-body flex flex-wrap items-center gap-1">
+ <span className="truncate">{player.name}</span>
+ {team.captainId === player.id && <span className="text-[10px] bg-brand-blue/20 text-brand-blue px-1.5 py-0.5 rounded-full font-bold">C</span>}
+ {team.viceCaptainId === player.id && <span className="text-[10px] bg-warning/20 text-yellow-700 dark:text-yellow-400 px-1.5 py-0.5 rounded-full font-bold">VC</span>}
+ {player.role === PlayerRole.WICKET_KEEPER && <span className="text-[10px] bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 px-1.5 py-0.5 rounded-full font-bold">WK</span>}
+ </div>
+ <div className="text-xs text-text-secondary flex items-center gap-1 mt-0.5">
+ {getRoleEmoji(player.role)} {getShortRoleName(player.role)}
+ </div>
+ </div>
+ </div>
+ <div className="flex items-center flex-shrink-0">
+ {/* Delete button removed as requested for now */}
+ </div>
+ </div>
+ ))}
+ </div>
+ {/* Add player button moved to floating footer */}
+ </div>
+ )}
+ </>
+ );
+ })()}
+ </div>
+ <div className="p-4 md:p-6 border-t border-border flex justify-between items-center gap-4 bg-primary/80 backdrop-blur-md rounded-b-2xl safe-pad-b">
+ <div className="flex-1 flex gap-2">
+ {/* Add player button moved to floating action button */}
+ </div>
+ <div className="flex gap-2">
+ <button onClick={onClose} className="py-2 px-4 rounded-2xl font-semibold text-body bg-primary/80 border border-brand-blue/15 hover:bg-primary">Cancel</button>
+ {onDone && (
+ <Button onClick={handleUpdate} disabled={isSaveDisabled} title={saveButtonTitle}>
+ Done
+ </Button>
+ )}
+ </div>
+ </div>
 
-                {confirmDeletePlayer && (
-                    <ConfirmationModal
-                        title={`Delete ${confirmDeletePlayer.name}?`}
-                        message={deleteConfirmationMessage}
-                        onClose={() => setConfirmDeletePlayer(null)}
-                        onConfirm={handleConfirmDelete}
-                    />
-                )}
-                {confirmDone && (
-                    <ConfirmationModal
-                        title="Confirm Team Players?"
-                        message={
-                            <div>
-                                <p className="mb-2">You have added {match ? currentSquadIds.length : team.players.length} / {maxPlayers} players.</p>
-                                <p>Captain, Vice-Captain, and Wicket Keeper are assigned.</p>
-                            </div>
-                        }
-                        onClose={() => setConfirmDone(false)}
-                        onConfirm={handleConfirmDone}
-                        confirmText="Confirm & Save"
-                        confirmVariant="primary"
-                    />
-                )}
-                {activeMatchForLock && addPlayerReplacement && (
-                    <ImpactPlayerModal
-                        isOpen={isImpactPlayerModalOpen}
-                        onClose={() => setIsImpactPlayerModalOpen(false)}
-                        match={activeMatchForLock}
-                        team={team}
-                        updateTeam={updateTeam}
-                        addPlayerReplacement={addPlayerReplacement}
-                    />
-                )}
-                
-                {/* Floating Add Player Button */}
-                {!isTeamLocked && (
-                    <button
-                        onClick={handleAddPlayerClick}
-                        style={{ bottom: 'calc(5rem + env(safe-area-inset-bottom))' }}
-                        className="fixed right-6 px-6 py-3 bg-brand-blue text-white rounded-xl shadow-2xl font-bold border-2 border-white dark:border-transparent flex items-center gap-2 hover:bg-brand-blue/90 transform hover:-translate-y-1 transition-all z-[60] text-body"
-                    >
-                        <PlusIcon /> Add Player
-                    </button>
-                )}
-            </div>
-        </div>
-    );
+ {confirmDeletePlayer && (
+ <ConfirmationModal
+ title={`Delete ${confirmDeletePlayer.name}?`}
+ message={deleteConfirmationMessage}
+ onClose={() => setConfirmDeletePlayer(null)}
+ onConfirm={handleConfirmDelete}
+ />
+ )}
+ {confirmDone && (
+ <ConfirmationModal
+ title="Confirm Team Players?"
+ message={
+ <div>
+ <p className="mb-2">You have added {match ? currentSquadIds.length : team.players.length} / {maxPlayers} players.</p>
+ <p>Captain, Vice-Captain, and Wicket Keeper are assigned.</p>
+ </div>
+ }
+ onClose={() => setConfirmDone(false)}
+ onConfirm={handleConfirmDone}
+ confirmText="Confirm & Save"
+ confirmVariant="primary"
+ />
+ )}
+ {activeMatchForLock && addPlayerReplacement && (
+ <ImpactPlayerModal
+ isOpen={isImpactPlayerModalOpen}
+ onClose={() => setIsImpactPlayerModalOpen(false)}
+ match={activeMatchForLock}
+ team={team}
+ updateTeam={updateTeam}
+ addPlayerReplacement={addPlayerReplacement}
+ />
+ )}
+ 
+ {/* Floating Add Player Button */}
+ {!isTeamLocked && (
+ <button
+ onClick={handleAddPlayerClick}
+ style={{ bottom: 'calc(5rem + env(safe-area-inset-bottom))' }}
+ className="fixed right-6 px-6 py-3 bg-brand-blue text-white rounded-xl shadow-2xl font-bold border-2 border-white dark:border-transparent flex items-center gap-2 hover:bg-brand-blue/90 transform hover:-translate-y-1 transition-all z-[60] text-body"
+ >
+ <PlusIcon /> Add Player
+ </button>
+ )}
+ </div>
+ </div>
+ );
 };

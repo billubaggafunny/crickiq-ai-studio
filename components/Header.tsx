@@ -31,7 +31,7 @@ const Header: React.FC<HeaderProps> = ({
     actionButton
 }) => {
     return (
-        <header className="h-[56px] px-2 md:px-4 bg-brand-gradient text-white shadow-sm flex items-center justify-between sticky top-0 z-20 backdrop-blur-md safe-pad-t shrink-0">
+        <header className="h-[56px] px-2 md:px-4 bg-[#0B1730] dark:bg-header border-b border-white/5 text-white shadow-sm flex items-center justify-between sticky top-0 z-20 backdrop-blur-md safe-pad-t shrink-0">
             {/* Left: Brand Logo, Back, Menu, or Close */}
             <div className="flex items-center gap-2 min-w-[100px]">
                 {showMenu && onMenuClick && (

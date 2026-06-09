@@ -113,7 +113,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
         >
             <div className="w-full max-w-md" onClick={e => e.stopPropagation()}>
                 <CrickIQCard className="max-h-[85vh] flex flex-col overflow-hidden" noPadding>
-                    <div className="flex justify-between items-center px-4 py-3 bg-brand-gradient text-white sticky top-0 z-20 shrink-0">
+                    <div className="flex justify-between items-center px-4 py-3 bg-[#0B1730] dark:bg-header border-b border-white/5 text-white sticky top-0 z-20 shrink-0">
                         <h2 className="text-lg font-bold">
                             {view === "main" ? "Settings" : view === "howToUse" ? "How to Use CrickIQ" : "Data Management"}
                         </h2>
@@ -126,7 +126,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                         {view === 'main' ? (
                         <div className="space-y-4">
                             <div>
-                                <h3 className="text-h3 text-text-primary mb-2">Theme</h3>
+                                <h3 className="text-xl font-bold text-text-primary mb-2">Theme</h3>
                                 <div className="flex space-x-2 bg-primary/50 p-1 rounded-2xl">
                                     {themeOptions.map(option => (
                                         <button
@@ -140,7 +140,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                                 </div>
                             </div>
                             <div>
-                                <h3 className="text-h3 text-text-primary mb-2">Font Size</h3>
+                                <h3 className="text-xl font-bold text-text-primary mb-2">Font Size</h3>
                                 <div className="flex space-x-2 bg-primary/50 p-1 rounded-2xl">
                                     {fontSizeOptions.map(option => (
                                         <button
@@ -155,7 +155,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                             </div>
 
                             <div>
-                                <h3 className="text-h3 text-text-primary mb-2">Notifications</h3>
+                                <h3 className="text-xl font-bold text-text-primary mb-2">Notifications</h3>
                                 <div className="flex items-center justify-between bg-primary/50 p-2 rounded-2xl">
                                     <label htmlFor="notif-toggle" className="font-semibold text-body cursor-pointer pl-2 text-text-primary">
                                         Match Reminders
@@ -184,7 +184,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                                 )}
                             </div>
                              <div>
-                                <h3 className="text-h3 text-text-primary mb-2">Help & Data</h3>
+                                <h3 className="text-xl font-bold text-text-primary mb-2">Help & Data</h3>
                                 <div className="space-y-2">
                                     <button
                                         onClick={() => setView('howToUse')}
@@ -227,7 +227,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                                 <div className="grid grid-cols-1 gap-2">
                                     <button 
                                         onClick={handleExport}
-                                        className="flex items-center justify-center gap-2 py-4 px-4 bg-brand-blue text-white rounded-xl font-bold hover:bg-brand-blue/90 transition-all text-body"
+                                        className="flex items-center justify-center gap-2 py-4 px-4 bg-brand-blue text-white rounded-xl font-bold hover:bg-[#0B1730] border-b border-white/5 transition-all text-body"
                                     >
                                         <DownloadIcon className="w-4 h-4" />
                                         Export JSON Backup

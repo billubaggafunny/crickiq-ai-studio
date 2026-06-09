@@ -6,6 +6,8 @@ import type { Player, Match, Team, Innings } from '../types';
 import { calculatePlayerCareerStats } from '../utils/cricketLogic';
 import { getRoleIcon } from '../constants';
 
+import { SafeChartWrapper } from './SafeChartWrapper';
+
 interface PlayerStatsModalProps {
     player: Player & { teamName?: string; teamId?: string };
     matches: Match[];
@@ -14,9 +16,9 @@ interface PlayerStatsModalProps {
 }
 
 const StatItem: React.FC<{ label: string, value: string | number }> = ({ label, value }) => (
-    <div className="flex justify-between items-center py-2 px-4 bg-primary rounded-xl selectable-text">
-        <span className="text-sm text-text-secondary">{label}</span>
-        <span className="font-bold text-body text-text-primary">{value}</span>
+    <div className="flex flex-col items-center justify-center p-3 bg-primary rounded-[16px] selectable-text shadow-sm">
+        <span className="font-bold text-2xl md:text-3xl tracking-tight text-text-primary leading-none mb-1.5">{value}</span>
+        <span className="text-[10px] sm:text-xs uppercase tracking-widest font-bold text-text-secondary">{label}</span>
     </div>
 );
 
@@ -66,12 +68,12 @@ const PlayerStatsModal: React.FC<PlayerStatsModalProps> = ({ player, matches, te
             onClick={onClose}
         >
             <div 
-                className="bg-secondary rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col border border-brand-blue/15"
+                className="bg-secondary rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col"
                 onClick={e => e.stopPropagation()}
             >
                 <div className="p-4 border-b border-brand-blue/15 flex justify-between items-center">
                     <div>
-                        <h2 className="text-h2 text-text-primary">{player.name}</h2>
+                        <h2 className="text-xl font-bold tracking-tight text-text-primary leading-tight mt-1">{player.name}</h2>
                         <div className="text-text-secondary flex items-center gap-2">
                              <div className="w-5 h-5 flex items-center justify-center rounded-sm text-button text-white text-[10px]" style={{ backgroundColor: teams.find(t => t.id === player.teamId)?.logo }}>
                                  {player.teamName?.substring(0, 2).toUpperCase()}
@@ -91,7 +93,7 @@ const PlayerStatsModal: React.FC<PlayerStatsModalProps> = ({ player, matches, te
                     {/* Batting Stats */}
                     {careerStats.inningsBatted > 0 && (
                         <div>
-                            <h3 className="text-h3 text-text-primary mb-4">Batting Career</h3>
+                            <h3 className="text-sm uppercase tracking-widest font-bold text-text-secondary mb-4">Batting Career</h3>
                             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                                 <StatItem label="Matches" value={careerStats.matches} />
                                 <StatItem label="Innings" value={careerStats.inningsBatted} />
@@ -112,7 +114,7 @@ const PlayerStatsModal: React.FC<PlayerStatsModalProps> = ({ player, matches, te
                     {/* Bowling Stats */}
                     {careerStats.inningsBowled > 0 && (
                          <div>
-                            <h3 className="text-h3 text-text-primary mb-4">Bowling Career</h3>
+                            <h3 className="text-sm uppercase tracking-widest font-bold text-text-secondary mb-4">Bowling Career</h3>
                             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                                 <StatItem label="Matches" value={careerStats.matches} />
                                 <StatItem label="Innings" value={careerStats.inningsBowled} />
@@ -130,7 +132,7 @@ const PlayerStatsModal: React.FC<PlayerStatsModalProps> = ({ player, matches, te
                     {/* Performance Charts */}
                     {performanceData.length > 0 && (
                         <div>
-                            <h3 className="text-h3 text-text-primary mb-4">Performance Timeline</h3>
+                            <h3 className="text-sm uppercase tracking-widest font-bold text-text-secondary mb-4">Performance Timeline</h3>
                             {careerStats.inningsBatted > 0 && (
                                  <div className="mb-4">
                                     <h4 className="text-base font-semibold text-text-secondary mb-2">Runs per Match</h4>
@@ -139,21 +141,23 @@ const PlayerStatsModal: React.FC<PlayerStatsModalProps> = ({ player, matches, te
             {(!performanceData || performanceData.length === 0) ? (
                 <div className="flex items-center justify-center h-full w-full text-text-secondary">No data available</div>
             ) : (
-                <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={performanceData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
-                        <XAxis dataKey="match" stroke="var(--color-text-secondary)" fontSize={12} />
-                        <YAxis stroke="var(--color-text-secondary)" fontSize={12} />
-                        <Tooltip
-                            contentStyle={{
-                                backgroundColor: 'var(--color-secondary)',
-                                border: '1px solid var(--color-border)',
-                                borderRadius: '0.25rem'
-                            }}
-                        />
-                        <Bar dataKey="runs" fill="var(--color-accent)" name="Runs" />
-                    </BarChart>
-                </ResponsiveContainer>
+                <SafeChartWrapper>
+                    <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={performanceData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
+                            <XAxis dataKey="match" stroke="var(--color-text-secondary)" fontSize={12} />
+                            <YAxis stroke="var(--color-text-secondary)" fontSize={12} />
+                            <Tooltip
+                                contentStyle={{
+                                    backgroundColor: 'var(--color-secondary)',
+                                    border: '1px solid var(--color-border)',
+                                    borderRadius: '0.25rem'
+                                }}
+                            />
+                            <Bar dataKey="runs" fill="var(--color-info)" name="Runs" />
+                        </BarChart>
+                    </ResponsiveContainer>
+                </SafeChartWrapper>
             )}
         </div>
         
@@ -167,21 +171,23 @@ const PlayerStatsModal: React.FC<PlayerStatsModalProps> = ({ player, matches, te
             {(!performanceData || performanceData.length === 0) ? (
                 <div className="flex items-center justify-center h-full w-full text-text-secondary">No data available</div>
             ) : (
-                <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={performanceData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
-                        <XAxis dataKey="match" stroke="var(--color-text-secondary)" fontSize={12} />
-                        <YAxis stroke="var(--color-text-secondary)" fontSize={12} allowDecimals={false} />
-                        <Tooltip
-                            contentStyle={{
-                                backgroundColor: 'var(--color-secondary)',
-                                border: '1px solid var(--color-border)',
-                                borderRadius: '0.25rem'
-                            }}
-                        />
-                        <Bar dataKey="wickets" fill="var(--color-warning)" name="Wickets" />
-                    </BarChart>
-                </ResponsiveContainer>
+                <SafeChartWrapper>
+                    <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={performanceData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
+                            <XAxis dataKey="match" stroke="var(--color-text-secondary)" fontSize={12} />
+                            <YAxis stroke="var(--color-text-secondary)" fontSize={12} allowDecimals={false} />
+                            <Tooltip
+                                contentStyle={{
+                                    backgroundColor: 'var(--color-secondary)',
+                                    border: '1px solid var(--color-border)',
+                                    borderRadius: '0.25rem'
+                                }}
+                            />
+                            <Bar dataKey="wickets" fill="var(--color-danger)" name="Wickets" />
+                        </BarChart>
+                    </ResponsiveContainer>
+                </SafeChartWrapper>
             )}
         </div>
         

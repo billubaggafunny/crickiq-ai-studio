@@ -39,7 +39,7 @@ const Select: React.FC<React.SelectHTMLAttributes<HTMLSelectElement>> = (
 ) => (
   <select
     {...props}
-    className={`w-full p-1.5 text-body bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue ${props.className}`}
+    className={`w-full p-1.5 text-body bg-tertiary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue ${props.className}`}
   />
 );
 
@@ -917,7 +917,7 @@ const LiveScoring: React.FC<LiveScoringProps> = ({
                   if (!stats) return null;
                   return (
                     <Tr key={player.id}>
-                      <Td>
+                      <Td className="font-semibold text-text-primary">
                         {player.name}
                         {stats.status === BattingStatus.OUT &&
                           stats.outDetails && (
@@ -975,7 +975,7 @@ const LiveScoring: React.FC<LiveScoringProps> = ({
                 );
                 return (
                   <Tr key={stats.playerId}>
-                    <Td>{bowler?.name}</Td>
+                    <Td className="font-semibold text-text-primary">{bowler?.name}</Td>
                     <Td className="text-right text-text-secondary">
                       {stats.overs}
                     </Td>
@@ -1108,7 +1108,7 @@ const LiveScoring: React.FC<LiveScoringProps> = ({
                 d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
               ></path>
             </svg>
-            <h2 className="text-h2 text-text-primary">Match Finished</h2>
+            <h2 className="text-xl font-bold tracking-tight text-text-primary">Match Finished</h2>
             <p className="text-text-secondary mt-1">
               Generating final scorecard...
             </p>
@@ -1145,36 +1145,36 @@ const LiveScoring: React.FC<LiveScoringProps> = ({
 
           <div className="flex justify-between items-center">
             <div>
-              <h2 className="text-base font-bold text-text-primary flex items-center gap-2">
+              <h2 className="text-lg font-bold text-text-primary flex items-center gap-2">
                 <div
-                  className="w-8 h-8 flex items-center justify-center rounded-lg text-button text-white text-body"
+                  className="w-8 h-8 flex items-center justify-center rounded-lg text-button text-white text-body shadow-sm"
                   style={{ backgroundColor: battingTeam.logo }}
                 >
                   {battingTeam.name.substring(0, 2).toUpperCase()}
                 </div>
                 {battingTeam.name}
               </h2>
-              <p className="text-5xl text-brand-blue selectable-text">
+              <p className="text-5xl sm:text-6xl font-extrabold tracking-tight text-text-primary selectable-text py-1 leading-tight my-1">
                 {currentInnings.score} - {currentInnings.wickets}
               </p>
-              <p className="text-base text-text-secondary">
+              <p className="text-base text-text-secondary font-medium">
                 Overs: {currentInnings.overs} / {match.oversPerInnings}
               </p>
             </div>
             <div className="text-right">
-              <h2 className="text-base font-bold text-text-primary flex items-center justify-end gap-2">
+              <h2 className="text-lg font-bold text-text-primary flex items-center justify-end gap-2">
                 {bowlingTeam.name}
                 <div
-                  className="w-8 h-8 flex items-center justify-center rounded-lg text-button text-white text-body"
+                  className="w-8 h-8 flex items-center justify-center rounded-lg text-button text-white text-body shadow-sm"
                   style={{ backgroundColor: bowlingTeam.logo }}
                 >
                   {bowlingTeam.name.substring(0, 2).toUpperCase()}
                 </div>
               </h2>
               {match.innings1 && currentInnings !== match.innings1 && (
-                <p className="text-md text-text-secondary mt-1">
+                <p className="text-sm text-text-secondary mt-1">
                   Target:
-                  <span className="text-h3 text-text-primary ml-2">
+                  <span className="text-lg font-bold text-text-primary ml-2">
                     {match.innings1.score + 1}
                   </span>
                 </p>
@@ -1186,7 +1186,8 @@ const LiveScoring: React.FC<LiveScoringProps> = ({
               This Over:
             </span>
             {ballsThisOver.map((ball, index) => {
-              const { text, className, title } = getBallDisplay(ball);
+              const isCurrent = index === ballsThisOver.length - 1;
+              const { text, className, title } = getBallDisplay(ball, isCurrent);
               return (
                 <div key={index} className={className} title={title}>
                   {text}
@@ -1281,7 +1282,7 @@ const LiveScoring: React.FC<LiveScoringProps> = ({
                 if (ballsRemaining <= 0) return null;
 
                 return (
-                  <div className="mt-2 text-center font-bold text-brand-blue text-h3 bg-brand-blue/10 p-2 rounded-lg">
+                  <div className="mt-2 text-center font-bold text-brand-blue text-lg bg-brand-blue/10 p-2 rounded-lg">
                     Need {runsNeeded} to win in {ballsRemaining} balls
                   </div>
                 );
@@ -1299,25 +1300,25 @@ const LiveScoring: React.FC<LiveScoringProps> = ({
                   ? "Select on-strike and non-striker batsmen first"
                   : undefined
               }
-              className={`flex-shrink-0 py-2.5 px-4 font-medium text-sm transition-colors duration-200 whitespace-nowrap ${activeScoringTab === "scoring" ? "border-b-[3px] border-brand-blue text-brand-blue" : "border-b-[3px] border-transparent text-text-secondary hover:text-text-primary hover:border-black/5 dark:hover:border-white/5"} ${!arePlayersSelected && !isMatchOver ? "opacity-50 cursor-not-allowed" : ""}`}
+              className={`flex-shrink-0 py-3 px-5 font-bold text-sm transition-colors duration-200 whitespace-nowrap ${activeScoringTab === "scoring" ? "border-b-2 border-accent text-accent bg-accent/5" : "border-b-2 border-transparent text-text-secondary hover:text-text-primary hover:bg-black/5 dark:hover:bg-white/5"} ${!arePlayersSelected && !isMatchOver ? "opacity-50 cursor-not-allowed" : ""}`}
             >
               Scoring
             </button>
             <button
               onClick={() => setActiveScoringTab("players")}
-              className={`flex-shrink-0 py-2.5 px-4 font-medium text-sm transition-colors duration-200 whitespace-nowrap ${activeScoringTab === "players" ? "border-b-[3px] border-brand-blue text-brand-blue" : "border-b-[3px] border-transparent text-text-secondary hover:text-text-primary hover:border-black/5 dark:hover:border-white/5"}`}
+              className={`flex-shrink-0 py-3 px-5 font-bold text-sm transition-colors duration-200 whitespace-nowrap ${activeScoringTab === "players" ? "border-b-2 border-accent text-accent bg-accent/5" : "border-b-2 border-transparent text-text-secondary hover:text-text-primary hover:bg-black/5 dark:hover:bg-white/5"}`}
             >
               Players
             </button>
             <button
               onClick={() => setActiveScoringTab("scoreboard")}
-              className={`flex-shrink-0 py-2.5 px-4 font-medium text-sm transition-colors duration-200 whitespace-nowrap ${activeScoringTab === "scoreboard" ? "border-b-[3px] border-brand-blue text-brand-blue" : "border-b-[3px] border-transparent text-text-secondary hover:text-text-primary hover:border-black/5 dark:hover:border-white/5"}`}
+              className={`flex-shrink-0 py-3 px-5 font-bold text-sm transition-colors duration-200 whitespace-nowrap ${activeScoringTab === "scoreboard" ? "border-b-2 border-accent text-accent bg-accent/5" : "border-b-2 border-transparent text-text-secondary hover:text-text-primary hover:bg-black/5 dark:hover:bg-white/5"}`}
             >
               Scoreboard
             </button>
             <button
               onClick={() => setActiveScoringTab("commentary")}
-              className={`flex-shrink-0 py-2.5 px-4 font-medium text-sm transition-colors duration-200 whitespace-nowrap ${activeScoringTab === "commentary" ? "border-b-[3px] border-brand-blue text-brand-blue" : "border-b-[3px] border-transparent text-text-secondary hover:text-text-primary hover:border-black/5 dark:hover:border-white/5"}`}
+              className={`flex-shrink-0 py-3 px-5 font-bold text-sm transition-colors duration-200 whitespace-nowrap ${activeScoringTab === "commentary" ? "border-b-2 border-accent text-accent bg-accent/5" : "border-b-2 border-transparent text-text-secondary hover:text-text-primary hover:bg-black/5 dark:hover:bg-white/5"}`}
             >
               Commentary
             </button>
@@ -1382,7 +1383,7 @@ const LiveScoring: React.FC<LiveScoringProps> = ({
                         disabled={
                           isWicket && wicketDetails.type === WicketType.RUN_OUT
                         }
-                        className={`aspect-square rounded-full font-bold text-h3 transition-all duration-200 transform hover:scale-105 flex items-center justify-center ${runs === r && !isWicket ? "bg-brand-blue text-white shadow-lg" : "bg-primary/50 hover:bg-primary text-text-primary"} ${isWicket && wicketDetails.type === WicketType.RUN_OUT ? "opacity-50 cursor-not-allowed" : ""}`}
+                        className={`aspect-square rounded-full font-bold text-lg transition-all duration-200 transform hover:scale-105 flex items-center justify-center ${runs === r && !isWicket ? "bg-brand-blue text-white shadow-lg" : "bg-primary/50 hover:bg-primary text-text-primary"} ${isWicket && wicketDetails.type === WicketType.RUN_OUT ? "opacity-50 cursor-not-allowed" : ""}`}
                       >
                         {r}
                       </button>
@@ -1401,7 +1402,7 @@ const LiveScoring: React.FC<LiveScoringProps> = ({
                     </button>
                     <button
                       onClick={() => setIsWicket(!isWicket)}
-                      className={`aspect-square rounded-full font-bold text-h3 transition-all duration-200 transform hover:scale-105 flex items-center justify-center ${isWicket ? "bg-highlight text-white shadow-lg" : "bg-primary/50 hover:bg-primary text-text-primary"}`}
+                      className={`aspect-square rounded-full font-bold text-lg transition-all duration-200 transform hover:scale-105 flex items-center justify-center ${isWicket ? "bg-highlight text-white shadow-lg" : "bg-primary/50 hover:bg-primary text-text-primary"}`}
                     >
                       W
                     </button>
@@ -1545,18 +1546,18 @@ const LiveScoring: React.FC<LiveScoringProps> = ({
                   )}
                   <div className="grid grid-cols-[1fr_auto_1fr] gap-4 mt-4 items-stretch">
                     {/* Left buttons */}
-                    <div className="flex flex-col gap-2">
+                    <div className="flex flex-col gap-3">
                       <button
                         onClick={handleUndo}
                         disabled={currentInnings.balls.length === 0}
                         title="Undo Last Ball"
-                        className="flex-1 text-white font-bold rounded-2xl hover:opacity-90 disabled:bg-gray-500 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-body bg-teal-400 active:bg-danger/100 transition-colors"
+                        className="flex-1 bg-brand-teal text-white font-bold rounded-2xl hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-body active:scale-95 transition-all"
                       >
                         Undo
                       </button>
                       <button
                         onClick={handleEndInnings}
-                        className="flex-1 text-white font-bold rounded-2xl hover:opacity-90 text-body bg-slate-400 active:bg-danger/100 transition-colors"
+                        className="flex-1 bg-danger text-white font-bold rounded-2xl hover:opacity-90 text-body active:scale-95 transition-all"
                       >
                         End Inn.
                       </button>
@@ -1569,24 +1570,24 @@ const LiveScoring: React.FC<LiveScoringProps> = ({
                         disabled={
                           !onStrikeId || !nonStrikerId || !currentBowlerId
                         }
-                        className="bg-purple-500 text-white font-semibold hover:opacity-90 disabled:bg-gray-400 disabled:cursor-not-allowed border border-purple-600/20 rounded-2xl flex items-center justify-center text-center p-2 text-2xl w-[7.35rem] h-[7.35rem] active:bg-purple-600 active:scale-95 transform transition-all duration-150"
+                        className="bg-brand-blue text-white font-bold hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed rounded-2xl flex items-center justify-center text-center p-2 text-2xl w-28 h-28 aspect-square active:scale-95 transform transition-all shadow-lg shadow-brand-blue/30"
                       >
                         Record
                       </button>
                     </div>
 
                     {/* Right buttons */}
-                    <div className="flex flex-col gap-2">
+                    <div className="flex flex-col gap-3">
                       <button
                         onClick={handleRetireBatsman}
                         disabled={!onStrikeId}
-                        className="flex-1 text-black font-bold rounded-2xl hover:opacity-90 disabled:bg-gray-500 disabled:cursor-not-allowed text-body bg-yellow-300 active:bg-danger/100 active:text-white transition-colors"
+                        className="flex-1 bg-warning text-white font-bold rounded-2xl hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed text-body active:scale-95 transition-all"
                       >
                         Retire
                       </button>
                       <button
                         onClick={onStartDrinksBreak}
-                        className="flex-1 text-black font-bold rounded-2xl hover:opacity-90 text-body bg-blue-300 active:bg-danger/100 active:text-white transition-colors"
+                        className="flex-1 bg-info text-white font-bold rounded-2xl hover:opacity-90 text-body active:scale-95 transition-all"
                       >
                         Drinks
                       </button>
@@ -1802,19 +1803,19 @@ const LiveScoring: React.FC<LiveScoringProps> = ({
             <div className="space-y-6 pt-2">
               {isSecondInnings && match.innings1 && (
                 <div className="space-y-2">
-                  <h3 className="text-h3 text-text-primary">First Innings</h3>
+                  <h3 className="text-xl font-bold text-text-primary">First Innings</h3>
                   {renderInningsSummary(match.innings1, "innings1")}
                 </div>
               )}
 
               <div className="space-y-6">
                 {isSecondInnings && (
-                  <h3 className="text-h3 text-text-primary">Current Innings</h3>
+                  <h3 className="text-xl font-bold text-text-primary">Current Innings</h3>
                 )}
                 {/* Team Totals & Chase */}
                 <div className="flex justify-between items-baseline p-4 bg-primary/50 rounded-xl">
                   <div>
-                    <h3 className="text-h2 text-text-primary flex items-center gap-2">
+                    <h3 className="text-2xl md:text-3xl font-bold tracking-tight text-text-primary flex items-center gap-2">
                       <div
                         className="w-8 h-8 flex items-center justify-center rounded-lg text-button text-white text-body"
                         style={{ backgroundColor: battingTeam.logo }}
@@ -1825,7 +1826,7 @@ const LiveScoring: React.FC<LiveScoringProps> = ({
                     </h3>
                     <p className="text-3xl text-brand-blue">
                       {currentInnings.score}/{currentInnings.wickets}
-                      <span className="text-h3 text-text-secondary ml-2">
+                      <span className="text-lg text-text-secondary ml-2">
                         ({currentInnings.overs})
                       </span>
                     </p>
@@ -2081,7 +2082,7 @@ const LiveScoring: React.FC<LiveScoringProps> = ({
               )}
 
               {isSecondInnings && match.innings1 && (
-                <h3 className="text-h3 text-text-primary pt-2">
+                <h3 className="text-xl font-bold text-text-primary pt-2">
                   Current Innings
                 </h3>
               )}

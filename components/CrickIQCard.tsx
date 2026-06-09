@@ -19,7 +19,7 @@ const CrickIQCard: React.FC<CrickIQCardProps> = ({ children, className = '', noP
     return (
         <div 
             {...rest} 
-            className={`bg-primary border border-light-border dark:border-brand-blue/15 rounded-3xl shadow-md ${paddingClass} ${className} ${accentColor ? 'border-l-[6px]' : ''}`}
+            className={`bg-secondary rounded-3xl shadow-[0_4px_14px_rgba(0,0,0,0.28)] dark:shadow-md dark:shadow-black/20 ${paddingClass} ${className} ${accentColor ? 'border-l-[6px] border-solid' : ''}`}
             style={accentColor ? { ...rest.style, borderLeftColor: accentColor } : rest.style}
         >
             {children}

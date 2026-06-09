@@ -1,0 +1,65 @@
+components/MatchTable.tsx:118:                                className="flex flex-col p-0 overflow-hidden shadow-sm hover:shadow-md bg-white rounded-3xl transition-all duration-300 relative"
+components/WagonWheelModal.tsx:315:                            <div className="bg-white/10 p-4 rounded-xl backdrop-blur-sm border border-white/10 grid grid-cols-[1fr_1fr_1fr_2px_1fr_1fr] gap-x-3 text-center text-white">
+components/WagonWheelModal.tsx:319:                                <div className="w-px h-full bg-white/20"></div>
+components/TournamentTeamManagementSheet.tsx:78:                                className="p-2 -mr-2 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white rounded-full transition-colors"
+components/Rankings.tsx:288:              ? "bg-white/20 border border-white/30 text-white"
+components/Rankings.tsx:332:            <div className="absolute inset-0 bg-white/5 "></div>
+components/Rankings.tsx:840:              <div className="w-16 h-16 rounded-xl bg-white/20 flex flex-col items-center justify-center border border-white/30 shadow-sm flex-shrink-0">
+components/Rankings.tsx:852:                    <span className="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-white/20 text-white border border-white/30">
+components/Rankings.tsx:914:                    <span className="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-white/20 text-white border border-white/30">
+components/Rankings.tsx:918:                  <span className="text-[10px] font-bold px-2 py-0.5 bg-white/20 text-white rounded border border-white/30">
+components/Rankings.tsx:921:                  <span className="text-[10px] font-bold px-2 py-0.5 bg-white/20 text-white rounded border border-white/30">
+components/MatchManager.tsx:1799:                              className="p-2 rounded-2xl bg-white/10 hover:bg-white/20 transition-colors"
+components/Drawer.tsx:143:                    <span className="bg-white/20 text-white text-caption font-bold px-4 py-1 rounded-2xl uppercase tracking-wider">Current Plan</span>
+components/Drawer.tsx:568:                                <div className="w-4 h-4 bg-white rounded-full shadow-sm"></div>
+components/Drawer.tsx:577:                                <div className="w-4 h-4 bg-white rounded-full shadow-sm"></div>
+components/Drawer.tsx:586:                                <div className="w-4 h-4 bg-white rounded-full shadow-sm"></div>
+components/Drawer.tsx:1184:                        <button onClick={handleManualClose} className="p-2 -ml-2 rounded-2xl text-white hover:bg-white/20 transition-colors">
+components/Drawer.tsx:1198:                            <button onClick={handleManualClose} className="p-2 -ml-2 rounded-2xl text-white hover:bg-white/20 transition-colors">
+components/Drawer.tsx:1242:                            className="p-2 -mr-2 rounded-2xl hover:bg-white/20 transition-colors text-white"
+components/Home.tsx:21:                        className="w-full bg-white text-gray-800 font-bold py-1.5 px-4 rounded-2xl shadow-lg hover:bg-gray-50 transition-all duration-300 flex items-center justify-center gap-4 transform hover:scale-105"
+components/QuickMatchResults.tsx:55:                    <div className="w-7 h-4 rounded-sm bg-white/20 md:w-8 md:h-5"></div> 
+components/MatchCommentary.tsx:61:    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+components/MatchCommentary.tsx:76:      <div className="p-4 md:p-6 bg-white overflow-y-auto max-h-[600px] relative">
+components/SettingsModal.tsx:120:                        <button onClick={onClose} className="p-2 hover:bg-white/20 rounded-2xl transition-colors flex items-center justify-center">
+components/SettingsModal.tsx:174:                                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+components/QuickMatchHistory.tsx:77:                            className="flex flex-col p-0 overflow-hidden shadow-sm hover:shadow-md bg-white rounded-3xl transition-all duration-300"
+components/MatchDetailsHub.tsx:296:                        className="text-white hover:text-gray-200 transition-colors p-2 -ml-2 rounded-full hover:bg-white/10"
+components/MatchDetailsHub.tsx:315:                <div className="max-w-4xl mx-auto flex mt-6 bg-white/10 rounded-xl p-1 gap-1 overflow-x-auto no-scrollbar">
+components/MatchDetailsHub.tsx:320:                                ? 'bg-white text-brand-blue shadow-sm' 
+components/MatchDetailsHub.tsx:321:                                : 'text-white/80 hover:text-white hover:bg-white/5'
+components/MatchDetailsHub.tsx:330:                                ? 'bg-white text-brand-blue shadow-sm' 
+components/MatchDetailsHub.tsx:331:                                : 'text-white/80 hover:text-white hover:bg-white/5'
+components/MatchDetailsHub.tsx:340:                                ? 'bg-white text-brand-blue shadow-sm' 
+components/MatchDetailsHub.tsx:341:                                : 'text-white/80 hover:text-white hover:bg-white/5'
+components/MatchDetailsHub.tsx:350:                                ? 'bg-white text-brand-blue shadow-sm' 
+components/MatchDetailsHub.tsx:351:                                : 'text-white/80 hover:text-white hover:bg-white/5'
+components/MatchDetailsHub.tsx:360:                                ? 'bg-white text-brand-blue shadow-sm' 
+components/MatchDetailsHub.tsx:361:                                : 'text-white/80 hover:text-white hover:bg-white/5'
+components/MatchDetailsHub.tsx:375:                        <CrickIQCard className="p-0 overflow-hidden shadow-sm bg-white rounded-3xl">
+components/MatchDetailsHub.tsx:381:                                <div className="p-4 flex items-center gap-4 bg-white hover:bg-gray-50 transition-colors justify-between cursor-pointer" onClick={() => setViewingTeamId(team1.id)}>
+components/MatchDetailsHub.tsx:396:                                <div className="p-4 flex items-center gap-4 bg-white hover:bg-gray-50 transition-colors justify-between cursor-pointer" onClick={() => setViewingTeamId(team2.id)}>
+components/MatchDetailsHub.tsx:414:                        <CrickIQCard className="p-0 overflow-hidden shadow-sm bg-white rounded-3xl">
+components/MatchDetailsHub.tsx:421:                                        <div className="p-3 px-4 flex justify-between items-center bg-white hover:bg-gray-50 transition-colors">
+components/MatchDetailsHub.tsx:427:                                        <div className="p-3 px-4 flex justify-between items-center bg-white hover:bg-gray-50 transition-colors">
+components/MatchDetailsHub.tsx:437:                                        <div className="p-3 px-4 flex justify-between items-center bg-white hover:bg-gray-50 transition-colors">
+components/MatchDetailsHub.tsx:445:                                        <div className="p-3 px-4 flex justify-between items-center bg-white hover:bg-gray-50 transition-colors">
+components/MatchDetailsHub.tsx:450:                                    <div className="p-3 px-4 flex justify-between items-center bg-white hover:bg-gray-50 transition-colors">
+components/MatchDetailsHub.tsx:454:                                    <div className="p-3 px-4 flex justify-between items-center bg-white hover:bg-gray-50 transition-colors">
+components/MatchDetailsHub.tsx:458:                                    <div className="p-3 px-4 flex justify-between items-center bg-white hover:bg-gray-50 transition-colors">
+components/MatchDetailsHub.tsx:463:                                        <div className="p-3 px-4 flex justify-between items-center bg-white hover:bg-gray-50 transition-colors">
+components/MatchDetailsHub.tsx:469:                                        <div className="p-3 px-4 flex justify-between items-center bg-white hover:bg-gray-50 transition-colors">
+components/MatchDetailsHub.tsx:475:                                        <div className="p-3 px-4 bg-white hover:bg-gray-50 transition-colors border-t border-gray-100">
+components/MatchDetailsHub.tsx:503:                    <CrickIQCard className="p-0 overflow-hidden shadow-sm bg-white rounded-3xl">
+components/MatchDetailsHub.tsx:548:                        <CrickIQCard className="p-0 overflow-hidden shadow-sm bg-white rounded-3xl">
+components/MatchDetailsHub.tsx:652:                                                    ? 'bg-white text-brand-blue shadow-sm' 
+components/MatchDetailsHub.tsx:662:                                                    ? 'bg-white text-brand-blue shadow-sm' 
+components/AnalyticsOverview.tsx:727:                <div className="flex-1 overflow-y-auto w-full [&>div]:!relative [&>div]:!inset-auto [&>div]:!h-auto [&>div]:!min-h-full [&>div]:!w-full [&>div]:!bg-white [&>div]:!max-w-none [&>div]:!rounded-none [&>div]:!shadow-none">
+components/Header.tsx:40:                        className="w-11 h-11 flex items-center justify-center rounded-2xl text-white hover:bg-white/20 transition-colors md:hidden" 
+components/Header.tsx:52:                        className="w-11 h-11 flex items-center justify-center rounded-2xl text-white hover:bg-white/20 transition-colors"
+components/Header.tsx:61:                        className="w-11 h-11 flex items-center justify-center rounded-2xl text-white hover:bg-white/20 transition-colors"
+components/Header.tsx:87:                        className="w-11 h-11 flex items-center justify-center rounded-2xl text-white hover:bg-white/20 transition-colors" 
+components/Header.tsx:96:                        className="w-11 h-11 flex items-center justify-center rounded-2xl text-white hover:bg-white/20 transition-colors" 
+components/MatchOvers.tsx:46:        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+components/MatchesView.tsx:130:                        <div className={`w-4 h-4 bg-white rounded-full transition-transform duration-300 ${matchType ? 'translate-x-6' : 'translate-x-0'}`} />
+components/TossModal.tsx:103:                            <div className="w-2.5 h-2.5 bg-white rounded-full"></div>

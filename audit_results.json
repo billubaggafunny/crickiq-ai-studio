@@ -1,0 +1,1306 @@
+{
+  "issues": [
+    {
+      "file": "components/Comparison.tsx",
+      "line": 12,
+      "match": "bg-gray-300",
+      "content": "const baseClasses = 'px-4 py-2 rounded-2xl text-button transition-all duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-md bg-brand-gradient text-white border-0';"
+    },
+    {
+      "file": "components/Comparison.tsx",
+      "line": 12,
+      "match": "bg-gray-700",
+      "content": "const baseClasses = 'px-4 py-2 rounded-2xl text-button transition-all duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-md bg-brand-gradient text-white border-0';"
+    },
+    {
+      "file": "components/Comparison.tsx",
+      "line": 12,
+      "match": "text-gray-600",
+      "content": "const baseClasses = 'px-4 py-2 rounded-2xl text-button transition-all duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-md bg-brand-gradient text-white border-0';"
+    },
+    {
+      "file": "components/Comparison.tsx",
+      "line": 12,
+      "match": "text-gray-400",
+      "content": "const baseClasses = 'px-4 py-2 rounded-2xl text-button transition-all duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-md bg-brand-gradient text-white border-0';"
+    },
+    {
+      "file": "components/Comparison.tsx",
+      "line": 12,
+      "match": "dark:bg-gray-700",
+      "content": "const baseClasses = 'px-4 py-2 rounded-2xl text-button transition-all duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-md bg-brand-gradient text-white border-0';"
+    },
+    {
+      "file": "components/Comparison.tsx",
+      "line": 12,
+      "match": "dark:text-gray-400",
+      "content": "const baseClasses = 'px-4 py-2 rounded-2xl text-button transition-all duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-md bg-brand-gradient text-white border-0';"
+    },
+    {
+      "file": "components/Comparison.tsx",
+      "line": 291,
+      "match": "bg-gray-300",
+      "content": "<select value={player1Id} onChange={e => { setPlayer1Id(e.target.value); setPlayerResult(null); }} disabled={!p1TeamId} className=\"w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400\">"
+    },
+    {
+      "file": "components/Comparison.tsx",
+      "line": 291,
+      "match": "bg-gray-700",
+      "content": "<select value={player1Id} onChange={e => { setPlayer1Id(e.target.value); setPlayerResult(null); }} disabled={!p1TeamId} className=\"w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400\">"
+    },
+    {
+      "file": "components/Comparison.tsx",
+      "line": 291,
+      "match": "text-gray-600",
+      "content": "<select value={player1Id} onChange={e => { setPlayer1Id(e.target.value); setPlayerResult(null); }} disabled={!p1TeamId} className=\"w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400\">"
+    },
+    {
+      "file": "components/Comparison.tsx",
+      "line": 291,
+      "match": "text-gray-400",
+      "content": "<select value={player1Id} onChange={e => { setPlayer1Id(e.target.value); setPlayerResult(null); }} disabled={!p1TeamId} className=\"w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400\">"
+    },
+    {
+      "file": "components/Comparison.tsx",
+      "line": 291,
+      "match": "dark:bg-gray-700",
+      "content": "<select value={player1Id} onChange={e => { setPlayer1Id(e.target.value); setPlayerResult(null); }} disabled={!p1TeamId} className=\"w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400\">"
+    },
+    {
+      "file": "components/Comparison.tsx",
+      "line": 291,
+      "match": "dark:text-gray-400",
+      "content": "<select value={player1Id} onChange={e => { setPlayer1Id(e.target.value); setPlayerResult(null); }} disabled={!p1TeamId} className=\"w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400\">"
+    },
+    {
+      "file": "components/Comparison.tsx",
+      "line": 301,
+      "match": "bg-gray-300",
+      "content": "<select value={player2Id} onChange={e => { setPlayer2Id(e.target.value); setPlayerResult(null); }} disabled={!p2TeamId} className=\"w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400\">"
+    },
+    {
+      "file": "components/Comparison.tsx",
+      "line": 301,
+      "match": "bg-gray-700",
+      "content": "<select value={player2Id} onChange={e => { setPlayer2Id(e.target.value); setPlayerResult(null); }} disabled={!p2TeamId} className=\"w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400\">"
+    },
+    {
+      "file": "components/Comparison.tsx",
+      "line": 301,
+      "match": "text-gray-600",
+      "content": "<select value={player2Id} onChange={e => { setPlayer2Id(e.target.value); setPlayerResult(null); }} disabled={!p2TeamId} className=\"w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400\">"
+    },
+    {
+      "file": "components/Comparison.tsx",
+      "line": 301,
+      "match": "text-gray-400",
+      "content": "<select value={player2Id} onChange={e => { setPlayer2Id(e.target.value); setPlayerResult(null); }} disabled={!p2TeamId} className=\"w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400\">"
+    },
+    {
+      "file": "components/Comparison.tsx",
+      "line": 301,
+      "match": "dark:bg-gray-700",
+      "content": "<select value={player2Id} onChange={e => { setPlayer2Id(e.target.value); setPlayerResult(null); }} disabled={!p2TeamId} className=\"w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400\">"
+    },
+    {
+      "file": "components/Comparison.tsx",
+      "line": 301,
+      "match": "dark:text-gray-400",
+      "content": "<select value={player2Id} onChange={e => { setPlayer2Id(e.target.value); setPlayerResult(null); }} disabled={!p2TeamId} className=\"w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400\">"
+    },
+    {
+      "file": "components/ConfirmationModal.tsx",
+      "line": 29,
+      "match": "text-gray-900",
+      "content": "<h2 id=\"confirmation-title\" className=\"text-h2 text-gray-900 dark:text-white mb-4\">{title}</h2>"
+    },
+    {
+      "file": "components/ConfirmationModal.tsx",
+      "line": 30,
+      "match": "text-gray-700",
+      "content": "<div className=\"text-gray-700 dark:text-gray-300 mb-4\">{message}</div>"
+    },
+    {
+      "file": "components/ConfirmationModal.tsx",
+      "line": 30,
+      "match": "text-gray-300",
+      "content": "<div className=\"text-gray-700 dark:text-gray-300 mb-4\">{message}</div>"
+    },
+    {
+      "file": "components/ConfirmationModal.tsx",
+      "line": 30,
+      "match": "dark:text-gray-300",
+      "content": "<div className=\"text-gray-700 dark:text-gray-300 mb-4\">{message}</div>"
+    },
+    {
+      "file": "components/ConfirmationModal.tsx",
+      "line": 32,
+      "match": "text-gray-800",
+      "content": "<button onClick={onClose} className=\"py-1.5 px-6 bg-black/5 dark:bg-white/10 border border-black/10 dark:border-white/20 rounded-2xl hover:bg-black/10 dark:hover:bg-white/20 font-semibold text-body text-gray-800 dark:text-gray-200\">"
+    },
+    {
+      "file": "components/ConfirmationModal.tsx",
+      "line": 32,
+      "match": "text-gray-200",
+      "content": "<button onClick={onClose} className=\"py-1.5 px-6 bg-black/5 dark:bg-white/10 border border-black/10 dark:border-white/20 rounded-2xl hover:bg-black/10 dark:hover:bg-white/20 font-semibold text-body text-gray-800 dark:text-gray-200\">"
+    },
+    {
+      "file": "components/ConfirmationModal.tsx",
+      "line": 32,
+      "match": "dark:text-gray-200",
+      "content": "<button onClick={onClose} className=\"py-1.5 px-6 bg-black/5 dark:bg-white/10 border border-black/10 dark:border-white/20 rounded-2xl hover:bg-black/10 dark:hover:bg-white/20 font-semibold text-body text-gray-800 dark:text-gray-200\">"
+    },
+    {
+      "file": "components/CreateTeamSheet.tsx",
+      "line": 158,
+      "match": "bg-gray-300",
+      "content": "<div className=\"w-12 h-1.5 bg-gray-300 dark:bg-white/10 rounded-full\" />"
+    },
+    {
+      "file": "components/CreateTeamSheet.tsx",
+      "line": 169,
+      "match": "bg-gray-100",
+      "content": "className=\"p-2 bg-gray-100 hover:bg-gray-200 dark:bg-white/5 dark:hover:bg-white/10 text-text-secondary rounded-full transition-colors cursor-pointer\""
+    },
+    {
+      "file": "components/CreateTeamSheet.tsx",
+      "line": 169,
+      "match": "bg-gray-200",
+      "content": "className=\"p-2 bg-gray-100 hover:bg-gray-200 dark:bg-white/5 dark:hover:bg-white/10 text-text-secondary rounded-full transition-colors cursor-pointer\""
+    },
+    {
+      "file": "components/CreateTeamSheet.tsx",
+      "line": 203,
+      "match": "bg-gray-200",
+      "content": "className=\"px-3.5 py-1.5 bg-gray-200 dark:bg-white/10 hover:bg-gray-300 dark:hover:bg-white/15 text-text-primary rounded-xl text-xs font-bold transition-all\""
+    },
+    {
+      "file": "components/CreateTeamSheet.tsx",
+      "line": 203,
+      "match": "bg-gray-300",
+      "content": "className=\"px-3.5 py-1.5 bg-gray-200 dark:bg-white/10 hover:bg-gray-300 dark:hover:bg-white/15 text-text-primary rounded-xl text-xs font-bold transition-all\""
+    },
+    {
+      "file": "components/CreateTeamSheet.tsx",
+      "line": 429,
+      "match": "bg-gray-100",
+      "content": "className=\"px-5 py-2.5 border border-brand-blue/15 hover:bg-gray-100 dark:hover:bg-white/5 text-text-secondary rounded-2xl font-bold text-sm transition-all focus:outline-none cursor-pointer\""
+    },
+    {
+      "file": "components/CreateTournamentSheet.tsx",
+      "line": 220,
+      "match": "bg-gray-300",
+      "content": "<div className=\"w-12 h-1.5 bg-gray-300 dark:bg-white/10 rounded-full\" />"
+    },
+    {
+      "file": "components/CreateTournamentSheet.tsx",
+      "line": 235,
+      "match": "bg-gray-100",
+      "content": "className=\"p-2 bg-gray-100 hover:bg-gray-200 dark:bg-white/5 dark:hover:bg-white/10 text-text-secondary rounded-full transition-colors cursor-pointer\""
+    },
+    {
+      "file": "components/CreateTournamentSheet.tsx",
+      "line": 235,
+      "match": "bg-gray-200",
+      "content": "className=\"p-2 bg-gray-100 hover:bg-gray-200 dark:bg-white/5 dark:hover:bg-white/10 text-text-secondary rounded-full transition-colors cursor-pointer\""
+    },
+    {
+      "file": "components/CreateTournamentSheet.tsx",
+      "line": 351,
+      "match": "bg-gray-100",
+      "content": "className=\"px-5 py-2.5 border border-brand-blue/15 hover:bg-gray-100 dark:hover:bg-white/5 text-text-secondary rounded-2xl font-bold text-sm transition-all focus:outline-none cursor-pointer\""
+    },
+    {
+      "file": "components/Drawer.tsx",
+      "line": 568,
+      "match": "bg-white",
+      "content": "<div className=\"w-4 h-4 bg-white rounded-full shadow-sm\"></div>"
+    },
+    {
+      "file": "components/Drawer.tsx",
+      "line": 577,
+      "match": "bg-white",
+      "content": "<div className=\"w-4 h-4 bg-white rounded-full shadow-sm\"></div>"
+    },
+    {
+      "file": "components/Drawer.tsx",
+      "line": 586,
+      "match": "bg-white",
+      "content": "<div className=\"w-4 h-4 bg-white rounded-full shadow-sm\"></div>"
+    },
+    {
+      "file": "components/Drawer.tsx",
+      "line": 599,
+      "match": "bg-white",
+      "content": "<div className=\"absolute top-4 right-4 w-4 h-4 rounded-full border-4 border-brand-blue bg-white dark:bg-black\"></div>"
+    },
+    {
+      "file": "components/EditTeamSheet.tsx",
+      "line": 170,
+      "match": "bg-gray-300",
+      "content": "<div className=\"w-12 h-1.5 bg-gray-300 dark:bg-white/10 rounded-full\" />"
+    },
+    {
+      "file": "components/EditTeamSheet.tsx",
+      "line": 181,
+      "match": "bg-gray-100",
+      "content": "className=\"p-2 bg-gray-100 hover:bg-gray-200 dark:bg-white/5 dark:hover:bg-white/10 text-text-secondary rounded-full transition-colors cursor-pointer\""
+    },
+    {
+      "file": "components/EditTeamSheet.tsx",
+      "line": 181,
+      "match": "bg-gray-200",
+      "content": "className=\"p-2 bg-gray-100 hover:bg-gray-200 dark:bg-white/5 dark:hover:bg-white/10 text-text-secondary rounded-full transition-colors cursor-pointer\""
+    },
+    {
+      "file": "components/EditTeamSheet.tsx",
+      "line": 421,
+      "match": "bg-gray-100",
+      "content": "className=\"px-5 py-2.5 border border-brand-blue/15 hover:bg-gray-100 dark:hover:bg-white/5 text-text-secondary rounded-2xl font-bold text-sm transition-all focus:outline-none cursor-pointer\""
+    },
+    {
+      "file": "components/Home.tsx",
+      "line": 21,
+      "match": "bg-white",
+      "content": "className=\"w-full bg-white text-gray-800 font-bold py-1.5 px-4 rounded-2xl shadow-lg hover:bg-gray-50 transition-all duration-300 flex items-center justify-center gap-4 transform hover:scale-105\""
+    },
+    {
+      "file": "components/Home.tsx",
+      "line": 21,
+      "match": "bg-gray-50",
+      "content": "className=\"w-full bg-white text-gray-800 font-bold py-1.5 px-4 rounded-2xl shadow-lg hover:bg-gray-50 transition-all duration-300 flex items-center justify-center gap-4 transform hover:scale-105\""
+    },
+    {
+      "file": "components/Home.tsx",
+      "line": 21,
+      "match": "text-gray-800",
+      "content": "className=\"w-full bg-white text-gray-800 font-bold py-1.5 px-4 rounded-2xl shadow-lg hover:bg-gray-50 transition-all duration-300 flex items-center justify-center gap-4 transform hover:scale-105\""
+    },
+    {
+      "file": "components/LineupPreview.tsx",
+      "line": 50,
+      "match": "bg-gray-50",
+      "content": "{isViceCaptain && <span className=\"flex-shrink-0 text-caption font-bold text-slate-600 bg-gray-500/20 px-1.5 rounded-2xl\">VC</span>}"
+    },
+    {
+      "file": "components/LiveScoring.tsx",
+      "line": 1553,
+      "match": "bg-gray-500",
+      "content": "className=\"flex-1 text-white font-bold rounded-2xl hover:opacity-90 disabled:bg-gray-500 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-body bg-teal-400 active:bg-danger/100 transition-colors\""
+    },
+    {
+      "file": "components/LiveScoring.tsx",
+      "line": 1572,
+      "match": "bg-gray-400",
+      "content": "className=\"bg-purple-500 text-white font-semibold hover:opacity-90 disabled:bg-gray-400 disabled:cursor-not-allowed border border-purple-600/20 rounded-2xl flex items-center justify-center text-center p-2 text-2xl w-[7.35rem] h-[7.35rem] active:bg-purple-600 active:scale-95 transform transition-all duration-150\""
+    },
+    {
+      "file": "components/LiveScoring.tsx",
+      "line": 1583,
+      "match": "bg-gray-500",
+      "content": "className=\"flex-1 text-black font-bold rounded-2xl hover:opacity-90 disabled:bg-gray-500 disabled:cursor-not-allowed text-body bg-yellow-300 active:bg-danger/100 active:text-white transition-colors\""
+    },
+    {
+      "file": "components/LiveScoring.tsx",
+      "line": 1674,
+      "match": "bg-gray-300",
+      "content": "className=\"p-2 h-9 w-9 flex items-center justify-center bg-primary/80 rounded-full text-text-secondary hover:bg-primary disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 disabled:cursor-not-allowed transition-colors\""
+    },
+    {
+      "file": "components/LiveScoring.tsx",
+      "line": 1674,
+      "match": "bg-gray-700",
+      "content": "className=\"p-2 h-9 w-9 flex items-center justify-center bg-primary/80 rounded-full text-text-secondary hover:bg-primary disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 disabled:cursor-not-allowed transition-colors\""
+    },
+    {
+      "file": "components/LiveScoring.tsx",
+      "line": 1674,
+      "match": "text-gray-600",
+      "content": "className=\"p-2 h-9 w-9 flex items-center justify-center bg-primary/80 rounded-full text-text-secondary hover:bg-primary disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 disabled:cursor-not-allowed transition-colors\""
+    },
+    {
+      "file": "components/LiveScoring.tsx",
+      "line": 1674,
+      "match": "text-gray-400",
+      "content": "className=\"p-2 h-9 w-9 flex items-center justify-center bg-primary/80 rounded-full text-text-secondary hover:bg-primary disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 disabled:cursor-not-allowed transition-colors\""
+    },
+    {
+      "file": "components/LiveScoring.tsx",
+      "line": 1674,
+      "match": "dark:bg-gray-700",
+      "content": "className=\"p-2 h-9 w-9 flex items-center justify-center bg-primary/80 rounded-full text-text-secondary hover:bg-primary disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 disabled:cursor-not-allowed transition-colors\""
+    },
+    {
+      "file": "components/LiveScoring.tsx",
+      "line": 1674,
+      "match": "dark:text-gray-400",
+      "content": "className=\"p-2 h-9 w-9 flex items-center justify-center bg-primary/80 rounded-full text-text-secondary hover:bg-primary disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 disabled:cursor-not-allowed transition-colors\""
+    },
+    {
+      "file": "components/MatchCommentary.tsx",
+      "line": 61,
+      "match": "bg-white",
+      "content": "<div className=\"bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden\">"
+    },
+    {
+      "file": "components/MatchCommentary.tsx",
+      "line": 61,
+      "match": "border-gray-100",
+      "content": "<div className=\"bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden\">"
+    },
+    {
+      "file": "components/MatchCommentary.tsx",
+      "line": 62,
+      "match": "bg-gray-5",
+      "content": "<div className=\"p-4 bg-gray-50/80 border-b border-gray-100 flex items-center justify-between\">"
+    },
+    {
+      "file": "components/MatchCommentary.tsx",
+      "line": 62,
+      "match": "border-gray-100",
+      "content": "<div className=\"p-4 bg-gray-50/80 border-b border-gray-100 flex items-center justify-between\">"
+    },
+    {
+      "file": "components/MatchCommentary.tsx",
+      "line": 63,
+      "match": "text-gray-900",
+      "content": "<h3 className=\"font-bold text-gray-900 flex items-center gap-2\">"
+    },
+    {
+      "file": "components/MatchCommentary.tsx",
+      "line": 72,
+      "match": "text-gray-500",
+      "content": "<div className=\"text-sm font-mono font-medium text-gray-500\">"
+    },
+    {
+      "file": "components/MatchCommentary.tsx",
+      "line": 76,
+      "match": "bg-white",
+      "content": "<div className=\"p-4 md:p-6 bg-white overflow-y-auto max-h-[600px] relative\">"
+    },
+    {
+      "file": "components/MatchCreationForm.tsx",
+      "line": 9,
+      "match": "bg-gray-300",
+      "content": "const baseClasses = 'px-4 py-2 rounded-2xl text-button transition-all duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-md';"
+    },
+    {
+      "file": "components/MatchCreationForm.tsx",
+      "line": 9,
+      "match": "bg-gray-700",
+      "content": "const baseClasses = 'px-4 py-2 rounded-2xl text-button transition-all duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-md';"
+    },
+    {
+      "file": "components/MatchCreationForm.tsx",
+      "line": 9,
+      "match": "text-gray-600",
+      "content": "const baseClasses = 'px-4 py-2 rounded-2xl text-button transition-all duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-md';"
+    },
+    {
+      "file": "components/MatchCreationForm.tsx",
+      "line": 9,
+      "match": "text-gray-400",
+      "content": "const baseClasses = 'px-4 py-2 rounded-2xl text-button transition-all duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-md';"
+    },
+    {
+      "file": "components/MatchCreationForm.tsx",
+      "line": 9,
+      "match": "dark:bg-gray-700",
+      "content": "const baseClasses = 'px-4 py-2 rounded-2xl text-button transition-all duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-md';"
+    },
+    {
+      "file": "components/MatchCreationForm.tsx",
+      "line": 9,
+      "match": "dark:text-gray-400",
+      "content": "const baseClasses = 'px-4 py-2 rounded-2xl text-button transition-all duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-md';"
+    },
+    {
+      "file": "components/MatchModals.tsx",
+      "line": 66,
+      "match": "bg-gray-300",
+      "content": "<button onClick={handleUpdateMatch} disabled={!isEditFormValid} className=\"py-1.5 px-4 bg-brand-blue text-white font-bold rounded-2xl hover:bg-opacity-90 text-body disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400\">Update</button>"
+    },
+    {
+      "file": "components/MatchModals.tsx",
+      "line": 66,
+      "match": "bg-gray-700",
+      "content": "<button onClick={handleUpdateMatch} disabled={!isEditFormValid} className=\"py-1.5 px-4 bg-brand-blue text-white font-bold rounded-2xl hover:bg-opacity-90 text-body disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400\">Update</button>"
+    },
+    {
+      "file": "components/MatchModals.tsx",
+      "line": 66,
+      "match": "text-gray-600",
+      "content": "<button onClick={handleUpdateMatch} disabled={!isEditFormValid} className=\"py-1.5 px-4 bg-brand-blue text-white font-bold rounded-2xl hover:bg-opacity-90 text-body disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400\">Update</button>"
+    },
+    {
+      "file": "components/MatchModals.tsx",
+      "line": 66,
+      "match": "text-gray-400",
+      "content": "<button onClick={handleUpdateMatch} disabled={!isEditFormValid} className=\"py-1.5 px-4 bg-brand-blue text-white font-bold rounded-2xl hover:bg-opacity-90 text-body disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400\">Update</button>"
+    },
+    {
+      "file": "components/MatchModals.tsx",
+      "line": 66,
+      "match": "dark:bg-gray-700",
+      "content": "<button onClick={handleUpdateMatch} disabled={!isEditFormValid} className=\"py-1.5 px-4 bg-brand-blue text-white font-bold rounded-2xl hover:bg-opacity-90 text-body disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400\">Update</button>"
+    },
+    {
+      "file": "components/MatchModals.tsx",
+      "line": 66,
+      "match": "dark:text-gray-400",
+      "content": "<button onClick={handleUpdateMatch} disabled={!isEditFormValid} className=\"py-1.5 px-4 bg-brand-blue text-white font-bold rounded-2xl hover:bg-opacity-90 text-body disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400\">Update</button>"
+    },
+    {
+      "file": "components/MatchOvers.tsx",
+      "line": 39,
+      "match": "text-gray-500",
+      "content": "return <p className=\"text-gray-500 text-center py-8\">No overs bowled yet.</p>;"
+    },
+    {
+      "file": "components/MatchOvers.tsx",
+      "line": 46,
+      "match": "bg-white",
+      "content": "<div className=\"bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden\">"
+    },
+    {
+      "file": "components/MatchOvers.tsx",
+      "line": 46,
+      "match": "border-gray-100",
+      "content": "<div className=\"bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden\">"
+    },
+    {
+      "file": "components/MatchOvers.tsx",
+      "line": 47,
+      "match": "bg-gray-5",
+      "content": "<div className=\"p-4 bg-gray-50/80 border-b border-gray-100 flex items-center justify-between\">"
+    },
+    {
+      "file": "components/MatchOvers.tsx",
+      "line": 47,
+      "match": "border-gray-100",
+      "content": "<div className=\"p-4 bg-gray-50/80 border-b border-gray-100 flex items-center justify-between\">"
+    },
+    {
+      "file": "components/MatchOvers.tsx",
+      "line": 48,
+      "match": "text-gray-900",
+      "content": "<h3 className=\"font-bold text-gray-900 flex items-center gap-2\">"
+    },
+    {
+      "file": "components/MatchOvers.tsx",
+      "line": 54,
+      "match": "text-gray-500",
+      "content": "<div className=\"text-sm font-mono font-medium text-gray-500\">Overs: {innings.overs}</div>"
+    },
+    {
+      "file": "components/MatchOvers.tsx",
+      "line": 58,
+      "match": "bg-gray-5",
+      "content": "<div key={over} className=\"border border-gray-100 rounded-lg p-3 sm:p-4 bg-gray-50/50 hover:bg-gray-50 transition-colors\">"
+    },
+    {
+      "file": "components/MatchOvers.tsx",
+      "line": 58,
+      "match": "bg-gray-50",
+      "content": "<div key={over} className=\"border border-gray-100 rounded-lg p-3 sm:p-4 bg-gray-50/50 hover:bg-gray-50 transition-colors\">"
+    },
+    {
+      "file": "components/MatchOvers.tsx",
+      "line": 58,
+      "match": "border-gray-100",
+      "content": "<div key={over} className=\"border border-gray-100 rounded-lg p-3 sm:p-4 bg-gray-50/50 hover:bg-gray-50 transition-colors\">"
+    },
+    {
+      "file": "components/MatchOvers.tsx",
+      "line": 60,
+      "match": "text-gray-700",
+      "content": "<div className=\"font-bold text-gray-700\">Over {over}</div>"
+    },
+    {
+      "file": "components/MatchOvers.tsx",
+      "line": 61,
+      "match": "text-gray-500",
+      "content": "<div className=\"text-sm text-gray-500 font-medium\">"
+    },
+    {
+      "file": "components/MatchOvers.tsx",
+      "line": 69,
+      "match": "border-gray-200",
+      "content": "<div key={i} className={`${className} shadow-sm border border-gray-200/50`} title={title}>"
+    },
+    {
+      "file": "components/MatchScorecard.tsx",
+      "line": 575,
+      "match": "text-gray-900",
+      "content": "<h3 className=\"font-bold text-gray-900 dark:text-text-primary border-l-4 border-brand-blue pl-3 text-sm uppercase tracking-wider mb-3\">Match Notes</h3>"
+    },
+    {
+      "file": "components/MatchScorecard.tsx",
+      "line": 599,
+      "match": "text-gray-800",
+      "content": "className=\"px-4 py-2 rounded-2xl text-button flex items-center justify-center gap-2  text-gray-800  dark:text-text-primary hover:brightness-105 border border-brand-blue/15\""
+    },
+    {
+      "file": "components/MatchesView.tsx",
+      "line": 125,
+      "match": "text-gray-500",
+      "content": "<span className={`text-sm ${matchType ? 'text-gray-500' : 'text-text-primary'}`}>Single Match</span>"
+    },
+    {
+      "file": "components/MatchesView.tsx",
+      "line": 128,
+      "match": "bg-gray-300",
+      "content": "className={`w-12 h-6 rounded-full p-1 transition-colors duration-300 ${matchType ? 'bg-brand-blue' : 'bg-gray-300'}`}"
+    },
+    {
+      "file": "components/MatchesView.tsx",
+      "line": 130,
+      "match": "bg-white",
+      "content": "<div className={`w-4 h-4 bg-white rounded-full transition-transform duration-300 ${matchType ? 'translate-x-6' : 'translate-x-0'}`} />"
+    },
+    {
+      "file": "components/MatchesView.tsx",
+      "line": 132,
+      "match": "text-gray-500",
+      "content": "<span className={`text-sm ${matchType ? 'text-text-primary' : 'text-gray-500'}`}>Tournament</span>"
+    },
+    {
+      "file": "components/MatchesView.tsx",
+      "line": 139,
+      "match": "text-gray-400",
+      "content": "<label htmlFor=\"match-status-filter\" className=\"text-[10px] font-extrabold text-gray-400 dark:text-gray-500 uppercase tracking-wider\">"
+    },
+    {
+      "file": "components/MatchesView.tsx",
+      "line": 139,
+      "match": "text-gray-500",
+      "content": "<label htmlFor=\"match-status-filter\" className=\"text-[10px] font-extrabold text-gray-400 dark:text-gray-500 uppercase tracking-wider\">"
+    },
+    {
+      "file": "components/MatchesView.tsx",
+      "line": 139,
+      "match": "dark:text-gray-500",
+      "content": "<label htmlFor=\"match-status-filter\" className=\"text-[10px] font-extrabold text-gray-400 dark:text-gray-500 uppercase tracking-wider\">"
+    },
+    {
+      "file": "components/MatchesView.tsx",
+      "line": 157,
+      "match": "text-gray-400",
+      "content": "<label htmlFor=\"match-tournament-filter\" className=\"text-[10px] font-extrabold text-gray-400 dark:text-gray-500 uppercase tracking-wider\">"
+    },
+    {
+      "file": "components/MatchesView.tsx",
+      "line": 157,
+      "match": "text-gray-500",
+      "content": "<label htmlFor=\"match-tournament-filter\" className=\"text-[10px] font-extrabold text-gray-400 dark:text-gray-500 uppercase tracking-wider\">"
+    },
+    {
+      "file": "components/MatchesView.tsx",
+      "line": 157,
+      "match": "dark:text-gray-500",
+      "content": "<label htmlFor=\"match-tournament-filter\" className=\"text-[10px] font-extrabold text-gray-400 dark:text-gray-500 uppercase tracking-wider\">"
+    },
+    {
+      "file": "components/QuickMatchSetup.tsx",
+      "line": 17,
+      "match": "bg-gray-300",
+      "content": "const baseClasses = 'px-4 py-2 rounded-2xl text-button transition-all duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-md';"
+    },
+    {
+      "file": "components/QuickMatchSetup.tsx",
+      "line": 17,
+      "match": "bg-gray-700",
+      "content": "const baseClasses = 'px-4 py-2 rounded-2xl text-button transition-all duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-md';"
+    },
+    {
+      "file": "components/QuickMatchSetup.tsx",
+      "line": 17,
+      "match": "text-gray-600",
+      "content": "const baseClasses = 'px-4 py-2 rounded-2xl text-button transition-all duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-md';"
+    },
+    {
+      "file": "components/QuickMatchSetup.tsx",
+      "line": 17,
+      "match": "text-gray-400",
+      "content": "const baseClasses = 'px-4 py-2 rounded-2xl text-button transition-all duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-md';"
+    },
+    {
+      "file": "components/QuickMatchSetup.tsx",
+      "line": 17,
+      "match": "dark:bg-gray-700",
+      "content": "const baseClasses = 'px-4 py-2 rounded-2xl text-button transition-all duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-md';"
+    },
+    {
+      "file": "components/QuickMatchSetup.tsx",
+      "line": 17,
+      "match": "dark:text-gray-400",
+      "content": "const baseClasses = 'px-4 py-2 rounded-2xl text-button transition-all duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-md';"
+    },
+    {
+      "file": "components/QuickMatchSetup.tsx",
+      "line": 44,
+      "match": "text-gray-800",
+      "content": ": ' text-gray-800  dark:text-text-primary hover:brightness-105 border border-brand-blue/15'"
+    },
+    {
+      "file": "components/QuickMatchSetup.tsx",
+      "line": 270,
+      "match": "bg-gray-300",
+      "content": "className=\"w-full sm:w-auto px-6 py-2 rounded-2xl text-button bg-brand-blue text-white shadow-md disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 disabled:cursor-not-allowed transition-opacity\""
+    },
+    {
+      "file": "components/QuickMatchSetup.tsx",
+      "line": 270,
+      "match": "bg-gray-700",
+      "content": "className=\"w-full sm:w-auto px-6 py-2 rounded-2xl text-button bg-brand-blue text-white shadow-md disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 disabled:cursor-not-allowed transition-opacity\""
+    },
+    {
+      "file": "components/QuickMatchSetup.tsx",
+      "line": 270,
+      "match": "text-gray-600",
+      "content": "className=\"w-full sm:w-auto px-6 py-2 rounded-2xl text-button bg-brand-blue text-white shadow-md disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 disabled:cursor-not-allowed transition-opacity\""
+    },
+    {
+      "file": "components/QuickMatchSetup.tsx",
+      "line": 270,
+      "match": "text-gray-400",
+      "content": "className=\"w-full sm:w-auto px-6 py-2 rounded-2xl text-button bg-brand-blue text-white shadow-md disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 disabled:cursor-not-allowed transition-opacity\""
+    },
+    {
+      "file": "components/QuickMatchSetup.tsx",
+      "line": 270,
+      "match": "dark:bg-gray-700",
+      "content": "className=\"w-full sm:w-auto px-6 py-2 rounded-2xl text-button bg-brand-blue text-white shadow-md disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 disabled:cursor-not-allowed transition-opacity\""
+    },
+    {
+      "file": "components/QuickMatchSetup.tsx",
+      "line": 270,
+      "match": "dark:text-gray-400",
+      "content": "className=\"w-full sm:w-auto px-6 py-2 rounded-2xl text-button bg-brand-blue text-white shadow-md disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 disabled:cursor-not-allowed transition-opacity\""
+    },
+    {
+      "file": "components/ScheduleGenerator.tsx",
+      "line": 13,
+      "match": "bg-gray-300",
+      "content": "const baseClasses = 'px-4 py-2 rounded-2xl text-button transition-all duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-md';"
+    },
+    {
+      "file": "components/ScheduleGenerator.tsx",
+      "line": 13,
+      "match": "bg-gray-700",
+      "content": "const baseClasses = 'px-4 py-2 rounded-2xl text-button transition-all duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-md';"
+    },
+    {
+      "file": "components/ScheduleGenerator.tsx",
+      "line": 13,
+      "match": "text-gray-600",
+      "content": "const baseClasses = 'px-4 py-2 rounded-2xl text-button transition-all duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-md';"
+    },
+    {
+      "file": "components/ScheduleGenerator.tsx",
+      "line": 13,
+      "match": "text-gray-400",
+      "content": "const baseClasses = 'px-4 py-2 rounded-2xl text-button transition-all duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-md';"
+    },
+    {
+      "file": "components/ScheduleGenerator.tsx",
+      "line": 13,
+      "match": "dark:bg-gray-700",
+      "content": "const baseClasses = 'px-4 py-2 rounded-2xl text-button transition-all duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-md';"
+    },
+    {
+      "file": "components/ScheduleGenerator.tsx",
+      "line": 13,
+      "match": "dark:text-gray-400",
+      "content": "const baseClasses = 'px-4 py-2 rounded-2xl text-button transition-all duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-md';"
+    },
+    {
+      "file": "components/SettingsModal.tsx",
+      "line": 169,
+      "match": "bg-gray-300",
+      "content": "className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 disabled:cursor-not-allowed ${"
+    },
+    {
+      "file": "components/SettingsModal.tsx",
+      "line": 169,
+      "match": "bg-gray-700",
+      "content": "className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 disabled:cursor-not-allowed ${"
+    },
+    {
+      "file": "components/SettingsModal.tsx",
+      "line": 169,
+      "match": "text-gray-600",
+      "content": "className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 disabled:cursor-not-allowed ${"
+    },
+    {
+      "file": "components/SettingsModal.tsx",
+      "line": 169,
+      "match": "text-gray-400",
+      "content": "className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 disabled:cursor-not-allowed ${"
+    },
+    {
+      "file": "components/SettingsModal.tsx",
+      "line": 169,
+      "match": "dark:bg-gray-700",
+      "content": "className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 disabled:cursor-not-allowed ${"
+    },
+    {
+      "file": "components/SettingsModal.tsx",
+      "line": 169,
+      "match": "dark:text-gray-400",
+      "content": "className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 disabled:cursor-not-allowed ${"
+    },
+    {
+      "file": "components/SettingsModal.tsx",
+      "line": 170,
+      "match": "bg-gray-300",
+      "content": "notificationsEnabled ? 'bg-brand-blue' : 'bg-gray-300 dark:bg-gray-600'"
+    },
+    {
+      "file": "components/SettingsModal.tsx",
+      "line": 170,
+      "match": "bg-gray-600",
+      "content": "notificationsEnabled ? 'bg-brand-blue' : 'bg-gray-300 dark:bg-gray-600'"
+    },
+    {
+      "file": "components/SettingsModal.tsx",
+      "line": 170,
+      "match": "dark:bg-gray-600",
+      "content": "notificationsEnabled ? 'bg-brand-blue' : 'bg-gray-300 dark:bg-gray-600'"
+    },
+    {
+      "file": "components/SettingsModal.tsx",
+      "line": 174,
+      "match": "bg-white",
+      "content": "className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${"
+    },
+    {
+      "file": "components/SettingsModal.tsx",
+      "line": 238,
+      "match": "bg-gray-300",
+      "content": "className=\"flex items-center justify-center gap-2 py-4 px-4 bg-primary/50 text-text-primary rounded-xl font-bold hover:bg-primary transition-all text-body disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400\""
+    },
+    {
+      "file": "components/SettingsModal.tsx",
+      "line": 238,
+      "match": "bg-gray-700",
+      "content": "className=\"flex items-center justify-center gap-2 py-4 px-4 bg-primary/50 text-text-primary rounded-xl font-bold hover:bg-primary transition-all text-body disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400\""
+    },
+    {
+      "file": "components/SettingsModal.tsx",
+      "line": 238,
+      "match": "text-gray-600",
+      "content": "className=\"flex items-center justify-center gap-2 py-4 px-4 bg-primary/50 text-text-primary rounded-xl font-bold hover:bg-primary transition-all text-body disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400\""
+    },
+    {
+      "file": "components/SettingsModal.tsx",
+      "line": 238,
+      "match": "text-gray-400",
+      "content": "className=\"flex items-center justify-center gap-2 py-4 px-4 bg-primary/50 text-text-primary rounded-xl font-bold hover:bg-primary transition-all text-body disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400\""
+    },
+    {
+      "file": "components/SettingsModal.tsx",
+      "line": 238,
+      "match": "dark:bg-gray-700",
+      "content": "className=\"flex items-center justify-center gap-2 py-4 px-4 bg-primary/50 text-text-primary rounded-xl font-bold hover:bg-primary transition-all text-body disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400\""
+    },
+    {
+      "file": "components/SettingsModal.tsx",
+      "line": 238,
+      "match": "dark:text-gray-400",
+      "content": "className=\"flex items-center justify-center gap-2 py-4 px-4 bg-primary/50 text-text-primary rounded-xl font-bold hover:bg-primary transition-all text-body disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400\""
+    },
+    {
+      "file": "components/TeamDetailsHub.tsx",
+      "line": 1603,
+      "match": "bg-gray-400",
+      "content": "className=\"px-5 py-2.5 text-xs font-bold text-white bg-gray-400 dark:bg-zinc-700 cursor-not-allowed rounded-2xl shadow-sm tracking-wide uppercase\""
+    },
+    {
+      "file": "components/TeamDetailsHub.tsx",
+      "line": 1920,
+      "match": "bg-gray-50",
+      "content": "? 'bg-gray-500/10 text-text-secondary dark:text-text-secondary border-gray-500/15'"
+    },
+    {
+      "file": "components/TeamDetailsHub.tsx",
+      "line": 1920,
+      "match": "border-gray-500",
+      "content": "? 'bg-gray-500/10 text-text-secondary dark:text-text-secondary border-gray-500/15'"
+    },
+    {
+      "file": "components/TeamDetailsPage.tsx",
+      "line": 142,
+      "match": "bg-gray-50",
+      "content": "{isViceCaptain && <span className=\"flex-shrink-0 text-[10px] font-bold text-slate-600 bg-gray-500/20 px-1.5 rounded-2xl border border-gray-400\">VC</span>}"
+    },
+    {
+      "file": "components/TeamDetailsPage.tsx",
+      "line": 142,
+      "match": "border-gray-400",
+      "content": "{isViceCaptain && <span className=\"flex-shrink-0 text-[10px] font-bold text-slate-600 bg-gray-500/20 px-1.5 rounded-2xl border border-gray-400\">VC</span>}"
+    },
+    {
+      "file": "components/TeamEditorModal.tsx",
+      "line": 16,
+      "match": "bg-gray-300",
+      "content": "const baseClasses = 'px-4 py-2 rounded-2xl text-button transition-all duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-md';"
+    },
+    {
+      "file": "components/TeamEditorModal.tsx",
+      "line": 16,
+      "match": "bg-gray-700",
+      "content": "const baseClasses = 'px-4 py-2 rounded-2xl text-button transition-all duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-md';"
+    },
+    {
+      "file": "components/TeamEditorModal.tsx",
+      "line": 16,
+      "match": "text-gray-600",
+      "content": "const baseClasses = 'px-4 py-2 rounded-2xl text-button transition-all duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-md';"
+    },
+    {
+      "file": "components/TeamEditorModal.tsx",
+      "line": 16,
+      "match": "text-gray-400",
+      "content": "const baseClasses = 'px-4 py-2 rounded-2xl text-button transition-all duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-md';"
+    },
+    {
+      "file": "components/TeamEditorModal.tsx",
+      "line": 16,
+      "match": "dark:bg-gray-700",
+      "content": "const baseClasses = 'px-4 py-2 rounded-2xl text-button transition-all duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-md';"
+    },
+    {
+      "file": "components/TeamEditorModal.tsx",
+      "line": 16,
+      "match": "dark:text-gray-400",
+      "content": "const baseClasses = 'px-4 py-2 rounded-2xl text-button transition-all duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-md';"
+    },
+    {
+      "file": "components/TeamEditorModal.tsx",
+      "line": 18,
+      "match": "text-gray-800",
+      "content": "variant === 'secondary' ? ' text-gray-800  dark:text-text-primary hover:brightness-105 border border-brand-blue/15'"
+    },
+    {
+      "file": "components/TeamEditorModal.tsx",
+      "line": 253,
+      "match": "border-gray-300",
+      "content": "<div className=\"relative p-4 md:p-6 text-center border-b border-gray-300 dark:border-gray-700\">"
+    },
+    {
+      "file": "components/TeamEditorModal.tsx",
+      "line": 253,
+      "match": "border-gray-700",
+      "content": "<div className=\"relative p-4 md:p-6 text-center border-b border-gray-300 dark:border-gray-700\">"
+    },
+    {
+      "file": "components/TeamEditorModal.tsx",
+      "line": 253,
+      "match": "dark:border-gray-700",
+      "content": "<div className=\"relative p-4 md:p-6 text-center border-b border-gray-300 dark:border-gray-700\">"
+    },
+    {
+      "file": "components/TeamEditorModal.tsx",
+      "line": 357,
+      "match": "bg-gray-200",
+      "content": "className={`px-4 py-1.5 text-sm font-bold rounded-lg transition-colors ${isSelected ? 'bg-gray-200 text-gray-500 cursor-not-allowed dark:bg-gray-700 dark:text-gray-400' : (canAdd ? 'bg-brand-blue text-white hover:bg-brand-blue/90' : 'bg-gray-200 text-gray-400 cursor-not-allowed')}`}"
+    },
+    {
+      "file": "components/TeamEditorModal.tsx",
+      "line": 357,
+      "match": "bg-gray-700",
+      "content": "className={`px-4 py-1.5 text-sm font-bold rounded-lg transition-colors ${isSelected ? 'bg-gray-200 text-gray-500 cursor-not-allowed dark:bg-gray-700 dark:text-gray-400' : (canAdd ? 'bg-brand-blue text-white hover:bg-brand-blue/90' : 'bg-gray-200 text-gray-400 cursor-not-allowed')}`}"
+    },
+    {
+      "file": "components/TeamEditorModal.tsx",
+      "line": 357,
+      "match": "bg-gray-200",
+      "content": "className={`px-4 py-1.5 text-sm font-bold rounded-lg transition-colors ${isSelected ? 'bg-gray-200 text-gray-500 cursor-not-allowed dark:bg-gray-700 dark:text-gray-400' : (canAdd ? 'bg-brand-blue text-white hover:bg-brand-blue/90' : 'bg-gray-200 text-gray-400 cursor-not-allowed')}`}"
+    },
+    {
+      "file": "components/TeamEditorModal.tsx",
+      "line": 357,
+      "match": "text-gray-500",
+      "content": "className={`px-4 py-1.5 text-sm font-bold rounded-lg transition-colors ${isSelected ? 'bg-gray-200 text-gray-500 cursor-not-allowed dark:bg-gray-700 dark:text-gray-400' : (canAdd ? 'bg-brand-blue text-white hover:bg-brand-blue/90' : 'bg-gray-200 text-gray-400 cursor-not-allowed')}`}"
+    },
+    {
+      "file": "components/TeamEditorModal.tsx",
+      "line": 357,
+      "match": "text-gray-400",
+      "content": "className={`px-4 py-1.5 text-sm font-bold rounded-lg transition-colors ${isSelected ? 'bg-gray-200 text-gray-500 cursor-not-allowed dark:bg-gray-700 dark:text-gray-400' : (canAdd ? 'bg-brand-blue text-white hover:bg-brand-blue/90' : 'bg-gray-200 text-gray-400 cursor-not-allowed')}`}"
+    },
+    {
+      "file": "components/TeamEditorModal.tsx",
+      "line": 357,
+      "match": "text-gray-400",
+      "content": "className={`px-4 py-1.5 text-sm font-bold rounded-lg transition-colors ${isSelected ? 'bg-gray-200 text-gray-500 cursor-not-allowed dark:bg-gray-700 dark:text-gray-400' : (canAdd ? 'bg-brand-blue text-white hover:bg-brand-blue/90' : 'bg-gray-200 text-gray-400 cursor-not-allowed')}`}"
+    },
+    {
+      "file": "components/TeamEditorModal.tsx",
+      "line": 357,
+      "match": "dark:bg-gray-700",
+      "content": "className={`px-4 py-1.5 text-sm font-bold rounded-lg transition-colors ${isSelected ? 'bg-gray-200 text-gray-500 cursor-not-allowed dark:bg-gray-700 dark:text-gray-400' : (canAdd ? 'bg-brand-blue text-white hover:bg-brand-blue/90' : 'bg-gray-200 text-gray-400 cursor-not-allowed')}`}"
+    },
+    {
+      "file": "components/TeamEditorModal.tsx",
+      "line": 357,
+      "match": "dark:text-gray-400",
+      "content": "className={`px-4 py-1.5 text-sm font-bold rounded-lg transition-colors ${isSelected ? 'bg-gray-200 text-gray-500 cursor-not-allowed dark:bg-gray-700 dark:text-gray-400' : (canAdd ? 'bg-brand-blue text-white hover:bg-brand-blue/90' : 'bg-gray-200 text-gray-400 cursor-not-allowed')}`}"
+    },
+    {
+      "file": "components/TeamEditorModal.tsx",
+      "line": 508,
+      "match": "border-gray-300",
+      "content": "<div className=\"p-4 md:p-6 border-t border-gray-300 dark:border-gray-700 flex justify-between items-center gap-4 bg-primary/80 backdrop-blur-md rounded-b-2xl safe-pad-b\">"
+    },
+    {
+      "file": "components/TeamEditorModal.tsx",
+      "line": 508,
+      "match": "border-gray-700",
+      "content": "<div className=\"p-4 md:p-6 border-t border-gray-300 dark:border-gray-700 flex justify-between items-center gap-4 bg-primary/80 backdrop-blur-md rounded-b-2xl safe-pad-b\">"
+    },
+    {
+      "file": "components/TeamEditorModal.tsx",
+      "line": 508,
+      "match": "dark:border-gray-700",
+      "content": "<div className=\"p-4 md:p-6 border-t border-gray-300 dark:border-gray-700 flex justify-between items-center gap-4 bg-primary/80 backdrop-blur-md rounded-b-2xl safe-pad-b\">"
+    },
+    {
+      "file": "components/TeamsPage.tsx",
+      "line": 52,
+      "match": "bg-gray-200",
+      "content": "<div className=\"w-12 h-12 rounded-full bg-gray-200 dark:bg-white/10 shrink-0\" />"
+    },
+    {
+      "file": "components/TeamsPage.tsx",
+      "line": 56,
+      "match": "bg-gray-150",
+      "content": "<div className=\"h-4 bg-gray-150 dark:bg-white/5 rounded-full w-2/3\" />"
+    },
+    {
+      "file": "components/TeamsPage.tsx",
+      "line": 58,
+      "match": "bg-gray-150",
+      "content": "<div className=\"h-3 bg-gray-150 dark:bg-white/5 rounded w-1/4\" />"
+    },
+    {
+      "file": "components/TeamsPage.tsx",
+      "line": 59,
+      "match": "bg-gray-150",
+      "content": "<div className=\"h-3 bg-gray-150 dark:bg-white/5 rounded w-1/4\" />"
+    },
+    {
+      "file": "components/TeamsPage.tsx",
+      "line": 65,
+      "match": "bg-gray-150",
+      "content": "<div className=\"h-3 bg-gray-150 dark:bg-white/5 rounded w-1/5\" />"
+    },
+    {
+      "file": "components/TeamsPage.tsx",
+      "line": 66,
+      "match": "bg-gray-150",
+      "content": "<div className=\"h-3 bg-gray-150 dark:bg-white/5 rounded w-1/5\" />"
+    },
+    {
+      "file": "components/TeamsPage.tsx",
+      "line": 67,
+      "match": "bg-gray-150",
+      "content": "<div className=\"h-3 bg-gray-150 dark:bg-white/5 rounded w-1/5\" />"
+    },
+    {
+      "file": "components/TeamsPage.tsx",
+      "line": 237,
+      "match": "text-gray-400",
+      "content": "<Search className=\"absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500\" />"
+    },
+    {
+      "file": "components/TeamsPage.tsx",
+      "line": 237,
+      "match": "text-gray-500",
+      "content": "<Search className=\"absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500\" />"
+    },
+    {
+      "file": "components/TeamsPage.tsx",
+      "line": 237,
+      "match": "dark:text-gray-500",
+      "content": "<Search className=\"absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500\" />"
+    },
+    {
+      "file": "components/TeamsPage.tsx",
+      "line": 244,
+      "match": "text-gray-400",
+      "content": "className=\"w-full pl-11 pr-4 py-3 bg-primary text-text-primary border border-brand-blue/15 rounded-2xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-brand-blue/40 transition-all placeholder:text-gray-400 dark:placeholder:text-gray-500\""
+    },
+    {
+      "file": "components/TeamsPage.tsx",
+      "line": 244,
+      "match": "text-gray-500",
+      "content": "className=\"w-full pl-11 pr-4 py-3 bg-primary text-text-primary border border-brand-blue/15 rounded-2xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-brand-blue/40 transition-all placeholder:text-gray-400 dark:placeholder:text-gray-500\""
+    },
+    {
+      "file": "components/TeamsPage.tsx",
+      "line": 250,
+      "match": "text-gray-400",
+      "content": "<Filter className=\"absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 shrink-0 pointer-events-none\" />"
+    },
+    {
+      "file": "components/TeamsPage.tsx",
+      "line": 331,
+      "match": "bg-gray-100",
+      "content": "<span className=\"text-[11px] font-extrabold tracking-wider uppercase text-text-secondary bg-gray-100 dark:bg-white/5 px-2 py-0.5 rounded-md\">"
+    },
+    {
+      "file": "components/TeamsPage.tsx",
+      "line": 346,
+      "match": "text-gray-400",
+      "content": "<div className=\"text-gray-400 group-hover:text-brand-blue group-hover:translate-x-1 transition-all\">"
+    },
+    {
+      "file": "components/TossModal.tsx",
+      "line": 103,
+      "match": "bg-white",
+      "content": "<div className=\"w-2.5 h-2.5 bg-white rounded-full\"></div>"
+    },
+    {
+      "file": "components/TournamentList.tsx",
+      "line": 113,
+      "match": "bg-white",
+      "content": "className=\"bg-white dark:bg-secondary rounded-3xl shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] border border-brand-blue/10 p-4 flex flex-col relative transition-transform hover:-translate-y-1 duration-300 cursor-pointer overflow-hidden\""
+    },
+    {
+      "file": "components/TournamentManager.tsx",
+      "line": 14,
+      "match": "bg-gray-300",
+      "content": "const baseClasses = 'px-4 py-2 rounded-2xl text-button transition-all duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-md';"
+    },
+    {
+      "file": "components/TournamentManager.tsx",
+      "line": 14,
+      "match": "bg-gray-700",
+      "content": "const baseClasses = 'px-4 py-2 rounded-2xl text-button transition-all duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-md';"
+    },
+    {
+      "file": "components/TournamentManager.tsx",
+      "line": 14,
+      "match": "text-gray-600",
+      "content": "const baseClasses = 'px-4 py-2 rounded-2xl text-button transition-all duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-md';"
+    },
+    {
+      "file": "components/TournamentManager.tsx",
+      "line": 14,
+      "match": "text-gray-400",
+      "content": "const baseClasses = 'px-4 py-2 rounded-2xl text-button transition-all duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-md';"
+    },
+    {
+      "file": "components/TournamentManager.tsx",
+      "line": 14,
+      "match": "dark:bg-gray-700",
+      "content": "const baseClasses = 'px-4 py-2 rounded-2xl text-button transition-all duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-md';"
+    },
+    {
+      "file": "components/TournamentManager.tsx",
+      "line": 14,
+      "match": "dark:text-gray-400",
+      "content": "const baseClasses = 'px-4 py-2 rounded-2xl text-button transition-all duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue disabled:opacity-60 disabled:bg-gray-300 disabled:text-gray-600 disabled:dark:bg-gray-700 disabled:dark:text-gray-400 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-md';"
+    },
+    {
+      "file": "components/TournamentManager.tsx",
+      "line": 249,
+      "match": "text-gray-300",
+      "content": "className={`py-2 px-1 font-bold transition-colors duration-300 text-body flex-shrink-0 ${homeView === 'quickMatches' ? 'border-b-2 border-brand-blue text-brand-blue dark:text-white dark:border-brand-blue' : 'border-b-2 border-transparent text-text-secondary dark:text-gray-300 hover:text-text-primary'}`}"
+    },
+    {
+      "file": "components/TournamentManager.tsx",
+      "line": 249,
+      "match": "dark:text-gray-300",
+      "content": "className={`py-2 px-1 font-bold transition-colors duration-300 text-body flex-shrink-0 ${homeView === 'quickMatches' ? 'border-b-2 border-brand-blue text-brand-blue dark:text-white dark:border-brand-blue' : 'border-b-2 border-transparent text-text-secondary dark:text-gray-300 hover:text-text-primary'}`}"
+    },
+    {
+      "file": "components/TournamentManager.tsx",
+      "line": 352,
+      "match": "bg-gray-600",
+      "content": "<button key={team.id} onClick={() => handleSelectSuggestion1(team)} className=\"block w-full text-left px-4 py-2 hover:bg-primary dark:hover:bg-gray-600\">{team.name}</button>"
+    },
+    {
+      "file": "components/TournamentManager.tsx",
+      "line": 362,
+      "match": "bg-gray-600",
+      "content": "<button key={team.id} onClick={() => handleSelectSuggestion2(team)} className=\"block w-full text-left px-4 py-2 hover:bg-primary dark:hover:bg-gray-600\">{team.name}</button>"
+    },
+    {
+      "file": "components/TournamentStats.tsx",
+      "line": 245,
+      "match": "bg-gray-500",
+      "content": ": \"bg-gray-500\""
+    },
+    {
+      "file": "components/UpcomingMatchWidget.tsx",
+      "line": 30,
+      "match": "bg-white",
+      "content": "<div className=\"bg-white dark:bg-slate-800 border border-brand-blue/15 shadow-sm rounded-3xl p-4 mb-6\">"
+    },
+    {
+      "file": "components/UpcomingMatchWidget.tsx",
+      "line": 30,
+      "match": "dark:bg-slate-800",
+      "content": "<div className=\"bg-white dark:bg-slate-800 border border-brand-blue/15 shadow-sm rounded-3xl p-4 mb-6\">"
+    },
+    {
+      "file": "components/UpcomingMatchWidget.tsx",
+      "line": 34,
+      "match": "text-gray-500",
+      "content": "<p className=\"text-sm text-gray-500 dark:text-gray-400\">All scheduled matches are completed or no fixtures have been generated yet.</p>"
+    },
+    {
+      "file": "components/UpcomingMatchWidget.tsx",
+      "line": 34,
+      "match": "text-gray-400",
+      "content": "<p className=\"text-sm text-gray-500 dark:text-gray-400\">All scheduled matches are completed or no fixtures have been generated yet.</p>"
+    },
+    {
+      "file": "components/UpcomingMatchWidget.tsx",
+      "line": 34,
+      "match": "dark:text-gray-400",
+      "content": "<p className=\"text-sm text-gray-500 dark:text-gray-400\">All scheduled matches are completed or no fixtures have been generated yet.</p>"
+    },
+    {
+      "file": "components/UpcomingMatchWidget.tsx",
+      "line": 43,
+      "match": "bg-gray-100",
+      "content": "let badgeColor = 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300';"
+    },
+    {
+      "file": "components/UpcomingMatchWidget.tsx",
+      "line": 43,
+      "match": "bg-gray-800",
+      "content": "let badgeColor = 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300';"
+    },
+    {
+      "file": "components/UpcomingMatchWidget.tsx",
+      "line": 43,
+      "match": "text-gray-600",
+      "content": "let badgeColor = 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300';"
+    },
+    {
+      "file": "components/UpcomingMatchWidget.tsx",
+      "line": 43,
+      "match": "text-gray-300",
+      "content": "let badgeColor = 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300';"
+    },
+    {
+      "file": "components/UpcomingMatchWidget.tsx",
+      "line": 43,
+      "match": "dark:bg-gray-800",
+      "content": "let badgeColor = 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300';"
+    },
+    {
+      "file": "components/UpcomingMatchWidget.tsx",
+      "line": 43,
+      "match": "dark:text-gray-300",
+      "content": "let badgeColor = 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300';"
+    },
+    {
+      "file": "components/UpcomingMatchWidget.tsx",
+      "line": 88,
+      "match": "bg-gray-100",
+      "content": "badgeColor = 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300';"
+    },
+    {
+      "file": "components/UpcomingMatchWidget.tsx",
+      "line": 88,
+      "match": "bg-gray-800",
+      "content": "badgeColor = 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300';"
+    },
+    {
+      "file": "components/UpcomingMatchWidget.tsx",
+      "line": 88,
+      "match": "text-gray-600",
+      "content": "badgeColor = 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300';"
+    },
+    {
+      "file": "components/UpcomingMatchWidget.tsx",
+      "line": 88,
+      "match": "text-gray-300",
+      "content": "badgeColor = 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300';"
+    },
+    {
+      "file": "components/UpcomingMatchWidget.tsx",
+      "line": 88,
+      "match": "dark:bg-gray-800",
+      "content": "badgeColor = 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300';"
+    },
+    {
+      "file": "components/UpcomingMatchWidget.tsx",
+      "line": 88,
+      "match": "dark:text-gray-300",
+      "content": "badgeColor = 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300';"
+    },
+    {
+      "file": "components/UpcomingMatchWidget.tsx",
+      "line": 104,
+      "match": "bg-white",
+      "content": "<div className=\"bg-white dark:bg-slate-800 border border-brand-blue/15 shadow-sm rounded-3xl p-4 mb-6\">"
+    },
+    {
+      "file": "components/UpcomingMatchWidget.tsx",
+      "line": 104,
+      "match": "dark:bg-slate-800",
+      "content": "<div className=\"bg-white dark:bg-slate-800 border border-brand-blue/15 shadow-sm rounded-3xl p-4 mb-6\">"
+    },
+    {
+      "file": "components/UpcomingMatchWidget.tsx",
+      "line": 109,
+      "match": "bg-gray-5",
+      "content": "<div className=\"flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-3 rounded-lg border border-gray-100 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-900/50\">"
+    },
+    {
+      "file": "components/UpcomingMatchWidget.tsx",
+      "line": 109,
+      "match": "border-gray-100",
+      "content": "<div className=\"flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-3 rounded-lg border border-gray-100 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-900/50\">"
+    },
+    {
+      "file": "components/UpcomingMatchWidget.tsx",
+      "line": 109,
+      "match": "dark:bg-slate-900",
+      "content": "<div className=\"flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-3 rounded-lg border border-gray-100 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-900/50\">"
+    },
+    {
+      "file": "App.tsx",
+      "line": 111,
+      "match": "bg-gray-50",
+      "content": "className=\"px-6 py-2 bg-red-500/80 hover:bg-red-500 rounded-2xl text-button text-white transition-all disabled:bg-gray-500/50 disabled:cursor-not-allowed\""
+    },
+    {
+      "file": "App.tsx",
+      "line": 974,
+      "match": "bg-white",
+      "content": "<aside className=\"hidden md:flex flex-col w-64 bg-white border-r border-brand-blue/10 p-4 space-y-6\">"
+    }
+  ],
+  "alphaCounts": {
+    "bg-black/10": 12,
+    "bg-black/20": 49,
+    "bg-white/10": 21,
+    "bg-black/5": 90,
+    "bg-black/40": 5,
+    "bg-black/60": 16,
+    "bg-black/80": 8,
+    "bg-white/5": 105,
+    "bg-white/50": 1,
+    "bg-white/20": 18,
+    "bg-white/30": 3,
+    "bg-white/40": 2,
+    "bg-black/50": 2,
+    "bg-black/70": 2,
+    "bg-black/30": 2,
+    "bg-white/95": 1
+  },
+  "semanticCounts": {
+    "bg": 499,
+    "text": 1388,
+    "border": 61
+  },
+  "rechartsIssues": 7
+}

@@ -216,14 +216,14 @@ const TournamentStats: React.FC<UseCrickIQStateReturn> = ({
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-4">
                 <div
-                  className="w-12 h-12 flex items-center justify-center rounded-xl text-white text-h3 shadow-sm flex-shrink-0"
+                  className="w-12 h-12 flex items-center justify-center rounded-xl text-white text-lg shadow-sm flex-shrink-0"
                   style={{ backgroundColor: team.logo }}
                 >
                   {team.name.substring(0, 2).toUpperCase()}
                 </div>
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
-                    <h3 className="text-h3 text-text-primary leading-tight">
+                    <h3 className="text-xl font-bold text-text-primary leading-tight">
                       {team.name}
                     </h3>
                     {team.rank && (
@@ -305,7 +305,7 @@ const TournamentStats: React.FC<UseCrickIQStateReturn> = ({
                   <p className="text-[10px] font-bold text-text-secondary uppercase">
                     Average
                   </p>
-                  <p className="text-h3 text-text-primary">
+                  <p className="text-xl font-bold text-text-primary">
                     {team.avgScore || "0.0"}
                   </p>
                 </div>

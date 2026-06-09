@@ -45,7 +45,7 @@ export const EditMatchModal: React.FC<EditMatchModalProps> = ({
     return (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50 p-4">
             <CrickIQCard  className="w-full max-w-md">
-                <h3 className="text-h3 text-text-primary mb-4">Edit Match</h3>
+                <h3 className="text-xl font-bold text-text-primary mb-4">Edit Match</h3>
                 <div className="space-y-4">
                      <select value={editFormData.team1Id} onChange={e => setEditFormData(f => ({...f, team1Id: e.target.value}))} className="w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue">
                         <option value="" disabled>Select Team 1</option>

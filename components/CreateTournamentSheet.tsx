@@ -295,7 +295,14 @@ export const CreateTournamentSheet: React.FC<CreateTournamentSheetProps> = ({
                                 </div>
                                 <div className="space-y-1.5">
                                     <label className="text-[10px] font-bold text-text-secondary uppercase tracking-wider">Players / Team</label>
-                                    <input type="number" value={numberOfPlayers} onChange={handleNumberOfPlayersChange} disabled={mode === 'readonly'} placeholder="11" className="w-full px-3 py-2.5 bg-secondary text-text-primary border border-brand-blue/15 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-brand-blue/40 transition-all disabled:opacity-70" />
+                                    <input 
+                                        type="number" 
+                                        value={numberOfPlayers} 
+                                        onChange={handleNumberOfPlayersChange} 
+                                        disabled={mode === 'readonly'} 
+                                        placeholder="11" 
+                                        className="w-full px-3 py-2.5 bg-tertiary text-text-primary border border-brand-blue/15 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-brand-blue/40 transition-all disabled:opacity-70" 
+                                    />
                                 </div>
                             </div>
 

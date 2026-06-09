@@ -16,21 +16,21 @@ const WorkspaceSubPagePlaceholder: React.FC<{ subPage: string, title: string }> 
                 <div className="space-y-4">
                     <CrickIQCard  className="flex flex-col items-center justify-center text-center">
                         <HardDriveIcon className="w-12 h-12 text-danger mb-4" />
-                        <h3 className="text-h2 text-text-primary">Storage Usage</h3>
+                        <h3 className="text-2xl md:text-3xl font-bold tracking-tight text-text-primary">Storage Usage</h3>
                         <p className="text-text-secondary mt-1">Placeholder for storage calculations</p>
                     </CrickIQCard>
 
                     <CrickIQCard  className="space-y-4">
                         <h4 className="font-bold text-text-primary border-b border-brand-blue/15 pb-2 mb-2">Clear Data</h4>
-                        <button className="w-full text-left font-semibold text-text-primary p-4 rounded-lg bg-primary hover:bg-white/20 dark:hover:bg-black/30 transition-colors flex justify-between items-center">
+                        <button className="w-full text-left font-semibold text-text-primary p-4 rounded-lg bg-primary hover:bg-black/5 dark:hover:bg-white/5 transition-colors flex justify-between items-center">
                             <span>Clear Quick Match History</span>
                             <span className="text-xs px-2 py-1 bg-danger/20 dark:bg-red-900/30 text-danger rounded-2xl font-bold">Clear</span>
                         </button>
-                        <button className="w-full text-left font-semibold text-text-primary p-4 rounded-lg bg-primary hover:bg-white/20 dark:hover:bg-black/30 transition-colors flex justify-between items-center">
+                        <button className="w-full text-left font-semibold text-text-primary p-4 rounded-lg bg-primary hover:bg-black/5 dark:hover:bg-white/5 transition-colors flex justify-between items-center">
                             <span>Clear Tournament History</span>
                             <span className="text-xs px-2 py-1 bg-danger/20 dark:bg-red-900/30 text-danger rounded-2xl font-bold">Clear</span>
                         </button>
-                        <button className="w-full text-left font-semibold text-text-primary p-4 rounded-lg bg-primary hover:bg-white/20 dark:hover:bg-black/30 transition-colors flex justify-between items-center">
+                        <button className="w-full text-left font-semibold text-text-primary p-4 rounded-lg bg-primary hover:bg-black/5 dark:hover:bg-white/5 transition-colors flex justify-between items-center">
                             <span>Clear Cached Data</span>
                             <span className="text-xs px-2 py-1 bg-danger/20 dark:bg-red-900/30 text-danger rounded-2xl font-bold">Clear</span>
                         </button>
@@ -44,7 +44,7 @@ const WorkspaceSubPagePlaceholder: React.FC<{ subPage: string, title: string }> 
                 <svg className="w-16 h-16 text-text-secondary mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                 </svg>
-                <h3 className="text-h3 text-text-primary">No {title} Yet</h3>
+                <h3 className="text-xl font-bold text-text-primary">No {title} Yet</h3>
                 <p className="text-text-secondary mt-2 text-body">This is a UI placeholder.</p>
             </CrickIQCard>
         );
@@ -155,13 +155,13 @@ const UpgradePagePlaceholder: React.FC = () => {
             </CrickIQCard>
 
             <div className="space-y-4">
-                <h4 className="font-bold text-text-primary text-h2 px-1">Upgrade to Pro</h4>
+                <h4 className="font-bold text-text-primary text-2xl font-bold px-1">Upgrade to Pro</h4>
                 
                 <CrickIQCard  className="space-y-4 relative overflow-hidden">
                     <div className="absolute top-0 right-0 bg-brand-blue/100 text-white text-[10px] font-bold px-4 py-1 rounded-bl-lg uppercase tracking-wider">Popular</div>
                     <div className="flex justify-between items-center border-b border-brand-blue/15 pb-4">
                         <div>
-                            <h5 className="font-bold text-text-primary text-h3">Yearly Pro</h5>
+                            <h5 className="font-bold text-text-primary text-lg">Yearly Pro</h5>
                             <p className="text-sm text-text-secondary mt-1">Best value for regulars</p>
                         </div>
                         <div className="text-right">
@@ -180,7 +180,7 @@ const UpgradePagePlaceholder: React.FC = () => {
                 <CrickIQCard  className="space-y-4">
                     <div className="flex justify-between items-center border-b border-brand-blue/15 pb-4">
                         <div>
-                            <h5 className="font-bold text-text-primary text-h3">Monthly Pro</h5>
+                            <h5 className="font-bold text-text-primary text-lg">Monthly Pro</h5>
                             <p className="text-sm text-text-secondary mt-1">Flexible short term</p>
                         </div>
                         <div className="text-right">
@@ -192,13 +192,13 @@ const UpgradePagePlaceholder: React.FC = () => {
                         <li className="flex items-center gap-2"><svg className="w-4 h-4 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>Unlimited Usage</li>
                         <li className="flex items-center gap-2 text-text-secondary"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>With Ads</li>
                     </ul>
-                    <button className="w-full bg-primary border-2 border-brand-blue/15 hover:border-text-secondary text-text-primary font-bold py-4 rounded-xl transition-colors">Select Monthly</button>
+                    <button className="w-full bg-tertiary border-2 border-brand-blue/15 hover:border-text-secondary text-text-primary font-bold py-4 rounded-xl transition-colors">Select Monthly</button>
                 </CrickIQCard>
 
                 <CrickIQCard  className="space-y-4">
                     <div className="flex justify-between items-center border-b border-brand-blue/15 pb-4">
                         <div>
-                            <h5 className="font-bold text-text-primary text-h3">Lifetime Pro</h5>
+                            <h5 className="font-bold text-text-primary text-lg">Lifetime Pro</h5>
                             <p className="text-sm text-text-secondary mt-1">Pay once, yours forever</p>
                         </div>
                         <div className="text-right">
@@ -216,35 +216,35 @@ const UpgradePagePlaceholder: React.FC = () => {
             </div>
 
             <CrickIQCard  className="space-y-4">
-                <h4 className="font-bold text-text-primary text-h3 border-b border-brand-blue/15 pb-4">Billing Details</h4>
+                <h4 className="font-bold text-text-primary text-lg border-b border-brand-blue/15 pb-4">Billing Details</h4>
                 <div className="space-y-4">
                     <div className="space-y-1">
                         <label className="text-xs font-bold text-text-secondary uppercase tracking-wider">Billing Name</label>
-                        <input type="text" className="w-full p-4 bg-primary border border-brand-blue/15 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-blue text-text-primary transition-shadow" placeholder="Guest User" readOnly />
+                        <input type="text" className="w-full p-3 bg-tertiary border border-brand-blue/15 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-blue text-text-primary transition-shadow" placeholder="Guest User" readOnly />
                     </div>
                     <div className="space-y-1">
                         <label className="text-xs font-bold text-text-secondary uppercase tracking-wider">Billing Email</label>
-                        <input type="email" className="w-full p-4 bg-primary border border-brand-blue/15 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-blue text-text-primary transition-shadow" placeholder="[guest@crickiq.app]" readOnly />
+                        <input type="email" className="w-full p-3 bg-tertiary border border-brand-blue/15 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-blue text-text-primary transition-shadow" placeholder="[guest@crickiq.app]" readOnly />
                     </div>
                     <div className="space-y-1">
                         <label className="text-xs font-bold text-text-secondary uppercase tracking-wider">Billing Address <span className="opacity-50 font-normal lowercase">(optional)</span></label>
-                        <textarea className="w-full p-4 bg-primary border border-brand-blue/15 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-blue text-text-primary transition-shadow" placeholder="Add billing address" rows={2} readOnly></textarea>
+                        <textarea className="w-full p-3 bg-tertiary border border-brand-blue/15 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-blue text-text-primary transition-shadow" placeholder="Add billing address" rows={2} readOnly></textarea>
                     </div>
                 </div>
                 <div className="pt-4 flex gap-2">
-                    <button className="flex-1 bg-primary border border-brand-blue/15 hover:bg-secondary text-text-primary text-button py-2 rounded-lg transition-colors">Change Method</button>
+                    <button className="flex-1 bg-tertiary border border-brand-blue/15 hover:bg-secondary text-text-primary text-button py-2 rounded-lg transition-colors">Change Method</button>
                     <button className="flex-1 bg-danger/20 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-danger text-button py-2 rounded-lg transition-colors">Delete Method</button>
                 </div>
             </CrickIQCard>
 
             <CrickIQCard  className="space-y-4">
-                <h4 className="font-bold text-text-primary text-h3 border-b border-brand-blue/15 pb-4">Subscription Management</h4>
+                <h4 className="font-bold text-text-primary text-lg border-b border-brand-blue/15 pb-4">Subscription Management</h4>
                 <div className="space-y-2">
                     <div className="flex justify-between items-center py-2">
                         <span className="font-semibold text-text-secondary">Renewal Status</span>
                         <span className="font-bold px-4 py-1 bg-warning/20 text-yellow-800 rounded-2xl text-caption uppercase tracking-wider">Active Free</span>
                     </div>
-                    <button className="w-full text-left font-semibold text-text-primary p-4 rounded-lg bg-primary hover:bg-white/20 dark:hover:bg-black/30 transition-colors flex justify-between items-center">
+                    <button className="w-full text-left font-semibold text-text-primary p-4 rounded-lg bg-primary hover:bg-black/5 dark:hover:bg-white/5 transition-colors flex justify-between items-center">
                         <span>Cancel Subscription</span>
                         <span className="text-text-secondary">›</span>
                     </button>
@@ -252,7 +252,7 @@ const UpgradePagePlaceholder: React.FC = () => {
             </CrickIQCard>
 
             <CrickIQCard  className="space-y-4">
-                <h4 className="font-bold text-text-primary text-h3 border-b border-brand-blue/15 pb-4">Purchase History</h4>
+                <h4 className="font-bold text-text-primary text-lg border-b border-brand-blue/15 pb-4">Purchase History</h4>
                 <div className="py-6 flex flex-col items-center justify-center text-center opacity-60">
                     <svg className="w-12 h-12 text-text-secondary mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
@@ -316,7 +316,7 @@ const HelpCenterSubPagePlaceholder: React.FC<{ subPage: string, title?: string, 
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
-                    <h3 className="text-h3 text-text-primary">Tutorial content coming soon</h3>
+                    <h3 className="text-xl font-bold text-text-primary">Tutorial content coming soon</h3>
                     <p className="text-sm text-text-secondary max-w-xs">Detailed guides and interactive videos will be placed here.</p>
                 </CrickIQCard>
             );
@@ -375,15 +375,15 @@ const HelpCenterSubPagePlaceholder: React.FC<{ subPage: string, title?: string, 
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                             </svg>
                         </div>
-                        <h4 className="font-bold text-text-primary text-h3">Email Us</h4>
+                        <h4 className="font-bold text-text-primary text-lg">Email Us</h4>
                         <p className="text-sm text-brand-blue bg-brand-blue/10 px-4 py-2 rounded-2xl select-all">support@crickiq.app</p>
                     </CrickIQCard>
 
                     <CrickIQCard  className="space-y-4">
-                        <h4 className="font-bold text-text-primary text-h3 border-b border-brand-blue/15 pb-2">Send a Message</h4>
+                        <h4 className="font-bold text-text-primary text-lg border-b border-brand-blue/15 pb-2">Send a Message</h4>
                         <div className="space-y-4 pointer-events-none">
-                            <input type="text" placeholder="Subject" className="w-full p-4 bg-primary border border-brand-blue/15 rounded-xl" readOnly />
-                            <textarea placeholder="Describe your issue..." rows={4} className="w-full p-4 bg-primary border border-brand-blue/15 rounded-xl" readOnly></textarea>
+                            <input type="text" placeholder="Subject" className="w-full p-3 bg-tertiary border border-brand-blue/15 rounded-xl" readOnly />
+                            <textarea placeholder="Describe your issue..." rows={4} className="w-full p-3 bg-tertiary border border-brand-blue/15 rounded-xl" readOnly></textarea>
                             <button className="w-full bg-brand-blue text-white font-bold py-4 rounded-xl">Send Message</button>
                         </div>
                         <p className="text-caption text-text-secondary text-center mt-2">Support submission is currently a placeholder.</p>
@@ -427,7 +427,7 @@ const HelpCenterSubPagePlaceholder: React.FC<{ subPage: string, title?: string, 
 
         return (
             <CrickIQCard  className="flex flex-col items-center justify-center text-center h-64 mt-4">
-                <h3 className="text-h3 text-text-primary">No Content</h3>
+                <h3 className="text-xl font-bold text-text-primary">No Content</h3>
             </CrickIQCard>
         );
     };
@@ -452,11 +452,11 @@ const HelpCenterPagePlaceholder: React.FC<{ onNavigate: (page: string, title: st
                             </svg>
                         </div>
                         <div>
-                            <span className="font-bold text-text-primary text-h3">Tutorials</span>
+                            <span className="font-bold text-text-primary text-lg">Tutorials</span>
                             <p className="text-caption text-text-secondary mt-0.5">Learn how to use CrickIQ</p>
                         </div>
                     </div>
-                    <span className="text-text-secondary text-h2">›</span>
+                    <span className="text-text-secondary text-2xl font-bold">›</span>
                 </button>
 
                 <button onClick={() => onNavigate('faq', 'FAQ')} className="w-full text-left bg-primary/50 dark:bg-black/20 hover:bg-secondary p-4 border-b border-brand-blue/15 flex items-center justify-between transition-colors">
@@ -467,11 +467,11 @@ const HelpCenterPagePlaceholder: React.FC<{ onNavigate: (page: string, title: st
                             </svg>
                         </div>
                         <div>
-                            <span className="font-bold text-text-primary text-h3">FAQ</span>
+                            <span className="font-bold text-text-primary text-lg">FAQ</span>
                             <p className="text-caption text-text-secondary mt-0.5">Frequently asked questions</p>
                         </div>
                     </div>
-                    <span className="text-text-secondary text-h2">›</span>
+                    <span className="text-text-secondary text-2xl font-bold">›</span>
                 </button>
 
                 <button onClick={() => onNavigate('contact', 'Contact Support')} className="w-full text-left bg-primary/50 dark:bg-black/20 hover:bg-secondary p-4 border-b border-brand-blue/15 flex items-center justify-between transition-colors">
@@ -482,11 +482,11 @@ const HelpCenterPagePlaceholder: React.FC<{ onNavigate: (page: string, title: st
                             </svg>
                         </div>
                         <div>
-                            <span className="font-bold text-text-primary text-h3">Contact Support</span>
+                            <span className="font-bold text-text-primary text-lg">Contact Support</span>
                             <p className="text-caption text-text-secondary mt-0.5">Get help from our team</p>
                         </div>
                     </div>
-                    <span className="text-text-secondary text-h2">›</span>
+                    <span className="text-text-secondary text-2xl font-bold">›</span>
                 </button>
 
                 <button onClick={() => onNavigate('about', 'About CrickIQ')} className="w-full text-left bg-primary/50 dark:bg-black/20 hover:bg-secondary p-4 flex items-center justify-between transition-colors">
@@ -497,11 +497,11 @@ const HelpCenterPagePlaceholder: React.FC<{ onNavigate: (page: string, title: st
                             </svg>
                         </div>
                         <div>
-                            <span className="font-bold text-text-primary text-h3">About CrickIQ</span>
+                            <span className="font-bold text-text-primary text-lg">About CrickIQ</span>
                             <p className="text-caption text-text-secondary mt-0.5">Version & legal information</p>
                         </div>
                     </div>
-                    <span className="text-text-secondary text-h2">›</span>
+                    <span className="text-text-secondary text-2xl font-bold">›</span>
                 </button>
             </CrickIQCard>
             
@@ -518,7 +518,7 @@ const SettingsSubPagePlaceholder: React.FC<{ subPage: string, title: string }> =
             return (
                 <div className="space-y-6">
                     <CrickIQCard  className="space-y-4">
-                        <h4 className="font-bold text-text-primary text-h3 border-b border-brand-blue/15 pb-4">Theme</h4>
+                        <h4 className="font-bold text-text-primary text-lg border-b border-brand-blue/15 pb-4">Theme</h4>
                         <div className="grid grid-cols-2 gap-4">
                             <button className="border-2 border-brand-blue bg-brand-blue/10 rounded-xl p-4 flex flex-col items-center justify-center gap-2 cursor-pointer transition-colors relative overflow-hidden">
                                 <div className="absolute top-2 right-2 w-3 h-3 bg-brand-blue rounded-full"></div>
@@ -527,7 +527,7 @@ const SettingsSubPagePlaceholder: React.FC<{ subPage: string, title: string }> =
                                 </svg>
                                 <span className="text-button text-brand-blue">Light Mode</span>
                             </button>
-                            <button className="border border-brand-blue/15 bg-primary/50 hover:bg-white/20 dark:hover:bg-black/30 rounded-xl p-4 flex flex-col items-center justify-center gap-2 cursor-pointer transition-colors">
+                            <button className="border border-brand-blue/15 bg-primary/50 hover:bg-black/5 dark:hover:bg-white/5 rounded-xl p-4 flex flex-col items-center justify-center gap-2 cursor-pointer transition-colors">
                                 <svg className="w-8 h-8 text-text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                                 </svg>
@@ -537,16 +537,16 @@ const SettingsSubPagePlaceholder: React.FC<{ subPage: string, title: string }> =
                     </CrickIQCard>
                     
                     <CrickIQCard  className="space-y-4">
-                        <h4 className="font-bold text-text-primary text-h3 border-b border-brand-blue/15 pb-4">Font Size</h4>
+                        <h4 className="font-bold text-text-primary text-lg border-b border-brand-blue/15 pb-4">Font Size</h4>
                         <div className="space-y-2">
-                            <button className="w-full text-left font-semibold text-text-secondary p-4 rounded-lg bg-primary/50 hover:bg-white/20 dark:hover:bg-black/30 transition-colors flex justify-between items-center">
+                            <button className="w-full text-left font-semibold text-text-secondary p-4 rounded-lg bg-primary/50 hover:bg-black/5 dark:hover:bg-white/5 transition-colors flex justify-between items-center">
                                 <span className="text-sm">Small</span>
                             </button>
                             <button className="w-full text-left font-bold text-text-primary p-4 rounded-lg bg-brand-blue/10 border border-brand-blue transition-colors flex justify-between items-center relative">
                                 <span className="text-base">Medium</span>
                                 <div className="absolute right-4 w-2 h-2 bg-brand-blue rounded-full"></div>
                             </button>
-                            <button className="w-full text-left font-semibold text-text-secondary p-4 rounded-lg bg-primary/50 hover:bg-white/20 dark:hover:bg-black/30 transition-colors flex justify-between items-center">
+                            <button className="w-full text-left font-semibold text-text-secondary p-4 rounded-lg bg-primary/50 hover:bg-black/5 dark:hover:bg-white/5 transition-colors flex justify-between items-center">
                                 <span className="text-lg">Large</span>
                             </button>
                         </div>
@@ -582,7 +582,7 @@ const SettingsSubPagePlaceholder: React.FC<{ subPage: string, title: string }> =
                                 <h5 className="font-bold text-text-primary text-body">Subscription Alerts</h5>
                                 <p className="text-caption text-text-secondary mt-0.5">Billing and renewal notices</p>
                             </div>
-                            <div className="w-12 h-6 bg-gray-300 dark:bg-gray-600 rounded-2xl flex items-center justify-start p-1 cursor-pointer">
+                            <div className="w-12 h-6 bg-tertiary rounded-2xl flex items-center justify-start p-1 cursor-pointer">
                                 <div className="w-4 h-4 bg-white rounded-full shadow-sm"></div>
                             </div>
                         </div>
@@ -595,9 +595,9 @@ const SettingsSubPagePlaceholder: React.FC<{ subPage: string, title: string }> =
             return (
                 <div className="space-y-4">
                     <CrickIQCard  className="space-y-4">
-                        <div className="bg-primary border border-brand-blue rounded-xl p-4 relative overflow-hidden transition-colors cursor-pointer">
+                        <div className="bg-tertiary border border-brand-blue rounded-xl p-4 relative overflow-hidden transition-colors cursor-pointer">
                             <div className="absolute top-4 right-4 w-4 h-4 rounded-full border-4 border-brand-blue bg-white dark:bg-black"></div>
-                            <h5 className="font-bold text-text-primary text-h3">Pro Mode</h5>
+                            <h5 className="font-bold text-text-primary text-lg">Pro Mode</h5>
                             <p className="text-sm text-brand-blue mt-1 mb-4">Full App Access</p>
                             <ul className="text-caption text-text-secondary space-y-1.5 opacity-80">
                                 <li className="flex items-center gap-1.5"><svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>Quick Match Dashboard</li>
@@ -605,9 +605,9 @@ const SettingsSubPagePlaceholder: React.FC<{ subPage: string, title: string }> =
                             </ul>
                         </div>
 
-                        <div className="bg-primary/50 border border-brand-blue/15 hover:bg-white/20 dark:hover:bg-black/30 rounded-xl p-4 relative transition-colors cursor-pointer opacity-70">
+                        <div className="bg-tertiary border border-brand-blue/15 hover:bg-black/5 dark:hover:bg-white/5 rounded-xl p-4 relative transition-colors cursor-pointer opacity-70">
                             <div className="absolute top-4 right-4 w-4 h-4 rounded-full border-2 border-brand-blue/15"></div>
-                            <h5 className="font-bold text-text-primary text-h3">Basic Mode</h5>
+                            <h5 className="font-bold text-text-primary text-lg">Basic Mode</h5>
                             <p className="text-sm text-text-secondary mt-1 mb-4">Simplified UI</p>
                             <ul className="text-caption text-text-secondary space-y-1.5 opacity-80">
                                 <li className="flex items-center gap-1.5"><svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>Quick Match Dashboard Only</li>
@@ -624,7 +624,7 @@ const SettingsSubPagePlaceholder: React.FC<{ subPage: string, title: string }> =
 
         return (
             <CrickIQCard  className="flex flex-col items-center justify-center text-center h-64 mt-4">
-                <h3 className="text-h3 text-text-primary">No Config Found</h3>
+                <h3 className="text-xl font-bold text-text-primary">No Config Found</h3>
             </CrickIQCard>
         );
     };
@@ -702,25 +702,25 @@ const PrivacySubPagePlaceholder: React.FC<{ subPage: string, title?: string, onN
             return (
                 <div className="space-y-6">
                     <CrickIQCard  className="space-y-4">
-                        <h4 className="font-bold text-text-primary text-h3 border-b border-brand-blue/15 pb-4">User Data Privacy</h4>
+                        <h4 className="font-bold text-text-primary text-lg border-b border-brand-blue/15 pb-4">User Data Privacy</h4>
                         <p className="text-sm text-text-secondary leading-relaxed">
                             CrickIQ is designed offline-first. Your standard match data remains locally on your device unless explicitly synced to the cloud. We do not sell your personal data.
                         </p>
                     </CrickIQCard>
                     <CrickIQCard  className="space-y-4">
-                        <h4 className="font-bold text-text-primary text-h3 border-b border-brand-blue/15 pb-4">Account Data</h4>
+                        <h4 className="font-bold text-text-primary text-lg border-b border-brand-blue/15 pb-4">Account Data</h4>
                         <p className="text-sm text-text-secondary leading-relaxed">
                             If you create an account, basic identifying information (such as email) is securely stored to manage your subscription and cloud backups.
                         </p>
                     </CrickIQCard>
                     <CrickIQCard  className="space-y-4">
-                        <h4 className="font-bold text-text-primary text-h3 border-b border-brand-blue/15 pb-4">Offline Storage</h4>
+                        <h4 className="font-bold text-text-primary text-lg border-b border-brand-blue/15 pb-4">Offline Storage</h4>
                         <p className="text-sm text-text-secondary leading-relaxed">
                             Match data is stored in your device's local database. Clearing your browser/app data will clear your local match history.
                         </p>
                     </CrickIQCard>
                     <CrickIQCard  className="space-y-4">
-                        <h4 className="font-bold text-text-primary text-h3 border-b border-brand-blue/15 pb-4">User Rights</h4>
+                        <h4 className="font-bold text-text-primary text-lg border-b border-brand-blue/15 pb-4">User Rights</h4>
                         <p className="text-sm text-text-secondary leading-relaxed">
                             You have the right to request deletion of any cloud-synced account data by contacting support. Local data can be deleted from settings.
                         </p>
@@ -733,19 +733,19 @@ const PrivacySubPagePlaceholder: React.FC<{ subPage: string, title?: string, onN
             return (
                 <div className="space-y-6">
                     <CrickIQCard  className="space-y-4">
-                        <h4 className="font-bold text-text-primary text-h3 border-b border-brand-blue/15 pb-4">App Usage Rules</h4>
+                        <h4 className="font-bold text-text-primary text-lg border-b border-brand-blue/15 pb-4">App Usage Rules</h4>
                         <p className="text-sm text-text-secondary leading-relaxed">
                             By using CrickIQ, you agree to these placeholders. This app is provided as-is for scoring cricket matches.
                         </p>
                     </CrickIQCard>
                     <CrickIQCard  className="space-y-4">
-                        <h4 className="font-bold text-text-primary text-h3 border-b border-brand-blue/15 pb-4">Tournament Usage</h4>
+                        <h4 className="font-bold text-text-primary text-lg border-b border-brand-blue/15 pb-4">Tournament Usage</h4>
                         <p className="text-sm text-text-secondary leading-relaxed">
                             You are responsible for the tournament data you generate and distribute.
                         </p>
                     </CrickIQCard>
                     <CrickIQCard  className="space-y-4">
-                        <h4 className="font-bold text-text-primary text-h3 border-b border-brand-blue/15 pb-4">Limitation of Liability</h4>
+                        <h4 className="font-bold text-text-primary text-lg border-b border-brand-blue/15 pb-4">Limitation of Liability</h4>
                         <p className="text-sm text-text-secondary leading-relaxed">
                             We are not responsible for any lost match data due to device failure, clearing of browser cache, or beta testing.
                         </p>
@@ -758,19 +758,19 @@ const PrivacySubPagePlaceholder: React.FC<{ subPage: string, title?: string, onN
             return (
                 <div className="space-y-6">
                     <CrickIQCard  className="space-y-4">
-                        <h4 className="font-bold text-text-primary text-h3 border-b border-brand-blue/15 pb-4">Monthly Plan Policy</h4>
+                        <h4 className="font-bold text-text-primary text-lg border-b border-brand-blue/15 pb-4">Monthly Plan Policy</h4>
                         <p className="text-sm text-text-secondary leading-relaxed">
                             Monthly subscriptions can be cancelled at any time but are non-refundable for the active billing period.
                         </p>
                     </CrickIQCard>
                     <CrickIQCard  className="space-y-4">
-                        <h4 className="font-bold text-text-primary text-h3 border-b border-brand-blue/15 pb-4">Yearly Plan Policy</h4>
+                        <h4 className="font-bold text-text-primary text-lg border-b border-brand-blue/15 pb-4">Yearly Plan Policy</h4>
                         <p className="text-sm text-text-secondary leading-relaxed">
                             Yearly subscriptions offer a 7-day money-back guarantee. After 7 days, they are non-refundable.
                         </p>
                     </CrickIQCard>
                     <CrickIQCard  className="space-y-4">
-                        <h4 className="font-bold text-text-primary text-h3 border-b border-brand-blue/15 pb-4">Refund Processing</h4>
+                        <h4 className="font-bold text-text-primary text-lg border-b border-brand-blue/15 pb-4">Refund Processing</h4>
                         <p className="text-sm text-text-secondary leading-relaxed">
                             Play Store or App Store purchases are subject to the respective platform's refund policies and must be initiated through them. Note this is a placeholder.
                         </p>
@@ -783,13 +783,13 @@ const PrivacySubPagePlaceholder: React.FC<{ subPage: string, title?: string, onN
             return (
                 <div className="space-y-6">
                     <CrickIQCard  className="space-y-4">
-                        <h4 className="font-bold text-text-primary text-h3 border-b border-brand-blue/15 pb-4">Match Data Usage</h4>
+                        <h4 className="font-bold text-text-primary text-lg border-b border-brand-blue/15 pb-4">Match Data Usage</h4>
                         <p className="text-sm text-text-secondary leading-relaxed">
                             Local match data is yours. If synced to the cloud, it is used only to provide your services across devices.
                         </p>
                     </CrickIQCard>
                     <CrickIQCard  className="space-y-4">
-                        <h4 className="font-bold text-text-primary text-h3 border-b border-brand-blue/15 pb-4">Analytics Usage</h4>
+                        <h4 className="font-bold text-text-primary text-lg border-b border-brand-blue/15 pb-4">Analytics Usage</h4>
                         <p className="text-sm text-text-secondary leading-relaxed">
                             We may collect anonymous crash reports and usage analytics to improve app stability and user experience.
                         </p>
@@ -800,7 +800,7 @@ const PrivacySubPagePlaceholder: React.FC<{ subPage: string, title?: string, onN
 
         return (
             <CrickIQCard  className="flex flex-col items-center justify-center text-center h-64 mt-4">
-                <h3 className="text-h3 text-text-primary">Legal Information Pending</h3>
+                <h3 className="text-xl font-bold text-text-primary">Legal Information Pending</h3>
             </CrickIQCard>
         );
     };
@@ -824,11 +824,11 @@ const PrivacyPagePlaceholder: React.FC<{ onNavigate: (page: string, title: strin
                             </svg>
                         </div>
                         <div>
-                            <span className="font-bold text-text-primary text-h3">Privacy Policy</span>
+                            <span className="font-bold text-text-primary text-lg">Privacy Policy</span>
                             <p className="text-caption text-text-secondary mt-0.5">How we handle your data</p>
                         </div>
                     </div>
-                    <span className="text-text-secondary text-h2">›</span>
+                    <span className="text-text-secondary text-2xl font-bold">›</span>
                 </button>
 
                 <button onClick={() => onNavigate('terms', 'Terms & Conditions')} className="w-full text-left bg-primary/50 dark:bg-black/20 hover:bg-secondary p-4 border-b border-brand-blue/15 flex items-center justify-between transition-colors">
@@ -839,11 +839,11 @@ const PrivacyPagePlaceholder: React.FC<{ onNavigate: (page: string, title: strin
                             </svg>
                         </div>
                         <div>
-                            <span className="font-bold text-text-primary text-h3">Terms & Conditions</span>
+                            <span className="font-bold text-text-primary text-lg">Terms & Conditions</span>
                             <p className="text-caption text-text-secondary mt-0.5">App usage rules and agreements</p>
                         </div>
                     </div>
-                    <span className="text-text-secondary text-h2">›</span>
+                    <span className="text-text-secondary text-2xl font-bold">›</span>
                 </button>
 
                 <button onClick={() => onNavigate('refund', 'Subscription Refund Policy')} className="w-full text-left bg-primary/50 dark:bg-black/20 hover:bg-secondary p-4 border-b border-brand-blue/15 flex items-center justify-between transition-colors">
@@ -854,11 +854,11 @@ const PrivacyPagePlaceholder: React.FC<{ onNavigate: (page: string, title: strin
                             </svg>
                         </div>
                         <div>
-                            <span className="font-bold text-text-primary text-h3">Subscription Refund Policy</span>
+                            <span className="font-bold text-text-primary text-lg">Subscription Refund Policy</span>
                             <p className="text-caption text-text-secondary mt-0.5">Cancellations and refunds</p>
                         </div>
                     </div>
-                    <span className="text-text-secondary text-h2">›</span>
+                    <span className="text-text-secondary text-2xl font-bold">›</span>
                 </button>
 
                 <button onClick={() => onNavigate('data_usage', 'Data Usage Policy')} className="w-full text-left bg-primary/50 dark:bg-black/20 hover:bg-secondary p-4 flex items-center justify-between transition-colors">
@@ -869,11 +869,11 @@ const PrivacyPagePlaceholder: React.FC<{ onNavigate: (page: string, title: strin
                             </svg>
                         </div>
                         <div>
-                            <span className="font-bold text-text-primary text-h3">Data Usage Policy</span>
+                            <span className="font-bold text-text-primary text-lg">Data Usage Policy</span>
                             <p className="text-caption text-text-secondary mt-0.5">How we utilize your activity</p>
                         </div>
                     </div>
-                    <span className="text-text-secondary text-h2">›</span>
+                    <span className="text-text-secondary text-2xl font-bold">›</span>
                 </button>
             </CrickIQCard>
             
@@ -908,7 +908,7 @@ const ProfilePagePlaceholder: React.FC = () => {
 
             <CrickIQCard  className="space-y-6">
                <div className="flex justify-between items-center border-b border-brand-blue/15 pb-4">
-                    <h4 className="font-bold text-text-primary text-h3">Personal Details</h4>
+                    <h4 className="font-bold text-text-primary text-lg">Personal Details</h4>
                     <button 
                         onClick={() => setIsEditing(!isEditing)}
                         className="text-brand-blue text-body font-bold hover:underline bg-brand-blue/10 hover:bg-brand-blue/20 px-4 py-1 rounded-2xl transition-colors"
@@ -920,9 +920,9 @@ const ProfilePagePlaceholder: React.FC = () => {
                 <div className="space-y-1">
                     <label className="text-xs font-bold text-text-secondary uppercase tracking-wider">Name</label>
                     {isEditing ? (
-                            <input type="text" value={name} onChange={e => setName(e.target.value)} className="w-full p-4 mt-1 bg-primary border border-brand-blue/15 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-blue text-text-primary transition-shadow" placeholder="Your Name" />
+                            <input type="text" value={name} onChange={e => setName(e.target.value)} className="w-full p-4 mt-1 bg-tertiary border border-brand-blue/15 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-blue text-text-primary transition-shadow" placeholder="Your Name" />
                     ) : (
-                        <p className="font-bold text-text-primary text-h3">{name}</p>
+                        <p className="font-bold text-text-primary text-lg">{name}</p>
                     )}
                 </div>
 
@@ -939,7 +939,7 @@ const ProfilePagePlaceholder: React.FC = () => {
                 <div className="space-y-1 pt-2 border-t border-brand-blue/15 border-dashed">
                     <label className="text-xs font-bold text-text-secondary uppercase tracking-wider">Mobile Number <span className="opacity-50 font-normal lowercase">(optional)</span></label>
                     {isEditing ? (
-                        <input type="tel" value={mobile} onChange={e => setMobile(e.target.value)} placeholder="Add mobile number" className="w-full p-4 mt-1 bg-primary border border-brand-blue/15 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-blue text-text-primary transition-shadow" />
+                        <input type="tel" value={mobile} onChange={e => setMobile(e.target.value)} placeholder="Add mobile number" className="w-full p-4 mt-1 bg-tertiary border border-brand-blue/15 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-blue text-text-primary transition-shadow" />
                     ) : (
                         <p className="font-medium text-text-primary">{mobile || <span className="text-text-secondary italic">Not provided</span>}</p>
                     )}
@@ -947,7 +947,7 @@ const ProfilePagePlaceholder: React.FC = () => {
             </CrickIQCard>
 
             <CrickIQCard  className="space-y-4">
-                <h4 className="font-bold text-text-primary text-h3 border-b border-brand-blue/15 pb-4">Account Status</h4>
+                <h4 className="font-bold text-text-primary text-lg border-b border-brand-blue/15 pb-4">Account Status</h4>
                 
                 <div className="flex justify-between items-center py-2">
                     <div className="flex items-center gap-4">
@@ -958,7 +958,7 @@ const ProfilePagePlaceholder: React.FC = () => {
                         </div>
                         <span className="font-semibold text-text-secondary">Type</span>
                     </div>
-                    <span className="font-bold text-text-primary text-h3">{accountType}</span>
+                    <span className="font-bold text-text-primary text-lg">{accountType}</span>
                 </div>
                 
                 <div className="flex justify-between items-center py-2">
@@ -968,7 +968,7 @@ const ProfilePagePlaceholder: React.FC = () => {
                         </div>
                         <span className="font-semibold text-text-secondary">Subscription</span>
                     </div>
-                    <span className="font-bold px-4 py-1 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-2xl text-caption uppercase tracking-wider">
+                    <span className="font-bold px-4 py-1 bg-tertiary text-text-secondary rounded-2xl text-caption uppercase tracking-wider">
                         {subscriptionStatus}
                     </span>
                 </div>
@@ -1116,7 +1116,7 @@ const Drawer: React.FC<DrawerProps> = ({ isOpen, onClose }) => {
                     <div className="space-y-4">
                         <CrickIQCard  className="flex flex-col justify-center items-center text-center">
                             <HardDriveIcon className="w-12 h-12 mb-4 text-brand-blue" />
-                            <h3 className="text-h2 text-text-primary">Future Backup System</h3>
+                            <h3 className="text-2xl md:text-3xl font-bold tracking-tight text-text-primary">Future Backup System</h3>
                             <p className="text-text-secondary mt-2">Securely backup your matches and tournament data to the cloud.</p>
                         </CrickIQCard>
                         <CrickIQCard  className="flex justify-between items-center dark:">
@@ -1124,7 +1124,7 @@ const Drawer: React.FC<DrawerProps> = ({ isOpen, onClose }) => {
                                 <h4 className="font-bold text-text-primary">Cloud Sync</h4>
                                 <p className="text-caption text-text-secondary">Sync data across devices</p>
                             </div>
-                            <div className="w-10 h-6 bg-gray-300 dark:bg-gray-600 rounded-2xl"></div>
+                            <div className="w-10 h-6 bg-tertiary rounded-2xl"></div>
                         </CrickIQCard>
                         <div className="grid grid-cols-2 gap-4">
                             <CrickIQCard  className="h-32 h-32 flex flex-col items-center justify-center gap-2 cursor-pointer hover: dark:hover: transition-colors">
@@ -1166,7 +1166,7 @@ const Drawer: React.FC<DrawerProps> = ({ isOpen, onClose }) => {
                             <button className="w-full py-4 rounded-xl font-bold bg-danger/100 hover:bg-red-600 text-white transition-colors shadow-lg">
                                 Yes, Logout (Placeholder)
                             </button>
-                            <button onClick={handleManualClose} className="w-full py-4 rounded-xl font-bold bg-primary border border-brand-blue/15 text-text-primary hover:bg-secondary transition-colors">
+                            <button onClick={handleManualClose} className="w-full py-4 rounded-xl font-bold bg-tertiary border border-brand-blue/15 text-text-primary hover:bg-secondary transition-colors">
                                 Cancel
                             </button>
                         </div>

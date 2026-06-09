@@ -261,7 +261,7 @@ const ScheduleGenerator: React.FC<UseCrickIQStateReturn> = (props) => {
                 Tournament Fixtures
             </h2>
             <CrickIQCard>
-                <h3 className="text-h3 text-text-primary mb-2">1. Select Tournament</h3>
+                <h3 className="text-xl font-bold text-text-primary mb-2">1. Select Tournament</h3>
                 <select value={selectedTournamentId} onChange={e => { setSelectedTournamentId(e.target.value); }} className="w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue">
                     <option value="" disabled>Select a tournament...</option>
                     {tournamentOptions.map(t => <option key={t.id} value={t.id}>{t.name} ({t.teamIds.length} teams)</option>)}
@@ -269,7 +269,7 @@ const ScheduleGenerator: React.FC<UseCrickIQStateReturn> = (props) => {
             </CrickIQCard>
 
             <CrickIQCard>
-                <h3 className="text-h3 text-text-primary mb-4">2. Configure Fixtures</h3>
+                <h3 className="text-xl font-bold text-text-primary mb-4">2. Configure Fixtures</h3>
                 <div className="space-y-4">
                     <div>
                         <label className="text-table-header text-text-secondary">Tournament Format</label>
@@ -337,7 +337,7 @@ const ScheduleGenerator: React.FC<UseCrickIQStateReturn> = (props) => {
 
             {generatedSchedule && (
                 <CrickIQCard  className="animate-fade-in">
-                    <h3 className="text-h3 text-text-primary mb-4">3. Fixtures Preview</h3>
+                    <h3 className="text-xl font-bold text-text-primary mb-4">3. Fixtures Preview</h3>
                     <div className="space-y-4 max-h-96 overflow-y-auto no-scrollbar pr-2">
                         {renderedSchedule && 'error' in renderedSchedule ? (
                             <p className="text-highlight text-body text-center p-2 bg-highlight/10 rounded-md">{renderedSchedule.error as string}</p>

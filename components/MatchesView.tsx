@@ -120,7 +120,7 @@ const MatchesView: React.FC<MatchesViewProps> = ({
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
-                <h2 className="text-h2 font-bold text-text-primary">Matches</h2>
+                <h2 className="text-2xl font-bold tracking-tight text-text-primary">Matches</h2>
                 <div className="flex items-center gap-2">
                     <span className={`text-sm ${matchType ? 'text-gray-500' : 'text-text-primary'}`}>Single Match</span>
                     <button 
@@ -134,7 +134,7 @@ const MatchesView: React.FC<MatchesViewProps> = ({
             </div>
 
             {/* Filters Row */}
-            <div className="flex flex-col sm:flex-row gap-3 p-3.5 bg-primary rounded-2xl border border-brand-blue/10 dark:border-brand-blue/20">
+            <div className="flex flex-col sm:flex-row gap-3 p-3.5 bg-tertiary rounded-2xl shadow-sm">
                 <div className="flex-1 flex flex-col gap-1 min-w-[140px]">
                     <label htmlFor="match-status-filter" className="text-[10px] font-extrabold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
                         Match Status
@@ -143,7 +143,7 @@ const MatchesView: React.FC<MatchesViewProps> = ({
                         id="match-status-filter"
                         value={selectedStatus}
                         onChange={(e) => setSelectedStatus(e.target.value)}
-                        className="py-1.5 px-3 bg-primary text-text-primary border border-brand-blue/15 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-brand-blue transition-all"
+                        className="py-1.5 px-3 bg-tertiary text-text-primary border border-brand-blue/15 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-brand-blue transition-all"
                     >
                         <option value="all">All Matches</option>
                         <option value="completed">Completed</option>
@@ -167,7 +167,7 @@ const MatchesView: React.FC<MatchesViewProps> = ({
                                     setMatchType(true);
                                 }
                             }}
-                            className="py-1.5 px-3 bg-primary text-text-primary border border-brand-blue/15 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-brand-blue transition-all"
+                            className="py-1.5 px-3 bg-tertiary text-text-primary border border-brand-blue/15 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-brand-blue transition-all"
                         >
                             <option value="all">All Tournaments</option>
                             {allTournaments.map((t) => (

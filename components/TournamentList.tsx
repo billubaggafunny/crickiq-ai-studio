@@ -115,8 +115,8 @@ const TournamentList: React.FC<TournamentListProps> = ({ tournaments, teams, mat
                                 <div className="absolute top-0 left-0 bottom-0 w-1.5 opacity-80" style={{ backgroundColor: tournament.theme || '#4285F4' }}></div>
                                 <div className="flex justify-between items-start mb-3 pl-2">
                                     <div className="pr-2 overflow-hidden flex-1">
-                                        <h4 className="font-semibold text-[15px] sm:text-[17px] text-text-primary tracking-tight truncate">{tournament.name}</h4>
-                                        <p className="text-[10px] sm:text-[11px] text-text-secondary font-bold tracking-wider uppercase mt-1 truncate">
+                                        <h4 className="text-lg font-bold text-text-primary truncate">{tournament.name}</h4>
+                                        <p className="text-xs text-text-secondary font-bold tracking-wider uppercase mt-1 truncate">
                                            {tournament.organizerName ? `${tournament.organizerName} • ` : ''} {tournament.tournamentType || 'LOCAL TOURNAMENT'}
                                         </p>
                                     </div>

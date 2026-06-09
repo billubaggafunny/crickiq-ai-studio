@@ -246,7 +246,7 @@ const TournamentManager: React.FC<TournamentManagerProps> = (props) => {
             <div className="border-b border-brand-blue/15 flex items-center gap-4 overflow-x-auto no-scrollbar pb-1">
                 <button
                     onClick={() => setHomeView('quickMatches')}
-                    className={`py-2 px-1 font-bold transition-colors duration-300 text-body flex-shrink-0 ${homeView === 'quickMatches' ? 'border-b-2 border-brand-blue text-brand-blue dark:text-white dark:border-brand-blue' : 'border-b-2 border-transparent text-text-secondary dark:text-gray-300 hover:text-text-primary'}`}
+                    className={`py-2 px-1 font-bold transition-colors duration-300 text-body flex-shrink-0 ${homeView === 'quickMatches' ? 'border-b-2 border-accent text-accent' : 'border-b-2 border-transparent text-text-secondary hover:text-text-primary'}`}
                 >
                     Create
                 </button>
@@ -258,7 +258,7 @@ const TournamentManager: React.FC<TournamentManagerProps> = (props) => {
                     <div className="space-y-6 animate-fade-in">
                         <CrickIQCard  className="flex flex-col">
                             <div className="flex justify-between items-center">
-                                <h3 className="text-h3 text-text-primary flex items-center gap-2">
+                                <h3 className="text-xl md:text-2xl font-bold tracking-tight text-text-primary">
                                     <LightningBoltIcon className="w-5 h-5" /> Quick Match
                                 </h3>
                                 <div className="flex items-center gap-2">
@@ -283,9 +283,9 @@ const TournamentManager: React.FC<TournamentManagerProps> = (props) => {
                                         <div className="flex flex-col flex-grow">
                                             {liveMatchSummary ? (
                                                 <div className="space-y-4 text-body flex-grow">
-                                                    <div className="text-center bg-primary/50 p-2 rounded-lg">
+                                                    <div className="text-center bg-tertiary p-4 rounded-xl border border-black/5 dark:border-white/5">
                                                         <p className="text-xs font-semibold text-text-secondary">{liveMatchSummary.battingTeam.name} Batting</p>
-                                                        <p className="text-3xl text-brand-blue">{liveMatchSummary.score}-{liveMatchSummary.wickets}</p>
+                                                        <p className="text-4xl md:text-5xl font-bold tracking-tight text-brand-blue py-1">{liveMatchSummary.score}-{liveMatchSummary.wickets}</p>
                                                         <p className="text-sm font-bold text-text-secondary">Overs: {liveMatchSummary.overs}</p>
                                                     </div>
                                                     
@@ -367,7 +367,13 @@ const TournamentManager: React.FC<TournamentManagerProps> = (props) => {
                                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                                 <input type="number" value={quickOvers} onChange={e => setQuickOvers(e.target.value === '' ? '' : parseInt(e.target.value, 10))} placeholder="Overs" className="w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" />
                                                 <input type="number" value={quickMaxOvers} onChange={e => setQuickMaxOvers(e.target.value === '' ? '' : parseInt(e.target.value, 10))} placeholder="Max Overs/Bowler" className="w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" />
-                                                <input type="number" value={quickPlayers} onChange={handleQuickPlayersChange} placeholder="Players" className="w-full p-2 bg-primary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" />
+                                                <input 
+                                                    type="number" 
+                                                    value={quickPlayers} 
+                                                    onChange={handleQuickPlayersChange} 
+                                                    placeholder="Players/Team" 
+                                                    className="w-full p-2 bg-tertiary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue" 
+                                                />
                                             </div>
                                             <Button
                                                 onClick={handleAddQuickMatch}

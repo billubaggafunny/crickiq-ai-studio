@@ -88,6 +88,11 @@ const TimeScroller: React.FC<TimeScrollerProps> = ({ value, onChange }) => {
         propagateChange(hour, formattedMinute, period);
     };
 
+    const paddedHour = hour === '' ? '' : String(parseInt(hour, 10) || 0).padStart(2, '0');
+    const paddedMinute = minute === '' ? '' : String(parseInt(minute, 10) || 0).padStart(2, '0');
+    const handleHourInput = handleHourChange;
+    const handleMinuteInput = handleMinuteChange;
+
     const handlePeriodChange = (newPeriod: 'AM' | 'PM') => {
         setPeriod(newPeriod);
         propagateChange(hour, minute, newPeriod);
@@ -95,24 +100,20 @@ const TimeScroller: React.FC<TimeScrollerProps> = ({ value, onChange }) => {
 
     return (
         <div className="flex items-center justify-between gap-2 bg-primary border border-brand-blue/15 rounded-lg p-2 h-14">
-            <input
-                type="text"
-                inputMode="numeric"
-                value={hour}
-                onChange={handleHourChange}
+            <input 
+                value={paddedHour}
+                onChange={handleHourInput}
                 onBlur={handleHourBlur}
-                className="w-16 text-center text-h3 font-semibold bg-secondary rounded-md py-1 text-text-primary focus:outline-none focus:ring-2 focus:ring-brand-blue"
+                className="w-10 text-center text-lg font-bold bg-tertiary rounded-md py-1 text-text-primary focus:outline-none focus:ring-2 focus:ring-brand-blue"
                 aria-label="Hour"
                 maxLength={2}
             />
-            <span className="text-h3 text-text-secondary -mt-1">:</span>
+            <span className="text-lg text-text-secondary -mt-1">:</span>
             <input
-                type="text"
-                inputMode="numeric"
-                value={minute}
-                onChange={handleMinuteChange}
+                value={paddedMinute}
+                onChange={handleMinuteInput}
                 onBlur={handleMinuteBlur}
-                className="w-16 text-center text-h3 font-semibold bg-secondary rounded-md py-1 text-text-primary focus:outline-none focus:ring-2 focus:ring-brand-blue"
+                className="w-10 text-center text-lg font-bold bg-tertiary rounded-md py-1 text-text-primary focus:outline-none focus:ring-2 focus:ring-brand-blue"
                 aria-label="Minute"
                 maxLength={2}
             />

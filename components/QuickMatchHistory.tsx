@@ -56,7 +56,7 @@ const QuickMatchHistory: React.FC<QuickMatchHistoryProps> = ({ matches, getTeamB
 
     return (
         <div className="space-y-4">
-            <h3 className="text-h3 text-text-primary">Match History</h3>
+            <h3 className="text-xl font-bold text-text-primary">Match History</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {allQuickMatches.map((match) => {
                     const team1 = getTeamById(match.team1Id);
@@ -74,7 +74,7 @@ const QuickMatchHistory: React.FC<QuickMatchHistoryProps> = ({ matches, getTeamB
                     <CrickIQCard 
                             key={match.id}
                             accentColor={team1.logo}
-                            className="flex flex-col p-0 overflow-hidden shadow-sm hover:shadow-md bg-white rounded-3xl transition-all duration-300"
+                            className="flex flex-col p-0 overflow-hidden shadow-sm hover:shadow-md bg-secondary rounded-3xl transition-all duration-300"
                         >
                             <div 
                                 onClick={() => {
@@ -88,9 +88,9 @@ const QuickMatchHistory: React.FC<QuickMatchHistoryProps> = ({ matches, getTeamB
                                         }
                                     }
                                 }}
-                                className="p-5 cursor-pointer hover:bg-gray-50 transition-colors flex-grow"
+                                className="p-5 cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition-colors flex-grow"
                             >
-                                <div className="flex justify-between items-center text-sm text-gray-500 mb-4">
+                                <div className="flex justify-between items-center text-sm text-text-secondary mb-4">
                                     <div className="flex items-center gap-2">
                                         <span>{new Date(match.date).toLocaleDateString()} {match.time ? `• ${match.time}` : ''}</span>
                                         {match.rivalryMatchNumber !== undefined && match.rivalryMatchNumber !== null && (
@@ -104,10 +104,10 @@ const QuickMatchHistory: React.FC<QuickMatchHistoryProps> = ({ matches, getTeamB
                                 
                                 {match.isDraft ? (
                                     <div className="flex flex-col items-center py-4 gap-3">
-                                        <div className="text-center font-bold text-gray-500 text-lg">Setup Pending</div>
-                                        <div className="flex items-center gap-2 font-bold text-md text-gray-900">
+                                        <div className="text-center font-bold text-text-secondary text-lg">Setup Pending</div>
+                                        <div className="flex items-center gap-2 font-bold text-lg text-text-primary">
                                             <span>{team1.name}</span>
-                                            <span className="text-gray-400">vs</span>
+                                            <span className="text-text-secondary">vs</span>
                                             <span>{team2.name}</span>
                                         </div>
                                         <button 
@@ -120,36 +120,36 @@ const QuickMatchHistory: React.FC<QuickMatchHistoryProps> = ({ matches, getTeamB
                                 ) : (
                                     <>
                                         {match.toss && (
-                                            <p className="text-sm text-center text-gray-600 mb-4">
+                                            <p className="text-sm text-center text-text-secondary mb-4">
                                                 {getTeamById(match.toss.winner)?.name} won the toss and chose to {match.toss.decision}.
                                             </p>
                                         )}
                                         <div className="space-y-3">
-                                            <div className={`flex justify-between items-center ${isWinner(team1) ? 'text-gray-900 font-bold' : 'text-gray-600'}`}>
+                                            <div className={`flex justify-between items-center ${isWinner(team1) ? 'text-text-primary font-bold' : 'text-text-secondary'}`}>
                                                 <div className="flex items-center gap-3 font-semibold">
                                                     <div className="w-8 h-8 flex items-center justify-center rounded-lg text-white font-bold text-sm" style={{ backgroundColor: team1.logo }}>
                                                         {team1.name.substring(0, 2).toUpperCase()}
                                                     </div>
-                                                    <span className="text-base">{team1.name}</span>
+                                                    <span className="text-lg font-bold text-text-primary">{team1.name}</span>
                                                 </div>
                                                 <span className="font-mono font-bold text-base">{team1Score ? `${team1Score.score}/${team1Score.wickets} (${team1Score.overs})` : 'DNB'}</span>
                                             </div>
-                                            <div className={`flex justify-between items-center ${isWinner(team2) ? 'text-gray-900 font-bold' : 'text-gray-600'}`}>
+                                            <div className={`flex justify-between items-center ${isWinner(team2) ? 'text-text-primary font-bold' : 'text-text-secondary'}`}>
                                                 <div className="flex items-center gap-3 font-semibold">
                                                     <div className="w-8 h-8 flex items-center justify-center rounded-lg text-white font-bold text-sm" style={{ backgroundColor: team2.logo }}>
                                                         {team2.name.substring(0, 2).toUpperCase()}
                                                     </div>
-                                                    <span className="text-base">{team2.name}</span>
+                                                    <span className="text-lg font-bold text-text-primary">{team2.name}</span>
                                                 </div>
                                                 <span className="font-mono font-bold text-base">{team2Score ? `${team2Score.score}/${team2Score.wickets} (${team2Score.overs})` : 'DNB'}</span>
                                             </div>
                                         </div>
-                                        <div className="mt-6 text-center text-md font-bold text-gray-900 pt-2 border-t border-gray-100">
+                                        <div className="mt-6 text-center text-md font-bold text-text-primary pt-2 border-t border-border">
                                             {message}
                                         </div>
                                         <div className="mt-4">
                                             {(match.status === 'completed' || match.wasAbandoned) ? (
-                                                <button onClick={(e) => { e.stopPropagation(); onViewResult(match.id); }} className="w-full px-4 py-3 text-sm rounded-xl font-bold bg-gray-100 text-gray-900 shadow-sm hover:bg-gray-200">
+                                                <button onClick={(e) => { e.stopPropagation(); onViewResult(match.id); }} className="w-full px-4 py-3 text-sm rounded-xl font-bold bg-tertiary text-text-primary shadow-sm hover:bg-black/5 dark:hover:bg-white/5">
                                                     View Scorecard
                                                 </button>
                                             ) : (

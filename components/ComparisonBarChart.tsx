@@ -22,7 +22,7 @@ const ComparisonBarChart: React.FC<ComparisonBarChartProps> = ({ data, unit = '%
                 <div className="w-full">
                     <div className="flex justify-between items-center mb-1">
                         <span className="font-bold text-text-primary">{item1.name}</span>
-                        <span className="font-bold text-h3" style={{ color: item1.color }}>{item1.value.toFixed(0)}{unit}</span>
+                        <span className="font-bold text-lg" style={{ color: item1.color }}>{item1.value.toFixed(0)}{unit}</span>
                     </div>
                     <div className="w-full bg-primary rounded-2xl h-4 overflow-hidden">
                         <div className="h-4 rounded-2xl transition-all duration-500" style={{ width: `${item1.value}%`, backgroundColor: item1.color }} />
@@ -34,7 +34,7 @@ const ComparisonBarChart: React.FC<ComparisonBarChartProps> = ({ data, unit = '%
                 <div className="w-full">
                     <div className="flex justify-between items-center mb-1">
                         <span className="font-bold text-text-primary">{item2.name}</span>
-                        <span className="font-bold text-h3" style={{ color: item2.color }}>{item2.value.toFixed(0)}{unit}</span>
+                        <span className="font-bold text-lg" style={{ color: item2.color }}>{item2.value.toFixed(0)}{unit}</span>
                     </div>
                     <div className="w-full bg-primary rounded-2xl h-4 overflow-hidden">
                         <div className="h-4 rounded-2xl transition-all duration-500" style={{ width: `${item2.value}%`, backgroundColor: item2.color }} />

@@ -590,7 +590,7 @@ export const calculatePointsTable = (
     });
 };
 
-export const getBallDisplay = (ball: Ball) => {
+export const getBallDisplay = (ball: Ball, isCurrent: boolean = false) => {
     let text = '';
     let className = 'w-7 h-7 rounded-full flex items-center justify-center font-medium leading-none tracking-tight ';
     let title = '';
@@ -626,12 +626,16 @@ export const getBallDisplay = (ball: Ball) => {
         } else if (ball.runs === 4) {
              className += 'bg-brand-blue text-white text-[11px]';
         } else if (ball.runs <= 3) {
-             className += 'bg-primary text-text-primary border border-black/10 dark:border-white/10 text-[11px]';
+            if (isCurrent) {
+                className += 'bg-brand-blue text-white text-[11px]';
+            } else {
+                className += 'bg-tertiary text-text-primary text-[11px]';
+            }
             if (ball.runs === 0) {
                 title = 'Dot ball';
             }
         } else {
-             className += 'bg-primary/50 text-text-primary border border-brand-blue/15 text-[11px]';
+             className += 'bg-tertiary text-text-primary text-[11px]';
         }
     }
 

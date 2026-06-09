@@ -2,14 +2,14 @@ import React from 'react';
 
 const Section: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
     <div className="mb-10 last:mb-0">
-        <h3 className="text-h2 text-text-primary mb-4 pb-2 border-b border-brand-blue/15">{title}</h3>
+        <h3 className="text-2xl md:text-3xl font-bold tracking-tight text-text-primary mb-4 pb-2 border-b border-brand-blue/15">{title}</h3>
         <div className="space-y-4 text-text-secondary leading-relaxed">{children}</div>
     </div>
 );
 
 const SubSection: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
     <div className="mt-6 pl-4 border-l-2 border-brand-blue/50">
-        <h4 className="text-h3 text-text-primary mb-4">{title}</h4>
+        <h4 className="text-xl font-bold text-text-primary mb-4">{title}</h4>
         <div className="space-y-4">{children}</div>
     </div>
 );

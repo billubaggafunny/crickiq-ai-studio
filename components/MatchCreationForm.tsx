@@ -78,7 +78,7 @@ const MatchCreationForm: React.FC<MatchCreationFormProps> = ({
 }) => {
     return (
         <CrickIQCard className={isCalendarOpen ? 'z-40' : ''}>
-            <h3 className="text-h3 text-text-primary mb-4 flex items-center gap-2">
+            <h3 className="text-xl font-bold text-text-primary mb-4 flex items-center gap-2">
             <CalendarIcon className="w-5 h-5" />
             Add New Fixture
             </h3>

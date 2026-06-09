@@ -46,7 +46,7 @@ const TeamsSkeleton: React.FC = () => {
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="teams-skeleton-container">
             {[1, 2, 3].map((i) => (
-                <div key={i} className="animate-pulse bg-primary border border-brand-blue/10 dark:border-brand-blue/20 p-5 rounded-3xl flex flex-col justify-between h-[166px]">
+                <div key={i} className="animate-pulse bg-primary border border-brand-blue/10 dark:border-white/10 p-5 rounded-3xl flex flex-col justify-between h-[166px]">
                     <div className="flex items-start gap-4">
                         {/* Avatar badge placeholder */}
                         <div className="w-12 h-12 rounded-full bg-gray-200 dark:bg-white/10 shrink-0" />
@@ -216,7 +216,7 @@ const TeamsPage: React.FC<TeamsPageProps> = ({ teams, matches, tournaments, onOp
             {/* Header Section */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                    <h2 id="teams-page-title" className="text-h2 font-bold text-text-primary tracking-tight">Teams</h2>
+                    <h2 id="teams-page-title" className="text-2xl font-bold tracking-tight text-text-primary">Teams</h2>
                     <p className="text-sm text-text-secondary mt-1">Manage your cricket teams, squads, and history</p>
                 </div>
                 <button
@@ -230,7 +230,7 @@ const TeamsPage: React.FC<TeamsPageProps> = ({ teams, matches, tournaments, onOp
             </div>
 
             {/* Filter and Search Bar Row */}
-            <CrickIQCard className="p-4 bg-primary rounded-3xl border border-brand-blue/10 dark:border-brand-blue/20">
+            <CrickIQCard className="p-4 bg-primary rounded-3xl shadow-sm">
                 <div className="flex flex-col md:flex-row gap-4">
                     {/* Search Field */}
                     <div className="relative flex-1">
@@ -301,13 +301,13 @@ const TeamsPage: React.FC<TeamsPageProps> = ({ teams, matches, tournaments, onOp
                             >
                                 <CrickIQCard 
                                     accentColor={team.logoColor || team.logo}
-                                    className="p-5 h-full relative flex flex-col justify-between hover:shadow-xl hover:translate-y-[-2px] transition-all duration-300 border border-brand-blue/10 dark:border-brand-blue/20 bg-primary rounded-3xl"
+                                    className="p-5 h-full relative flex flex-col justify-between hover:shadow-xl hover:-translate-y-1 transition-all duration-300 bg-secondary rounded-2xl"
                                 >
                                     {/* Card Content Header */}
                                     <div className="flex items-start gap-4 h-full">
                                         {/* Colored Badge */}
                                         <div 
-                                            className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-white uppercase tracking-wider shrink-0 text-button shadow-inner"
+                                            className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-white tracking-wider shrink-0 text-lg shadow-inner"
                                             style={{ backgroundColor: team.logoColor || team.logo || '#3B82F6' }}
                                         >
                                             {team.teamInitials || 'TM'}
@@ -316,7 +316,7 @@ const TeamsPage: React.FC<TeamsPageProps> = ({ teams, matches, tournaments, onOp
                                         {/* Info Block */}
                                         <div className="flex-grow space-y-1">
                                             <div className="flex items-center gap-1.5 flex-wrap">
-                                                <h3 className="font-sans font-bold text-base text-text-primary group-hover:text-brand-blue transition-colors leading-tight">
+                                                <h3 className="text-lg font-bold text-text-primary group-hover:text-brand-blue transition-colors leading-tight">
                                                     {team.name}
                                                 </h3>
                                                 {team.shortName && team.shortName !== team.name && (
@@ -349,19 +349,19 @@ const TeamsPage: React.FC<TeamsPageProps> = ({ teams, matches, tournaments, onOp
                                     </div>
 
                                     {/* Card Bottom Meta Data */}
-                                    <div className="mt-5 pt-3 border-t border-brand-blue/5 flex items-center justify-between text-xs text-text-secondary">
-                                        <span className="flex items-center gap-1">
-                                            <Users className="w-3.5 h-3.5" />
-                                            <strong>{team.players?.length || 0}</strong> Players
-                                        </span>
-                                        <span className="flex items-center gap-1">
-                                            <Award className="w-3.5 h-3.5" />
-                                            <strong>{countMatches}</strong> Matches
-                                        </span>
-                                        <span className="flex items-center gap-1">
-                                            <Trophy className="w-3.5 h-3.5" />
-                                            <strong>{countTournaments}</strong> Tournaments
-                                        </span>
+                                    <div className="mt-5 bg-tertiary rounded-xl p-3 flex items-center justify-around">
+                                        <div className="flex flex-col items-center gap-0.5">
+                                            <span className="font-bold text-text-primary">{team.players?.length || 0}</span>
+                                            <span className="text-[10px] sm:text-xs font-semibold text-text-secondary flex items-center gap-1"><Users className="w-3 h-3" /> Players</span>
+                                        </div>
+                                        <div className="flex flex-col items-center gap-0.5">
+                                            <span className="font-bold text-text-primary">{countMatches}</span>
+                                            <span className="text-[10px] sm:text-xs font-semibold text-text-secondary flex items-center gap-1"><Award className="w-3 h-3" /> Matches</span>
+                                        </div>
+                                        <div className="flex flex-col items-center gap-0.5">
+                                            <span className="font-bold text-text-primary">{countTournaments}</span>
+                                            <span className="text-[10px] sm:text-xs font-semibold text-text-secondary flex items-center gap-1"><Trophy className="w-3 h-3" /> Leagues</span>
+                                        </div>
                                     </div>
                                 </CrickIQCard>
                             </div>
@@ -370,7 +370,7 @@ const TeamsPage: React.FC<TeamsPageProps> = ({ teams, matches, tournaments, onOp
                 </div>
             ) : (
                 /* Pure Clean Elegant Empty State */
-                <CrickIQCard className="p-12 text-center border border-brand-blue/10 dark:border-brand-blue/20 flex flex-col items-center justify-center space-y-4 max-w-xl mx-auto rounded-3xl bg-primary">
+                <CrickIQCard className="p-12 text-center flex flex-col items-center justify-center space-y-4 max-w-xl mx-auto rounded-3xl bg-primary shadow-sm">
                     <div className="w-16 h-16 rounded-full bg-brand-blue/10 text-brand-blue flex items-center justify-center">
                         <Users className="w-8 h-8" />
                     </div>
