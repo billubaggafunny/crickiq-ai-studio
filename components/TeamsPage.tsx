@@ -394,7 +394,7 @@ const TeamsPage: React.FC<TeamsPageProps> = ({ teams, matches, tournaments, onOp
             <button
                 id="mobile-add-team-fab"
                 onClick={handleAddTeamPlaceholder}
-                className="fixed bottom-24 right-6 z-40 md:hidden flex items-center justify-center gap-2 px-5 h-14 bg-brand-blue hover:bg-brand-blue/90 text-white rounded-full font-bold shadow-lg shadow-brand-blue/20 transition-all active:scale-95 border border-brand-blue/10"
+                className="fixed bottom-24 right-6 z-40 md:hidden flex items-center justify-center gap-2 px-5 h-14 bg-brand-blue hover:bg-brand-blue/90 dark:bg-accent dark:hover:bg-accent-hover text-white dark:text-black rounded-full font-bold shadow-lg shadow-brand-blue/20 dark:shadow-accent/20 transition-all active:scale-95 border border-brand-blue/10 dark:border-accent-hover/20"
                 aria-label="Add Team"
             >
                 <Plus className="w-6 h-6 shrink-0" />

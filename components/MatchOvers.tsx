@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { Innings, Team } from '../types';
-import { getBallDisplay } from '../utils/cricketLogic';
+import { getBallDisplay, getBallOutcomeChipClass } from '../utils/cricketLogic';
 
 interface MatchOversProps {
  innings: Innings;
@@ -66,7 +66,7 @@ const MatchOvers: React.FC<MatchOversProps> = ({ innings, battingTeam }) => {
  {balls.map((ball, i) => {
  const { text, className, title } = getBallDisplay(ball);
  return (
- <div key={i} className={`${className} shadow-sm border border-border/50`} title={title}>
+ <div key={i} className={`${className} ${getBallOutcomeChipClass(ball)} over-chip shadow-sm border border-border/50`} title={title}>
  {text}
  </div>
  );

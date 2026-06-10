@@ -17,6 +17,7 @@ import {
   calculateRunRate,
   generateCommentaryData,
   getBallDisplay,
+  getBallOutcomeChipClass,
 } from "../utils/cricketLogic";
 import CommentaryFeedDisplay from "./CommentaryFeedDisplay";
 import { getEffectiveSquadPlayers } from "../utils/matchConfig";
@@ -24,7 +25,8 @@ import { getRoleEmoji, SwapIcon, PlusIcon, MinusIcon } from "../constants";
 import ConfirmationModal from "./ConfirmationModal";
 import { useNotification } from "../hooks/useNotification";
 import ImpactPlayerModal from "./ImpactPlayerModal";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, ArrowRight } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 
 // FIX: Define LiveScoringProps interface to resolve TypeScript error.
 interface LiveScoringProps extends UseCrickIQStateReturn {
@@ -74,29 +76,6 @@ const getRunButtonDarkClasses = (r: number, isSelected: boolean): string => {
     default:
       return "dark:bg-tertiary/60 dark:text-text-primary dark:border-transparent dark:shadow-none";
   }
-};
-
-const getThisOverBallChipClass = (ball: Ball): string => {
-  if (ball.isWicket) {
-    return "dark:!bg-danger dark:!text-white dark:!shadow-sm";
-  }
-  if (ball.isWide || ball.isNoBall || ball.isBye || ball.isLegBye) {
-    return "dark:!bg-draft dark:!text-black dark:!shadow-sm";
-  }
-  // Normal deliveries
-  if (ball.runs === 0) {
-    return "dark:!bg-white dark:!text-black dark:!shadow-sm";
-  }
-  if (ball.runs === 4) {
-    return "dark:!bg-info dark:!text-white dark:!shadow-sm";
-  }
-  if (ball.runs === 6) {
-    return "dark:!bg-purple dark:!text-white dark:!shadow-sm";
-  }
-  if (ball.runs >= 1 && ball.runs <= 3) {
-    return "dark:!bg-accent dark:!text-black dark:!shadow-sm";
-  }
-  return "dark:!bg-tertiary dark:!text-text-primary dark:!shadow-none";
 };
 
 const LiveScoring: React.FC<LiveScoringProps> = ({
@@ -177,6 +156,18 @@ const LiveScoring: React.FC<LiveScoringProps> = ({
     () => match.innings2 || match.innings1,
     [match],
   );
+
+  const [showOverCompleteSheet, setShowOverCompleteSheet] = useState(false);
+  const [showInningsCompleteSheet, setShowInningsCompleteSheet] = useState(false);
+
+  const [lastShownCompletedOver, setLastShownCompletedOver] = useState<number | null>(() => {
+    if (currentInnings && currentInnings.overs > 0 && currentInnings.overs % 1 === 0 && currentInnings.currentBowler === null && currentInnings.lastBowlerId) {
+      return Math.round(currentInnings.overs);
+    }
+    return null;
+  });
+
+  const prevInnings2Exist = usePrevious(!!match.innings2);
   const battingTeam = useMemo(
     () => getTeamById(currentInnings?.battingTeamId || ""),
     [currentInnings, getTeamById],
@@ -303,6 +294,49 @@ const LiveScoring: React.FC<LiveScoringProps> = ({
   const currentBowlerId = currentInnings?.currentBowler;
   const isFreeHit = currentInnings?.isFreeHit;
 
+  const completedOverNumber = currentInnings ? Math.round(currentInnings.overs) : 0;
+
+  const overStats = useMemo(() => {
+    if (!currentInnings || completedOverNumber === 0) return { runs: 0, wickets: 0 };
+    const ballsInOver = currentInnings.balls.filter(
+      (b) => b.overNumber === completedOverNumber
+    );
+    const runs = ballsInOver.reduce(
+      (sum, b) => sum + b.runs + (b.isWide || b.isNoBall ? 1 : 0),
+      0
+    );
+    const wickets = ballsInOver.filter((b) => b.isWicket).length;
+    return { runs, wickets };
+  }, [currentInnings, completedOverNumber]);
+
+  const innings1Stats = useMemo(() => {
+    if (!match.innings1) return null;
+    const score = match.innings1.score;
+    const wickets = match.innings1.wickets;
+    const overs = match.innings1.overs;
+    const runRate = calculateRunRate(score, overs);
+    const target = score + 1;
+    return { score, wickets, overs, runRate, target };
+  }, [match.innings1]);
+
+  const handleStartNextOver = () => {
+    setShowOverCompleteSheet(false);
+    if (!currentInnings?.currentBowler) {
+      setActiveScoringTab("players");
+    } else {
+      setActiveScoringTab("scoring");
+    }
+  };
+
+  const handleStartSecondInnings = () => {
+    setShowInningsCompleteSheet(false);
+    if (!onStrikeId || !nonStrikerId || !currentBowlerId) {
+      setActiveScoringTab("players");
+    } else {
+      setActiveScoringTab("scoring");
+    }
+  };
+
   const arePlayersSelected = !!(onStrikeId && nonStrikerId);
 
   useEffect(() => {
@@ -390,12 +424,14 @@ const LiveScoring: React.FC<LiveScoringProps> = ({
       !isMatchOver &&
       currentInnings &&
       currentInnings.overs > 0 &&
+      currentInnings.overs % 1 === 0 &&
       currentInnings.currentBowler === null &&
-      currentInnings.lastBowlerId
+      currentInnings.lastBowlerId &&
+      lastShownCompletedOver !== completedOverNumber
     ) {
-      // When an over is complete, show a notification and switch to the player selection tab
-      showNotification("Over complete! Select next bowler.", "info");
-      setActiveScoringTab("players");
+      setLastShownCompletedOver(completedOverNumber);
+      setShowOverCompleteSheet(true);
+      showNotification(`Over ${completedOverNumber} complete!`, "info");
     }
   }, [
     isMatchOver,
@@ -403,8 +439,38 @@ const LiveScoring: React.FC<LiveScoringProps> = ({
     currentInnings?.overs,
     currentInnings?.currentBowler,
     currentInnings?.lastBowlerId,
+    completedOverNumber,
+    lastShownCompletedOver,
     showNotification,
   ]);
+
+  // Show Innings Complete Sheet when match.innings2 is created (i.e., first innings finished)
+  useEffect(() => {
+    if (prevInnings2Exist === false && !!match.innings2) {
+      setShowInningsCompleteSheet(true);
+    }
+  }, [prevInnings2Exist, match.innings2]);
+
+  // Auto Dismiss Sheets on undo/state-change
+  useEffect(() => {
+    if (showOverCompleteSheet) {
+      const isOverCompleteNow = 
+        !isMatchOver &&
+        currentInnings &&
+        currentInnings.overs > 0 &&
+        currentInnings.overs % 1 === 0 &&
+        currentInnings.currentBowler === null;
+      if (!isOverCompleteNow) {
+        setShowOverCompleteSheet(false);
+      }
+    }
+  }, [showOverCompleteSheet, isMatchOver, currentInnings, currentInnings?.overs, currentInnings?.currentBowler]);
+
+  useEffect(() => {
+    if (showInningsCompleteSheet && !match.innings2) {
+      setShowInningsCompleteSheet(false);
+    }
+  }, [showInningsCompleteSheet, match.innings2]);
 
   const handlePlayerSelectionChange = (
     type: "onStrike" | "nonStriker" | "bowler",
@@ -1232,7 +1298,7 @@ const LiveScoring: React.FC<LiveScoringProps> = ({
               const isCurrent = index === ballsThisOver.length - 1;
               const { text, className, title } = getBallDisplay(ball, isCurrent);
               return (
-                <div key={index} className={`${className} ${getThisOverBallChipClass(ball)} over-chip`} title={title}>
+                <div key={index} className={`${className} ${getBallOutcomeChipClass(ball)} over-chip`} title={title}>
                   {text}
                 </div>
               );
@@ -2158,6 +2224,167 @@ const LiveScoring: React.FC<LiveScoringProps> = ({
         updateTeam={updateTeam}
         addPlayerReplacement={addPlayerReplacement}
       />
+
+      {/* Over Complete Sheet */}
+      <AnimatePresence>
+        {showOverCompleteSheet && (
+          <div className="fixed inset-0 z-50 flex items-end justify-center p-0 md:p-4">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowOverCompleteSheet(false)}
+              className="absolute inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-sm cursor-pointer"
+            />
+
+            {/* Sheet Container */}
+            <motion.div
+              id="over-complete-sheet-container"
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 220 }}
+              className="relative bg-primary border-t md:border border-brand-blue/15 w-full md:max-w-md md:rounded-[2rem] rounded-t-[2.5rem] shadow-2xl overflow-hidden flex flex-col p-6 pb-8 z-10"
+            >
+              {/* Drag Handle on Mobile */}
+              <div className="flex md:hidden justify-center pb-4">
+                <div className="w-12 h-1.5 bg-gray-300 dark:bg-white/10 rounded-full" />
+              </div>
+
+              {/* Header */}
+              <div className="text-center space-y-1 mb-6">
+                <h3 className="text-2xl font-black text-text-primary tracking-tight">Over Complete</h3>
+                <p className="text-sm text-text-secondary font-medium">Over {completedOverNumber} completed</p>
+              </div>
+
+              {/* Over Summary */}
+              <div className="bg-tertiary/40 border border-border/40 dark:bg-secondary/40 rounded-2xl p-5 mb-6 text-center space-y-4">
+                <div>
+                  <p className="text-xs text-text-secondary font-semibold uppercase tracking-wider">{battingTeam?.name}</p>
+                  <p className="text-4xl font-extrabold text-text-primary mt-1">
+                    {currentInnings ? `${currentInnings.score}/${currentInnings.wickets}` : '0/0'}
+                  </p>
+                  <p className="text-xs text-text-secondary font-medium mt-1">
+                    Run Rate: {currentInnings ? calculateRunRate(currentInnings.score, currentInnings.overs) : '0.00'}
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 pt-3 border-t border-border/30">
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-accent">{overStats.runs}</p>
+                    <p className="text-xs text-text-secondary font-medium mt-0.5">Runs This Over</p>
+                  </div>
+                  <div className="text-center border-l border-border/30">
+                    <p className="text-2xl font-bold text-danger">{overStats.wickets}</p>
+                    <p className="text-xs text-text-secondary font-medium mt-0.5">Wickets This Over</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* CTA Buttons */}
+              <div className="flex flex-col gap-3">
+                <button
+                  id="over-complete-start-next bg-accent"
+                  onClick={handleStartNextOver}
+                  className="w-full py-4 px-6 bg-accent hover:opacity-90 active:scale-98 transition-all text-black font-extrabold rounded-2xl flex items-center justify-center gap-2 group text-base shadow-lg shadow-accent/20 cursor-pointer"
+                >
+                  <span>Start Next Over</span>
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </button>
+
+                <button
+                  id="over-complete-dismiss"
+                  onClick={() => setShowOverCompleteSheet(false)}
+                  className="w-full py-3 px-6 text-sm text-text-secondary hover:text-text-primary font-bold transition-colors text-center cursor-pointer"
+                >
+                  Dismiss
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Innings Complete Sheet */}
+      <AnimatePresence>
+        {showInningsCompleteSheet && (
+          <div className="fixed inset-0 z-50 flex items-end justify-center p-0 md:p-4">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowInningsCompleteSheet(false)}
+              className="absolute inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-sm cursor-pointer"
+            />
+
+            {/* Sheet Container */}
+            <motion.div
+              id="innings-complete-sheet-container"
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 220 }}
+              className="relative bg-primary border-t md:border border-brand-blue/15 w-full md:max-w-md md:rounded-[2rem] rounded-t-[2.5rem] shadow-2xl overflow-hidden flex flex-col p-6 pb-8 z-10"
+            >
+              {/* Drag Handle on Mobile */}
+              <div className="flex md:hidden justify-center pb-4">
+                <div className="w-12 h-1.5 bg-gray-300 dark:bg-white/10 rounded-full" />
+              </div>
+
+              {/* Header */}
+              <div className="text-center space-y-1 mb-6">
+                <h3 className="text-2xl font-black text-text-primary tracking-tight">First Innings Complete</h3>
+              </div>
+
+              {/* Innings Summary */}
+              <div className="bg-tertiary/40 border border-border/40 dark:bg-secondary/40 rounded-2xl p-5 mb-6 text-center space-y-4">
+                <div>
+                  <p className="text-xs text-text-secondary font-semibold uppercase tracking-wider">
+                    {getTeamById(match.innings1?.battingTeamId || '')?.name}
+                  </p>
+                  <p className="text-4xl font-extrabold text-text-primary mt-1">
+                    {match.innings1 ? `${match.innings1.score}/${match.innings1.wickets}` : '0/0'}
+                  </p>
+                  <div className="flex justify-center gap-4 text-xs text-text-secondary font-medium mt-2">
+                    <span>Overs: {match.innings1?.overs}</span>
+                    <span>•</span>
+                    <span>Run Rate: {innings1Stats?.runRate || '0.00'}</span>
+                  </div>
+                </div>
+
+                {innings1Stats && (
+                  <div className="bg-tertiary border border-border/50 dark:bg-secondary rounded-xl p-3.5 text-center">
+                    <p className="text-xs text-text-secondary font-medium">Target to Win</p>
+                    <p className="text-3xl font-black text-accent mt-0.5">{innings1Stats.target}</p>
+                  </div>
+                )}
+              </div>
+
+              {/* CTA Buttons */}
+              <div className="flex flex-col gap-3">
+                <button
+                  id="innings-complete-start-second bg-accent"
+                  onClick={handleStartSecondInnings}
+                  className="w-full py-4 px-6 bg-accent hover:opacity-90 active:scale-98 transition-all text-black font-extrabold rounded-2xl flex items-center justify-center gap-2 group text-base shadow-lg shadow-accent/20 cursor-pointer"
+                >
+                  <span>Start Second Innings</span>
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </button>
+
+                <button
+                  id="innings-complete-dismiss"
+                  onClick={() => setShowInningsCompleteSheet(false)}
+                  className="w-full py-3 px-6 text-sm text-text-secondary hover:text-text-primary font-bold transition-colors text-center cursor-pointer"
+                >
+                  Dismiss
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { generateCommentaryData, getBallDisplay } from "../utils/cricketLogic";
+import { generateCommentaryData, getBallDisplay, getBallOutcomeChipClass } from "../utils/cricketLogic";
 import { MinusIcon, PlusIcon } from "../constants"; // Assumes you have these, adjust imports if not
 
 const CommentaryFeedDisplay: React.FC<{
@@ -56,7 +56,7 @@ const CommentaryFeedDisplay: React.FC<{
                   return (
                     <div
                       key={idx}
-                      className={`${ballClass} flex-shrink-0 shadow-sm`}
+                      className={`${ballClass} ${getBallOutcomeChipClass(ball)} over-chip flex-shrink-0 shadow-sm`}
                       title={ballText}
                     >
                       {ballText}
@@ -74,7 +74,7 @@ const CommentaryFeedDisplay: React.FC<{
                   return (
                     <div key={index} className="flex gap-4 items-start">
                       <div className="flex flex-col items-center flex-shrink-0">
-                        <div className={`${ballClass} flex-shrink-0`}>
+                        <div className={`${ballClass} ${getBallOutcomeChipClass(ball)} over-chip flex-shrink-0`}>
                           {ballText}
                         </div>
                         <span className="text-caption text-text-secondary font-mono mt-1">

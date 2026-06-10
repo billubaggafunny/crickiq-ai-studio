@@ -642,6 +642,34 @@ export const getBallDisplay = (ball: Ball, isCurrent: boolean = false) => {
     return { text, className, title };
 };
 
+export const getBallOutcomeChipClass = (ball: Ball): string => {
+    if (ball.isWicket) {
+        return "dark:!bg-danger dark:!text-white";
+    }
+
+    if (ball.isWide || ball.isNoBall || ball.isBye || ball.isLegBye) {
+        return "dark:!bg-draft dark:!text-black";
+    }
+
+    if (ball.runs === 0) {
+        return "dark:!bg-white dark:!text-black";
+    }
+
+    if ([1, 2, 3].includes(ball.runs)) {
+         return "dark:!bg-accent dark:!text-black";
+    }
+
+    if (ball.runs === 4) {
+        return "dark:!bg-info dark:!text-white";
+    }
+
+    if (ball.runs === 6) {
+        return "dark:!bg-purple dark:!text-white";
+    }
+
+    return "dark:!bg-tertiary dark:!text-text-primary";
+};
+
 export const generateCommentaryForBall = (ball: Ball, getPlayerName: (id: string) => string): string => {
     const bowlerName = getPlayerName(ball.bowlerId).split(' ')[0] || '';
     const batsmanName = getPlayerName(ball.batsmanId).split(' ')[0] || '';
