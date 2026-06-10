@@ -106,7 +106,7 @@ export const UpcomingMatchWidget: React.FC<Props> = ({
  Next Match
  </h3>
  
- <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-3 rounded-lg border border-border bg-tertiary dark:bg-slate-900/50">
+ <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-3 rounded-lg border border-border bg-tertiary dark:bg-secondary/50">
  <div className="flex-1">
  <div className="flex items-center gap-2 mb-1.5">
  <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${badgeColor}`}>

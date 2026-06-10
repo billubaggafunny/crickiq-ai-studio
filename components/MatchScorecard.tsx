@@ -512,7 +512,7 @@ const MatchScorecard: React.FC<MatchScorecardProps> = ({ match, tournament, team
                                 <button 
                                     key={p.playerId}
                                     onClick={() => setManOfTheMatch(match.id, p.playerId)}
-                                    className="text-left p-4 bg-primary rounded-lg hover:shadow-xl transition-all duration-200 border-2 border-[#DCE3F0] dark:border-brand-blue/15 hover:border-brand-blue"
+                                    className="text-left p-4 bg-primary rounded-lg hover:shadow-xl transition-all duration-200 border-2 border-[#DCE3F0] dark:border-border hover:border-accent"
                                 >
                                     <p className="font-bold text-lg text-text-primary">{p.name}</p>
                                     <div className="text-sm text-text-secondary mb-2 flex items-center gap-2">

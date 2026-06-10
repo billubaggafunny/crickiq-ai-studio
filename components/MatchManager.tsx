@@ -1499,7 +1499,7 @@ const MatchManager: React.FC<MatchManagerProps> = (props) => {
 
  {view === "fixtures" && (
  <div className="space-y-6 relative z-50">
- <div className="flex bg-secondary dark:bg-black/20 rounded-lg p-1 space-x-1 border border-[#DCE3F0] dark:border-brand-blue/15">
+ <div className="flex bg-secondary dark:bg-black/20 rounded-lg p-1 space-x-1 border border-[#DCE3F0] dark:border-border">
  <button
  onClick={() => setFixtureView("manual")}
  className={`flex-1 py-2 px-4 text-body font-semibold rounded-md transition-colors ${fixtureView === "manual" ? "bg-primary text-brand-blue dark:text-white shadow-sm" : "text-text-secondary hover:text-text-primary hover:bg-black/5 dark:hover:bg-white/5"}`}

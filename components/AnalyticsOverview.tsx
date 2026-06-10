@@ -286,7 +286,7 @@ const AnalyticsOverview: React.FC<AnalyticsOverviewProps> = (props) => {
  <TrophyIcon className="w-32 h-32" />
  </div>
  <div className="relative z-10 flex items-center gap-4">
- <div className="relative z-10 w-12 h-12 bg-tertiary text-brand-blue rounded-full flex items-center justify-center border border-[#DCE3F0] dark:border-white/10 shadow-md shrink-0">
+ <div className="relative z-10 w-12 h-12 bg-tertiary text-brand-blue rounded-full flex items-center justify-center border border-[#DCE3F0] dark:border-border shadow-md shrink-0">
  <TrophyIcon className="w-6 h-6 text-brand-blue" />
  </div>
  <div className="relative z-10">
@@ -346,7 +346,7 @@ const AnalyticsOverview: React.FC<AnalyticsOverviewProps> = (props) => {
  <span className="text-8xl">🏏</span>
  </div>
  <div className="relative z-10 flex items-center gap-4">
- <div className="relative z-10 w-12 h-12 bg-tertiary text-brand-blue rounded-full flex items-center justify-center border border-[#DCE3F0] dark:border-white/10 shadow-md shrink-0">
+ <div className="relative z-10 w-12 h-12 bg-tertiary text-brand-blue rounded-full flex items-center justify-center border border-[#DCE3F0] dark:border-border shadow-md shrink-0">
  <span className="text-xl leading-none">🏏</span>
  </div>
  <div className="relative z-10 shrink min-w-0">
@@ -498,7 +498,7 @@ const AnalyticsOverview: React.FC<AnalyticsOverviewProps> = (props) => {
  return (
  <div className="flex flex-col h-full gap-6">
  <div className="flex justify-between items-center gap-4">
- <div className="flex-1 flex flex-col items-center bg-primary p-4 rounded-xl border border-[#DCE3F0] dark:border-white/10 shadow-md">
+ <div className="flex-1 flex flex-col items-center bg-primary p-4 rounded-xl border border-[#DCE3F0] dark:border-border shadow-md">
  <span className="text-[11px] text-text-secondary uppercase mb-1">
  {team1?.name?.substring(0, 3) || "UNK"}
  </span>
@@ -509,7 +509,7 @@ const AnalyticsOverview: React.FC<AnalyticsOverviewProps> = (props) => {
  <span className="text-[10px] uppercase font-bold text-text-secondary px-1">
  vs
  </span>
- <div className="flex-1 flex flex-col items-center bg-primary p-4 rounded-xl border border-[#DCE3F0] dark:border-white/10 shadow-md">
+ <div className="flex-1 flex flex-col items-center bg-primary p-4 rounded-xl border border-[#DCE3F0] dark:border-border shadow-md">
  <span className="text-[11px] text-text-secondary uppercase mb-1">
  {team2?.name?.substring(0, 3) || "UNK"}
  </span>

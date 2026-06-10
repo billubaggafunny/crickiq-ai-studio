@@ -62,12 +62,12 @@ export const TournamentTeamManagementSheet: React.FC<TournamentTeamManagementShe
                         animate={{ y: 0 }}
                         exit={{ y: '100%' }}
                         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                        className="fixed bottom-0 left-0 right-0 z-[51] bg-[#0A0F1C] border-t border-brand-blue/20 rounded-t-3xl shadow-[0_-10px_40px_rgba(0,123,255,0.1)] flex flex-col pt-2 shadow-2xl pb-safe flex-1"
+                        className="fixed bottom-0 left-0 right-0 z-[51] bg-secondary border-t border-border rounded-t-3xl shadow-[0_-10px_40px_rgba(0,123,255,0.05)] flex flex-col pt-2 shadow-2xl pb-safe flex-1"
                         style={{ maxHeight: '90vh' }}
                     >
-                        <div className="w-12 h-1.5 bg-slate-700 rounded-full mx-auto mb-4 opacity-50" />
+                        <div className="w-12 h-1.5 bg-tertiary rounded-full mx-auto mb-4 opacity-50" />
                         
-                        <div className="flex justify-between items-center px-6 pb-4 border-b border-white/5">
+                        <div className="flex justify-between items-center px-6 pb-4 border-b border-divider">
                             <h2 className="text-xl font-bold text-white tracking-tight">
                                 {mode === 'menu' && 'Tournament Teams'}
                                 {mode === 'select' && 'Select Existing Team'}
@@ -75,7 +75,7 @@ export const TournamentTeamManagementSheet: React.FC<TournamentTeamManagementShe
                             </h2>
                             <button
                                 onClick={mode === 'menu' ? handleClose : () => setMode('menu')}
-                                className="p-2 -mr-2 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white rounded-full transition-colors"
+                                className="p-2 -mr-2 bg-white/5 hover:bg-white/10 text-text-secondary hover:text-white rounded-full transition-colors"
                             >
                                 <X className="w-5 h-5" />
                             </button>
@@ -97,20 +97,20 @@ export const TournamentTeamManagementSheet: React.FC<TournamentTeamManagementShe
                                             </div>
                                             <div className="text-left font-bold text-lg text-white">Create New Team</div>
                                         </div>
-                                        <ChevronRight className="w-5 h-5 text-slate-500" />
+                                        <ChevronRight className="w-5 h-5 text-text-muted" />
                                     </button>
 
                                     <button 
                                         onClick={() => setMode('select')}
-                                        className="w-full flex items-center justify-between p-4 bg-slate-800/50 hover:bg-slate-800 border border-slate-700/50 rounded-2xl transition-all"
+                                        className="w-full flex items-center justify-between p-4 bg-tertiary/55 hover:bg-tertiary border border-border/50 rounded-2xl transition-all"
                                     >
                                         <div className="flex items-center gap-4">
-                                            <div className="w-12 h-12 bg-slate-700/50 text-slate-300 rounded-xl flex items-center justify-center">
+                                            <div className="w-12 h-12 bg-tertiary/50 text-text-secondary rounded-xl flex items-center justify-center">
                                                 <CheckCircle className="w-6 h-6" />
                                             </div>
                                             <div className="text-left font-bold text-lg text-white">Select Existing Team</div>
                                         </div>
-                                        <ChevronRight className="w-5 h-5 text-slate-500" />
+                                        <ChevronRight className="w-5 h-5 text-text-muted" />
                                     </button>
 
                                     {currentTournamentTeams.length > 0 && (
@@ -124,7 +124,7 @@ export const TournamentTeamManagementSheet: React.FC<TournamentTeamManagementShe
                                                 </div>
                                                 <div className="text-left font-bold text-lg text-white">Edit Tournament Team</div>
                                             </div>
-                                            <ChevronRight className="w-5 h-5 text-slate-500" />
+                                            <ChevronRight className="w-5 h-5 text-text-muted" />
                                         </button>
                                     )}
                                 </div>
@@ -133,13 +133,13 @@ export const TournamentTeamManagementSheet: React.FC<TournamentTeamManagementShe
                             {mode === 'select' && (
                                 <div className="space-y-4">
                                     <div className="relative">
-                                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary" />
                                         <input
                                             type="text"
                                             placeholder="Search existing teams..."
                                             value={searchQuery}
                                             onChange={(e) => setSearchQuery(e.target.value)}
-                                            className="w-full bg-slate-800/80 border border-slate-700 text-white pl-9 pr-4 py-3 rounded-xl focus:outline-none focus:border-brand-blue transition-colors"
+                                            className="w-full bg-tertiary border border-border text-white pl-9 pr-4 py-3 rounded-xl focus:outline-none focus:border-brand-blue transition-colors"
                                         />
                                     </div>
 
@@ -152,7 +152,7 @@ export const TournamentTeamManagementSheet: React.FC<TournamentTeamManagementShe
                                                         onSelectExistingTeam(t.id);
                                                         handleClose();
                                                     }}
-                                                    className="w-full flex items-center justify-between p-3 bg-slate-800/40 hover:bg-slate-800 border border-slate-700/50 rounded-xl transition-all"
+                                                    className="w-full flex items-center justify-between p-3 bg-tertiary/40 hover:bg-tertiary border border-border/50 rounded-xl transition-all"
                                                 >
                                                     <div className="flex items-center gap-3">
                                                         <div 
@@ -163,15 +163,15 @@ export const TournamentTeamManagementSheet: React.FC<TournamentTeamManagementShe
                                                         </div>
                                                         <div className="text-left flex flex-col">
                                                             <span className="font-bold text-white text-base">{t.name}</span>
-                                                            <span className="text-xs text-slate-400">{t.players.length} Players</span>
+                                                            <span className="text-xs text-text-secondary">{t.players.length} Players</span>
                                                         </div>
                                                     </div>
-                                                    <Check className="w-4 h-4 text-slate-500 opacity-0 group-hover:opacity-100" />
+                                                    <Check className="w-4 h-4 text-text-muted opacity-0 group-hover:opacity-100" />
                                                 </button>
                                             ))}
                                         </div>
                                     ) : (
-                                        <div className="py-8 text-center text-slate-400">
+                                        <div className="py-8 text-center text-text-secondary">
                                             <p className="text-sm">No teams found.</p>
                                             <p className="text-xs mt-1">Create your first team.</p>
                                         </div>
@@ -188,7 +188,7 @@ export const TournamentTeamManagementSheet: React.FC<TournamentTeamManagementShe
                                                 onEditTeam(t.id);
                                                 handleClose();
                                             }}
-                                            className="w-full flex items-center justify-between p-3 bg-slate-800/40 hover:bg-slate-800 border border-slate-700/50 rounded-xl transition-all group"
+                                            className="w-full flex items-center justify-between p-3 bg-tertiary/40 hover:bg-tertiary border border-border/50 rounded-xl transition-all group"
                                         >
                                             <div className="flex items-center gap-3">
                                                 <div 
@@ -199,7 +199,7 @@ export const TournamentTeamManagementSheet: React.FC<TournamentTeamManagementShe
                                                 </div>
                                                 <div className="text-left flex flex-col">
                                                     <span className="font-bold text-white text-base">{t.name}</span>
-                                                    <span className="text-xs text-slate-400">{t.players.length} Players</span>
+                                                    <span className="text-xs text-text-secondary">{t.players.length} Players</span>
                                                 </div>
                                             </div>
                                             <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-500 flex items-center justify-center group-hover:bg-amber-500 group-hover:text-white transition-colors">

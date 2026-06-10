@@ -83,35 +83,35 @@
       }
       html.dark {
   --color-header: rgba(35, 38, 44, 0.92);
-  --color-primary: #07111F;
-  --color-secondary: #0F1B2D;
-  --color-tertiary: #162338;
+  --color-primary: #23262C;
+  --color-secondary: #3A3F47;
+  --color-tertiary: #4A5059;
 
-  --color-text-primary: #F8FAFC;
-  --color-text-secondary: #CBD5E1;
-  --color-text-muted: #94A3B8;
-  --color-text-disabled: #64748B;
+  --color-text-primary: #FFFFFF;
+  --color-text-secondary: #D1D5DB;
+  --color-text-muted: #9CA3AF;
+  --color-text-disabled: #6B7280;
 
-  --color-border: rgba(255, 255, 255, 0.08);
-  --color-border-hover: rgba(255, 255, 255, 0.12);
-  --color-border-strong: rgba(255, 255, 255, 0.16);
-  --color-divider: rgba(255, 255, 255, 0.07);
+  --color-border: #2B3038;
+  --color-border-hover: #373D46;
+  --color-border-strong: #434B56;
+  --color-divider: #373D46;
 
-  --color-accent: #22C55E;
-  --color-accent-hover: #16A34A;
-  --color-accent-light: #4ADE80;
-  --color-accent-surface: rgba(34,197,94,0.12);
+  --color-accent: #00C49A;
+  --color-accent-hover: #00A884;
+  --color-accent-light: #2DD4BF;
+  --color-accent-surface: rgba(0, 196, 154, 0.12);
 
   --color-success: #22C55E;
-  --color-warning: #F59E0B;
-  --color-danger: #EF4444;
-  --color-info: #3B82F6;
+  --color-warning: #FF7733;
+  --color-danger: #FF4D4F;
+  --color-info: #4EA0FF;
   --color-purple: #8B5CF6;
 
-  --color-live: #EF4444;
-  --color-upcoming: #3B82F6;
-  --color-completed: #22C55E;
-  --color-draft: #F59E0B;
+  --color-live: #FF7733;
+  --color-upcoming: #4EA0FF;
+  --color-completed: #00C49A;
+  --color-draft: #F5A623;
   --color-abandoned: #6B7280;
 
   --color-brand-blue: var(--color-accent);
@@ -282,6 +282,428 @@
       }
       .safe-top-position {
         top: calc(1rem + env(safe-area-inset-top));
+      }
+
+      /* Premium CrickIQ Dark Theme UI Polish — Surface Layer Simplification (Phase A - G) */
+      html.dark body {
+        background-color: var(--color-primary) !important; /* Premium dark background */
+      }
+
+      html.dark .rounded-3xl:not([class*="border-l-"]),
+      html.dark .rounded-2xl:not([class*="border-l-"]),
+      html.dark .rounded-xl:not([class*="border-l-"]) {
+        border-color: rgba(255, 255, 255, 0.05) !important; /* Soft dark:border-white/5 for primary cards */
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22) !important; /* Premium Level 1 elevation shadow */
+      }
+      
+      html.dark .rounded-3xl[class*="border-l-"],
+      html.dark .rounded-2xl[class*="border-l-"],
+      html.dark .rounded-xl[class*="border-l-"] {
+        border-top-color: transparent !important;
+        border-right-color: transparent !important;
+        border-bottom-color: transparent !important;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22) !important;
+      }
+
+      /* Level 2 — Important / Featured Cards (Phase A & elevation instructions) */
+      html.dark .featured-card, 
+      html.dark [data-featured="true"],
+      html.dark .live-match-card {
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28) !important;
+        border-color: rgba(255, 255, 255, 0.06) !important;
+      }
+
+      /* Nested Container Simplification (Rule 3) */
+      html.dark .bg-secondary .bg-secondary,
+      html.dark .bg-secondary .dark\:bg-secondary,
+      html.dark [class*="bg-secondary"] [class*="bg-secondary"] {
+        background-color: rgba(35, 38, 44, 0.40) !important; /* Warm nested bg-primary/40 contrast */
+        box-shadow: none !important;
+        border-color: transparent !important;
+      }
+
+      html.dark .bg-secondary .bg-tertiary:not(.no-simplify),
+      html.dark .bg-secondary .dark\:bg-tertiary:not(.no-simplify),
+      html.dark [class*="bg-secondary"] [class*="bg-tertiary"]:not(.no-simplify) {
+        background-color: rgba(35, 38, 44, 0.40) !important; /* warm soft primary bg instead of muddy gray on gray */
+        border-color: transparent !important;
+        box-shadow: none !important;
+      }
+
+      /* Softer standard borders (Phase B & F) */
+      html.dark .border,
+      html.dark .border-border,
+      html.dark .border-divider,
+      html.dark .border-brand-blue\/15,
+      html.dark .border-brand-blue\/10,
+      html.dark .border-brand-blue\/20,
+      html.dark .dark\:border-border,
+      html.dark .dark\:border-white\/5,
+      html.dark .border-black\/5,
+      html.dark .border-black\/10,
+      html.dark .dark\:border-white\/10 {
+        border-color: rgba(255, 255, 255, 0.05) !important;
+      }
+
+      /* Internal divider softening (Phase B & Rule 4 - Soft Rows) */
+      html.dark .border-t:not(.border-accent):not(.border-live):not(.border-completed):not(.border-warning):not(.border-danger),
+      html.dark .border-b:not(.border-accent):not(.border-live):not(.border-completed):not(.border-warning):not(.border-danger),
+      html.dark .border-l:not(.border-l-2):not(.border-l-\[6px\]):not(.border-accent):not(.border-live):not(.border-completed):not(.border-warning):not(.border-danger),
+      html.dark .border-r:not(.border-accent):not(.border-live):not(.border-completed):not(.border-warning):not(.border-danger),
+      html.dark .divide-y > * {
+        border-color: rgba(255, 255, 255, 0.05) !important;
+      }
+
+      /* Soft Transparent Rows (Rule 4) */
+      html.dark .bg-secondary tr:not(.no-simplify),
+      html.dark .bg-secondary .flex-row:not(.no-simplify),
+      html.dark .bg-secondary [class*="bg-tertiary"]:not(.no-simplify) tr {
+        background-color: transparent !important;
+      }
+      html.dark .bg-secondary tr:hover,
+      html.dark .bg-secondary [class*="bg-tertiary"]:not(.no-simplify) tr:hover {
+        background-color: rgba(255, 255, 255, 0.04) !important;
+      }
+
+      /* Table Specific Soft Dividers (Phase F) */
+      html.dark .dark\:border-white\/10 {
+        border-color: rgba(255, 255, 255, 0.06) !important;
+      }
+      html.dark .dark\:divide-white\/5,
+      html.dark .divide-y > * {
+        border-color: rgba(255, 255, 255, 0.04) !important;
+      }
+
+      /* Soft Inputs (Rule 5 & Input Softening Pass) */
+      html.dark input[type="text"]:not([class*="focus:"]),
+      html.dark input[type="number"]:not([class*="focus:"]),
+      html.dark input[type="search"]:not([class*="focus:"]),
+      html.dark textarea:not([class*="focus:"]),
+      html.dark select:not([class*="focus:"]),
+      html.dark input[type="text"],
+      html.dark input[type="number"],
+      html.dark input[type="search"],
+      html.dark textarea,
+      html.dark select {
+        background-color: rgba(35, 38, 44, 0.35) !important; /* dark:bg-primary/35 */
+        border: 1px solid rgba(255, 255, 255, 0.08) !important; /* softer border-border/30 */
+        color: var(--color-text-primary) !important;
+        border-radius: 12px !important;
+        outline: none !important;
+        box-shadow: none !important;
+        transition: all 0.2s ease-in-out !important;
+      }
+      
+      html.dark input[type="text"]::placeholder,
+      html.dark input[type="number"]::placeholder,
+      html.dark input[type="search"]::placeholder,
+      html.dark textarea::placeholder {
+        color: rgba(255, 255, 255, 0.35) !important; /* dark:placeholder:text-text-muted */
+      }
+
+      /* Rule 2 — Inputs inside tertiary panels, primary layouts or nested structures */
+      html.dark .bg-secondary .bg-tertiary input,
+      html.dark .bg-secondary .bg-tertiary select,
+      html.dark .bg-secondary .bg-tertiary textarea,
+      html.dark .bg-tertiary input,
+      html.dark .bg-tertiary select,
+      html.dark .bg-tertiary textarea,
+      html.dark [class*="bg-tertiary"] input,
+      html.dark [class*="bg-tertiary"] select,
+      html.dark [class*="bg-tertiary"] textarea,
+      html.dark .bg-primary input,
+      html.dark .bg-primary select,
+      html.dark .bg-primary textarea {
+        background-color: rgba(35, 38, 44, 0.30) !important; /* dark:bg-primary/30 */
+        border-color: rgba(255, 255, 255, 0.05) !important; /* dark:border-border/20 */
+      }
+
+      /* Rule 3 — Search fields should feel lighter */
+      html.dark input[type="search"] {
+        background-color: rgba(35, 38, 44, 0.30) !important; /* dark:bg-primary/30 */
+        border-color: rgba(255, 255, 255, 0.06) !important; /* dark:border-border/25 */
+      }
+
+      /* Rule 4 — Disabled inputs/buttons */
+      html.dark input:disabled,
+      html.dark select:disabled,
+      html.dark textarea:disabled,
+      html.dark button:disabled,
+      html.dark input[disabled],
+      html.dark select[disabled],
+      html.dark textarea[disabled],
+      html.dark button[disabled] {
+        background-color: rgba(35, 38, 44, 0.20) !important; /* dark:bg-primary/20 */
+        color: rgba(255, 255, 255, 0.30) !important; /* dark:text-text-disabled */
+        border: 1px solid rgba(255, 255, 255, 0.04) !important; /* dark:border-border/15 */
+        opacity: 0.60 !important;
+        cursor: not-allowed !important;
+      }
+
+      /* Rule 5 — Focus state (visible but not aggressive) */
+      html.dark input[type="text"]:focus,
+      html.dark input[type="number"]:focus,
+      html.dark input[type="search"]:focus,
+      html.dark textarea:focus,
+      html.dark select:focus {
+        border-color: var(--color-accent) !important;
+        background-color: rgba(35, 38, 44, 0.50) !important;
+        box-shadow: 0 0 0 3px rgba(0, 196, 154, 0.20) !important; /* focus:dark:ring-accent/20 */
+      }
+
+      /* Chips / Select-Like Buttons (Role selection buttons and filter buttons) */
+      html.dark button.bg-primary.border-brand-blue\/15,
+      html.dark button[class*="bg-primary"][class*="border-brand-blue"],
+      html.dark label.bg-primary.border-brand-blue\/10,
+      html.dark label[class*="bg-primary"][class*="border-brand-blue"] {
+        background-color: rgba(35, 38, 44, 0.25) !important; /* dark:bg-primary/25 */
+        border: 1px solid rgba(255, 255, 255, 0.05) !important; /* dark:border-border/25 */
+        color: var(--color-text-secondary) !important;
+        box-shadow: none !important;
+        transition: all 0.2s ease-in-out !important;
+      }
+      
+      html.dark button.bg-brand-blue\/10.border-brand-blue,
+      html.dark button[class*="bg-brand-blue\/10"][class*="border-brand-blue"],
+      html.dark label.bg-brand-blue\/5.border-brand-blue\/40,
+      html.dark label[class*="bg-brand-blue\/5"][class*="border-brand-blue"] {
+        background-color: rgba(0, 196, 154, 0.15) !important; /* dark:bg-accent/15 */
+        border: 1px solid rgba(0, 196, 154, 0.40) !important; /* dark:border-accent/40 */
+        color: var(--color-accent) !important;
+        box-shadow: none !important;
+        transition: all 0.2s ease-in-out !important;
+      }
+
+      /* Bottom Sheets & Dialogs (Phase E) */
+      html.dark [role="dialog"],
+      html.dark .fixed.bottom-0 {
+        background-color: var(--color-secondary) !important;
+        border-color: transparent !important;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45) !important;
+      }
+
+      /* Soft Chips & Badges - Surface simplification (Rule 6) */
+      html.dark .rounded-full:not(.scoring-btn):not(.over-chip):not(.border-accent):not(.border-live):not(.border-completed):not(.border-warning):not(.border-danger):not([class*="bg-accent"]):not([class*="bg-live"]):not([class*="bg-completed"]):not([class*="bg-danger"]):not([class*="bg-warning"]) {
+        border-color: transparent !important;
+        background-color: rgba(255, 255, 255, 0.05) !important;
+        color: var(--color-text-secondary) !important;
+      }
+      
+      html.dark .rounded-full.bg-accent\/10:not(.scoring-btn):not(.over-chip),
+      html.dark .rounded-full.dark\:bg-accent\/15:not(.scoring-btn):not(.over-chip),
+      html.dark .rounded-full[class*="bg-accent"]:not(.scoring-btn):not(.over-chip) {
+        background-color: rgba(0, 196, 154, 0.15) !important;
+        color: var(--color-accent) !important;
+        border-color: transparent !important;
+      }
+
+      html.dark .rounded-full.bg-live\/10:not(.scoring-btn):not(.over-chip),
+      html.dark .rounded-full.dark\:bg-live\/15:not(.scoring-btn):not(.over-chip),
+      html.dark .rounded-full[class*="bg-live"]:not(.scoring-btn):not(.over-chip) {
+        background-color: rgba(255, 119, 51, 0.15) !important;
+        color: var(--color-live) !important;
+        border-color: transparent !important;
+      }
+
+      html.dark .rounded-full.bg-completed\/10:not(.scoring-btn):not(.over-chip),
+      html.dark .rounded-full.dark\:bg-completed\/15:not(.scoring-btn):not(.over-chip),
+      html.dark .rounded-full[class*="bg-completed"]:not(.scoring-btn):not(.over-chip) {
+        background-color: rgba(0, 196, 154, 0.15) !important;
+        color: var(--color-completed) !important;
+        border-color: transparent !important;
+      }
+
+      html.dark .rounded-full.bg-danger\/10:not(.scoring-btn):not(.over-chip),
+      html.dark .rounded-full.dark\:bg-danger\/15:not(.scoring-btn):not(.over-chip),
+      html.dark .rounded-full[class*="bg-danger"]:not(.scoring-btn):not(.over-chip) {
+        background-color: rgba(255, 77, 79, 0.15) !important;
+        color: var(--color-danger) !important;
+        border-color: transparent !important;
+      }
+
+      html.dark .rounded-full.bg-warning\/10:not(.scoring-btn):not(.over-chip),
+      html.dark .rounded-full.dark\:bg-warning\/15:not(.scoring-btn):not(.over-chip),
+      html.dark .rounded-full[class*="bg-warning"]:not(.scoring-btn):not(.over-chip) {
+        background-color: rgba(255, 119, 51, 0.15) !important;
+        color: var(--color-warning) !important;
+        border-color: transparent !important;
+      }
+
+      html.dark .rounded-full.bg-upcoming\/10:not(.scoring-btn):not(.over-chip),
+      html.dark .rounded-full.dark\:bg-upcoming\/15:not(.scoring-btn):not(.over-chip),
+      html.dark .rounded-full[class*="bg-upcoming"]:not(.scoring-btn):not(.over-chip) {
+        background-color: rgba(78, 160, 255, 0.15) !important;
+        color: var(--color-upcoming) !important;
+        border-color: transparent !important;
+      }
+
+      /* Button Surface Simplification (Rule 7) */
+      html.dark button.bg-secondary,
+      html.dark button.bg-tertiary,
+      html.dark button.bg-slate-700,
+      html.dark button.bg-slate-800,
+      html.dark button.bg-slate-900,
+      html.dark button.dark\:bg-secondary,
+      html.dark button.dark\:bg-tertiary {
+        background-color: rgba(255, 255, 255, 0.06) !important;
+        color: var(--color-text-primary) !important;
+        border-color: transparent !important;
+        box-shadow: none !important;
+        transition: all 0.2s ease-in-out !important;
+      }
+      html.dark button.bg-secondary:hover,
+      html.dark button.bg-tertiary:hover,
+      html.dark button.dark\:bg-secondary:hover,
+      html.dark button.dark\:bg-tertiary:hover {
+        background-color: rgba(255, 255, 255, 0.11) !important;
+      }
+
+      /* ==========================================================================
+         CRICKIQ MOBILE-FIRST HEADER OPTIMIZATION PASS (Dark Theme Only)
+         ========================================================================== */
+
+      /* Phase A — Global Header Height Reduction & Sticky Headers (Phase H) */
+      html.dark header,
+      html.dark .h-\[56px\],
+      html.dark [class*="h-[56px]"] {
+        height: 46px !important; /* 18% reduction */
+        padding-left: 0.75rem !important;
+        padding-right: 0.75rem !important;
+      }
+      html.dark header button {
+        width: 32px !important;
+        height: 32px !important;
+        border-radius: 8px !important;
+      }
+      html.dark header button svg {
+        width: 18px !important;
+        height: 18px !important;
+      }
+      html.dark header h1, 
+      html.dark header .text-h1 {
+        font-size: 1.05rem !important;
+        letter-spacing: -0.02em !important;
+      }
+      html.dark header div.font-display.text-\[20px\] {
+        font-size: 16px !important;
+      }
+
+      /* Phase B — Page Header Spacing Optimization */
+      html.dark .py-6, html.dark [class*="py-6"] {
+        padding-top: 1rem !important;
+        padding-bottom: 1rem !important;
+      }
+      html.dark .py-5, html.dark [class*="py-5"] {
+        padding-top: 0.75rem !important;
+        padding-bottom: 0.75rem !important; /* py-5 -> py-3 reduction (25%) */
+      }
+      html.dark .py-4, html.dark [class*="py-4"] {
+        padding-top: 0.625rem !important;
+        padding-bottom: 0.625rem !important; /* py-4 -> py-2.5 reduction (37.5%) */
+      }
+      html.dark .pt-6 { padding-top: 1rem !important; }
+      html.dark .pt-5 { padding-top: 0.75rem !important; }
+      html.dark .pt-4 { padding-top: 0.625rem !important; }
+      html.dark .pb-6 { padding-bottom: 1rem !important; }
+      html.dark .pb-5 { padding-bottom: 0.75rem !important; }
+      html.dark .pb-4 { padding-bottom: 0.625rem !important; }
+      html.dark .my-6 { margin-top: 1rem !important; margin-bottom: 1rem !important; }
+      html.dark .my-5 { margin-top: 0.75rem !important; margin-bottom: 0.75rem !important; }
+      html.dark .my-4 { margin-top: 0.625rem !important; margin-bottom: 0.625rem !important; }
+      html.dark .mt-6 { margin-top: 1rem !important; }
+      html.dark .mt-5 { margin-top: 0.75rem !important; }
+      html.dark .mt-4 { margin-top: 0.625rem !important; }
+      html.dark .mb-6 { margin-bottom: 1rem !important; }
+      html.dark .mb-5 { margin-bottom: 0.75rem !important; }
+      html.dark .mb-4 { margin-bottom: 0.625rem !important; }
+      html.dark .gap-6 { gap: 1rem !important; }
+      html.dark .gap-4 { gap: 0.5rem !important; /* gap-4 -> gap-2 reduction (50%) */ }
+
+      /* Compress Global Space-Y rules by 25%-33% in Dark Theme */
+      html.dark [class*="space-y-6"] > :not([class*="hidden"]) ~ :not([class*="hidden"]),
+      html.dark .space-y-6 > :not([class*="hidden"]) ~ :not([class*="hidden"]) {
+        margin-top: calc(1rem * calc(1 - var(--tw-space-y-reverse, 0))) !important;
+        margin-bottom: calc(1rem * var(--tw-space-y-reverse, 0)) !important;
+      }
+      html.dark [class*="space-y-5"] > :not([class*="hidden"]) ~ :not([class*="hidden"]),
+      html.dark .space-y-5 > :not([class*="hidden"]) ~ :not([class*="hidden"]) {
+        margin-top: calc(0.85rem * calc(1 - var(--tw-space-y-reverse, 0))) !important;
+        margin-bottom: calc(0.85rem * var(--tw-space-y-reverse, 0)) !important;
+      }
+      html.dark [class*="space-y-4"] > :not([class*="hidden"]) ~ :not([class*="hidden"]),
+      html.dark .space-y-4 > :not([class*="hidden"]) ~ :not([class*="hidden"]) {
+        margin-top: calc(0.65rem * calc(1 - var(--tw-space-y-reverse, 0))) !important;
+        margin-bottom: calc(0.65rem * var(--tw-space-y-reverse, 0)) !important;
+      }
+
+      /* Phase C — Match Center Header optimization */
+      html.dark .bg-primary > div.bg-\[\#0B1730\].dark\:bg-header {
+        padding-top: 0.5rem !important;
+        padding-bottom: 0.5rem !important;
+      }
+      html.dark .bg-primary > div.bg-\[\#0B1730\].dark\:bg-header .mt-4 {
+        margin-top: 0.4rem !important; /* reduce spacing below tab buttons */
+      }
+      html.dark .bg-primary > div.bg-\[\#0B1730\].dark\:bg-header button {
+        padding: 0.25rem !important;
+      }
+
+      /* Phase D — Team Hub Header optimization */
+      html.dark .fixed .container.mx-auto.px-4.py-4 {
+        padding-top: 0.5rem !important;
+        padding-bottom: 0.5rem !important;
+      }
+      html.dark .fixed .container.mx-auto.px-4.py-4 .space-y-3\.5 {
+        margin-top: 0.35rem !important;
+        margin-bottom: 0.35rem !important;
+      }
+      html.dark .fixed .container.mx-auto.px-4.py-4 .space-y-3\.5 > :not([class*="hidden"]) ~ :not([class*="hidden"]) {
+        margin-top: 0.35rem !important;
+      }
+      html.dark .fixed .container.mx-auto.px-4.py-4 .w-20.h-20 {
+        width: 3.75rem !important; /* Scale team badge sleekly */
+        height: 3.75rem !important;
+        font-size: 1.25rem !important;
+        border-radius: 0.75rem !important;
+      }
+      html.dark .fixed .container.mx-auto.px-4.py-4 .md\:w-24.md\:h-24 {
+        width: 4.5rem !important;
+        height: 4.5rem !important;
+      }
+
+      /* Phase E — Player Details Header optimization */
+      html.dark .bg-secondary.flex-col > .flex.items-center.justify-between.p-4.bg-\[\#0B1730\] {
+        padding-top: 0.45rem !important;
+        padding-bottom: 0.45rem !important;
+      }
+      html.dark .bg-secondary.flex-col > .flex.border-b.border-brand-blue\/15 button {
+        padding-top: 0.6!important;
+        padding-bottom: 0.6rem !important;
+      }
+      html.dark .bg-primary.p-6.border-b.flex.items-center {
+        padding: 0.85rem !important; /* Player Profile Card Padding */
+        gap: 0.85rem !important;
+      }
+      html.dark .bg-primary.p-6.border-b.flex.items-center .w-28.h-28 {
+        width: 4rem !important;
+        height: 4rem !important;
+        border-radius: 12px !important;
+      }
+      html.dark .bg-primary.p-6.border-b.flex.items-center .text-4xl {
+        font-size: 1.35rem !important;
+      }
+
+      /* Phase G — Modal & Sheet Headers */
+      html.dark [id*="-sheet-container"] div.px-6.py-4,
+      html.dark [id*="dialog"] div.px-6.py-4,
+      html.dark .rounded-t-\[2\.5rem\] div.px-6.py-4 {
+        padding-top: 0.75rem !important; /* py-3 instead of py-4 */
+        padding-bottom: 0.75rem !important;
+      }
+      html.dark [id*="-sheet-container"] .p-6,
+      html.dark [id*="-sheet-container"] .p-6 .space-y-5,
+      html.dark .rounded-t-\[2\.5rem\] .p-6 {
+        padding: 1rem !important; /* compact padding */
       }
     </style>
     <script>

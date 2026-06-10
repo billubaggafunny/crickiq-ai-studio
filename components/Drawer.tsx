@@ -1253,20 +1253,50 @@ const Drawer: React.FC<DrawerProps> = ({ isOpen, onClose }) => {
                             {DRAWER_ITEMS.map((item) => {
                                 // Add a subtle divider before Settings
                                 const isSettings = item.id === 'settings';
+                                if (item.highlight) {
+                                    return (
+                                        <React.Fragment key={item.id}>
+                                            <div 
+                                                className="mx-2 my-4 p-4 rounded-xl bg-slate-50 border border-slate-200/60 dark:bg-secondary dark:border-white/5 shadow-sm dark:shadow-[0_10px_30px_rgba(0,0,0,0.25)] flex flex-col gap-2.5 transition-all duration-200"
+                                            >
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="p-1.5 bg-brand-gradient/10 text-brand-blue dark:bg-accent/15 dark:text-accent rounded-lg">
+                                                            <SparklesIcon className="w-4 h-4" />
+                                                        </div>
+                                                        <span className="font-bold text-text-primary text-sm tracking-tight">CrickIQ Pro</span>
+                                                    </div>
+                                                    <span className="text-[10px] uppercase font-extrabold tracking-wider bg-brand-blue/10 text-brand-blue dark:bg-accent/15 dark:text-accent dark:border dark:border-accent/20 px-2.5 py-0.5 rounded-full">
+                                                        PRO
+                                                    </span>
+                                                </div>
+                                                
+                                                <p className="text-xs text-text-secondary leading-snug">
+                                                    Unlock unlimited matches, advanced analytics, and ad-free scoring.
+                                                </p>
+                                                
+                                                <button 
+                                                    onClick={() => setActivePage(item.id)}
+                                                    className="w-full mt-1 block text-center font-bold text-xs py-2 px-3 rounded-xl bg-brand-gradient text-white dark:bg-accent/15 dark:text-accent dark:hover:bg-accent/20 border border-transparent dark:border-accent/40 transition-all duration-200 active:scale-95 shadow-sm"
+                                                >
+                                                    Upgrade Now
+                                                </button>
+                                            </div>
+                                        </React.Fragment>
+                                    );
+                                }
                                 return (
                                     <React.Fragment key={item.id}>
                                         {isSettings && <div className="h-px bg-border-color my-4 mx-2 border-t border-dashed" />}
                                         <button
                                             onClick={() => setActivePage(item.id)}
                                             className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all duration-200 group
-                                                ${item.highlight ? 'bg-brand-gradient text-white border-0 text-warning dark:text-white' : 
-                                                  item.danger ? 'text-danger hover:bg-danger/10 dark:hover:bg-danger/100/10' : 
+                                                ${item.danger ? 'text-danger hover:bg-danger/10 dark:hover:bg-danger/100/10' : 
                                                   'hover:bg-primary'}
                                             `}
                                         >
                                             <div className={`p-1.5 rounded-lg transition-colors
-                                                ${item.highlight ? 'bg-yellow-400/20 text-warning dark:text-white' :
-                                                  item.danger ? 'bg-danger/20 dark:bg-red-900/30 text-danger' :
+                                                ${item.danger ? 'bg-danger/20 dark:bg-red-900/30 text-danger' :
                                                   'bg-primary shadow-md border border-light-border dark:border-brand-blue/15 text-text-secondary group-hover:text-brand-blue'}
                                             `}>
                                                 {item.icon}
@@ -1274,11 +1304,6 @@ const Drawer: React.FC<DrawerProps> = ({ isOpen, onClose }) => {
                                             <span className="text-button md:text-base">
                                                 {item.label}
                                             </span>
-                                            {item.highlight && (
-                                                <span className="ml-auto text-[10px] uppercase tracking-wider bg-yellow-400 text-yellow-900 px-2 py-0.5 rounded-2xl">
-                                                    Pro
-                                                </span>
-                                            )}
                                         </button>
                                     </React.Fragment>
                                 );

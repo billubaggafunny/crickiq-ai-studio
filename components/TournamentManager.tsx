@@ -349,7 +349,7 @@ const TournamentManager: React.FC<TournamentManagerProps> = (props) => {
                                                 {activeSuggestionBox === 'team1' && suggestions.length > 0 && (
                                                     <div className="absolute z-20 w-full bg-primary rounded-lg shadow-lg mt-1 border border-brand-blue/15 max-h-40 overflow-y-auto no-scrollbar">
                                                         {suggestions.map(team => (
-                                                            <button key={team.id} onClick={() => handleSelectSuggestion1(team)} className="block w-full text-left px-4 py-2 hover:bg-primary dark:hover:bg-gray-600">{team.name}</button>
+                                                            <button key={team.id} onClick={() => handleSelectSuggestion1(team)} className="block w-full text-left px-4 py-2 hover:bg-primary dark:hover:bg-secondary">{team.name}</button>
                                                         ))}
                                                     </div>
                                                 )}
@@ -359,7 +359,7 @@ const TournamentManager: React.FC<TournamentManagerProps> = (props) => {
                                                 {activeSuggestionBox === 'team2' && suggestions.length > 0 && (
                                                     <div className="absolute z-20 w-full bg-primary rounded-lg shadow-lg mt-1 border border-brand-blue/15 max-h-40 overflow-y-auto no-scrollbar">
                                                         {suggestions.map(team => (
-                                                            <button key={team.id} onClick={() => handleSelectSuggestion2(team)} className="block w-full text-left px-4 py-2 hover:bg-primary dark:hover:bg-gray-600">{team.name}</button>
+                                                            <button key={team.id} onClick={() => handleSelectSuggestion2(team)} className="block w-full text-left px-4 py-2 hover:bg-primary dark:hover:bg-secondary">{team.name}</button>
                                                         ))}
                                                     </div>
                                                 )}

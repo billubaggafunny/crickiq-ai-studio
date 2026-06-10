@@ -39,7 +39,7 @@ const Select: React.FC<React.SelectHTMLAttributes<HTMLSelectElement>> = (
 ) => (
   <select
     {...props}
-    className={`w-full p-1.5 text-body bg-tertiary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue ${props.className}`}
+    className={`w-full p-1.5 text-body bg-tertiary text-text-primary border border-brand-blue/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue dark:bg-primary/35 dark:border-border/25 dark:text-text-primary focus:dark:border-accent focus:dark:ring-2 focus:dark:ring-accent/20 ${props.className}`}
   />
 );
 
@@ -55,6 +55,49 @@ function usePrevious<T>(value: T): T | undefined {
   // eslint-disable-next-line react-hooks/refs
   return ref.current;
 }
+
+const getRunButtonDarkClasses = (r: number, isSelected: boolean): string => {
+  if (!isSelected) {
+    return "dark:bg-tertiary/60 dark:text-text-primary dark:border-transparent dark:shadow-none";
+  }
+  switch (r) {
+    case 0:
+      return "dark:bg-white dark:text-black dark:shadow-md";
+    case 1:
+    case 2:
+    case 3:
+      return "dark:bg-accent dark:text-black dark:shadow-md";
+    case 4:
+      return "dark:bg-info dark:text-white dark:shadow-md";
+    case 6:
+      return "dark:bg-purple dark:text-white dark:shadow-md";
+    default:
+      return "dark:bg-tertiary/60 dark:text-text-primary dark:border-transparent dark:shadow-none";
+  }
+};
+
+const getThisOverBallChipClass = (ball: Ball): string => {
+  if (ball.isWicket) {
+    return "dark:!bg-danger dark:!text-white dark:!shadow-sm";
+  }
+  if (ball.isWide || ball.isNoBall || ball.isBye || ball.isLegBye) {
+    return "dark:!bg-draft dark:!text-black dark:!shadow-sm";
+  }
+  // Normal deliveries
+  if (ball.runs === 0) {
+    return "dark:!bg-white dark:!text-black dark:!shadow-sm";
+  }
+  if (ball.runs === 4) {
+    return "dark:!bg-info dark:!text-white dark:!shadow-sm";
+  }
+  if (ball.runs === 6) {
+    return "dark:!bg-purple dark:!text-white dark:!shadow-sm";
+  }
+  if (ball.runs >= 1 && ball.runs <= 3) {
+    return "dark:!bg-accent dark:!text-black dark:!shadow-sm";
+  }
+  return "dark:!bg-tertiary dark:!text-text-primary dark:!shadow-none";
+};
 
 const LiveScoring: React.FC<LiveScoringProps> = ({
   match,
@@ -1134,8 +1177,8 @@ const LiveScoring: React.FC<LiveScoringProps> = ({
               <ChevronLeft className="w-5 h-5 text-inherit" />
             </button>
             {!isMatchOver && (
-              <div className="flex items-center gap-1.5 bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-500 px-2 py-0.5 rounded-full border border-green-200 dark:border-green-500/20 shadow-sm ml-auto">
-                <span className="w-1.5 h-1.5 rounded-full bg-green-600 dark:bg-green-500 animate-[pulse_2s_ease-in-out_infinite]" />
+              <div className="flex items-center gap-1.5 bg-green-50 dark:bg-accent/8 text-green-600 dark:text-accent px-2 py-0.5 rounded-full border border-green-200 dark:border-accent/20 shadow-sm ml-auto">
+                <span className="w-2 h-2 rounded-full bg-green-600 dark:bg-accent dark:animate-pulse animate-[pulse_2s_ease-in-out_infinite]" />
                 <span className="text-[10px] font-bold uppercase tracking-wider">
                   Live Match
                 </span>
@@ -1189,7 +1232,7 @@ const LiveScoring: React.FC<LiveScoringProps> = ({
               const isCurrent = index === ballsThisOver.length - 1;
               const { text, className, title } = getBallDisplay(ball, isCurrent);
               return (
-                <div key={index} className={className} title={title}>
+                <div key={index} className={`${className} ${getThisOverBallChipClass(ball)} over-chip`} title={title}>
                   {text}
                 </div>
               );
@@ -1209,19 +1252,19 @@ const LiveScoring: React.FC<LiveScoringProps> = ({
                 </div>
               </div>
               {striker && strikerStats && (
-                <div className="grid grid-cols-[minmax(0,2fr)_repeat(5,minmax(0,1fr))] gap-x-2 text-body font-bold text-text-primary items-center">
-                  <div className="text-left truncate">{striker.name}*</div>
-                  <div className="text-right">{strikerStats.runs}</div>
+                <div className="grid grid-cols-[minmax(0,2fr)_repeat(5,minmax(0,1fr))] gap-x-2 text-body font-bold text-text-primary items-center dark:bg-accent/5 dark:shadow-[0_0_12px_rgba(0,196,154,0.1)] px-2 -mx-2 rounded-lg py-1">
+                  <div className="text-left truncate dark:text-accent">{striker.name}*</div>
+                  <div className="text-right dark:text-accent">{strikerStats.runs}</div>
                   <div className="text-right">{strikerStats.balls}</div>
                   <div className="text-right">{strikerStats.fours}</div>
                   <div className="text-right">{strikerStats.sixes}</div>
-                  <div className="text-right">
+                  <div className="text-right dark:text-accent font-extrabold">
                     {calculateStrikeRate(strikerStats.runs, strikerStats.balls)}
                   </div>
                 </div>
               )}
               {nonStriker && nonStrikerStats && (
-                <div className="grid grid-cols-[minmax(0,2fr)_repeat(5,minmax(0,1fr))] gap-x-2 text-body text-text-primary items-center">
+                <div className="grid grid-cols-[minmax(0,2fr)_repeat(5,minmax(0,1fr))] gap-x-2 text-body text-text-primary items-center px-2 -mx-2 rounded-lg py-1 border border-transparent">
                   <div className="text-left truncate">{nonStriker.name}</div>
                   <div className="text-right">{nonStrikerStats.runs}</div>
                   <div className="text-right">{nonStrikerStats.balls}</div>
@@ -1383,7 +1426,7 @@ const LiveScoring: React.FC<LiveScoringProps> = ({
                         disabled={
                           isWicket && wicketDetails.type === WicketType.RUN_OUT
                         }
-                        className={`aspect-square rounded-full font-bold text-lg transition-all duration-200 transform hover:scale-105 flex items-center justify-center ${runs === r && !isWicket ? "bg-brand-blue text-white shadow-lg" : "bg-primary/50 hover:bg-primary text-text-primary"} ${isWicket && wicketDetails.type === WicketType.RUN_OUT ? "opacity-50 cursor-not-allowed" : ""}`}
+                        className={`aspect-square rounded-full font-bold text-lg transition-all duration-200 transform hover:scale-105 flex items-center justify-center ${runs === r && !isWicket ? "bg-brand-blue text-white shadow-lg" : "bg-primary/50 hover:bg-primary text-text-primary"} ${getRunButtonDarkClasses(r, runs === r && !isWicket)} ${isWicket && wicketDetails.type === WicketType.RUN_OUT ? "opacity-50 cursor-not-allowed" : ""} scoring-btn`}
                       >
                         {r}
                       </button>
@@ -1396,13 +1439,13 @@ const LiveScoring: React.FC<LiveScoringProps> = ({
                           ? "Toggle Free Hit"
                           : "Free Hit can only be set after a no ball."
                       }
-                      className={`aspect-square rounded-full font-bold text-caption transition-all duration-200 flex items-center justify-center text-center p-1 leading-tight ${isFreeHit ? "bg-highlight text-white shadow-lg animate-pulse" : "bg-primary/50 text-text-secondary"} ${!canToggleFreeHit ? "opacity-50 cursor-not-allowed" : ""}`}
+                      className={`aspect-square rounded-full font-bold text-caption transition-all duration-200 flex items-center justify-center text-center p-1 leading-tight border border-transparent ${isFreeHit ? "bg-highlight text-white shadow-lg animate-pulse dark:border dark:bg-danger/10 dark:text-danger dark:border-danger/50 dark:shadow-[0_0_16px_rgba(255,77,79,0.25)]" : "bg-primary/50 text-text-secondary dark:bg-tertiary/40 dark:text-text-muted dark:border-transparent"} ${!canToggleFreeHit ? "opacity-50 cursor-not-allowed" : ""} scoring-btn`}
                     >
                       Free Hit
                     </button>
                     <button
                       onClick={() => setIsWicket(!isWicket)}
-                      className={`aspect-square rounded-full font-bold text-lg transition-all duration-200 transform hover:scale-105 flex items-center justify-center ${isWicket ? "bg-highlight text-white shadow-lg" : "bg-primary/50 hover:bg-primary text-text-primary"}`}
+                      className={`aspect-square rounded-full font-bold text-lg transition-all duration-200 transform hover:scale-105 flex items-center justify-center ${isWicket ? "bg-highlight text-white shadow-lg dark:bg-danger dark:text-white dark:shadow-md" : "bg-primary/50 hover:bg-primary text-text-primary dark:bg-tertiary/60 dark:text-text-primary dark:border-transparent dark:shadow-none"} scoring-btn`}
                     >
                       W
                     </button>
@@ -1551,7 +1594,7 @@ const LiveScoring: React.FC<LiveScoringProps> = ({
                         onClick={handleUndo}
                         disabled={currentInnings.balls.length === 0}
                         title="Undo Last Ball"
-                        className="flex-1 bg-brand-teal text-white font-bold rounded-2xl hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-body active:scale-95 transition-all"
+                        className="flex-1 bg-brand-teal text-white font-bold rounded-2xl border border-transparent hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-body active:scale-95 transition-all dark:bg-secondary dark:text-accent dark:border-accent/40 dark:hover:bg-accent/10 dark:hover:border-accent/60"
                       >
                         Undo
                       </button>
