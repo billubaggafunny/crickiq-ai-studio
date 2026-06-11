@@ -23,6 +23,8 @@ const TimeScroller: React.FC<TimeScrollerProps> = ({ value, onChange }) => {
     const [hour, setHour] = useState<string>('');
     const [minute, setMinute] = useState<string>('');
     const [period, setPeriod] = useState<string>('');
+    const paddedHour = hour === '' ? '' : String(parseInt(hour, 10) || 0).padStart(2, '0');
+    const paddedMinute = minute === '' ? '' : String(parseInt(minute, 10) || 0).padStart(2, '0');
 
     // Sync internal state ONLY when the `value` prop changes from the parent.
     // This is the single source of truth from outside and prevents update loops.
@@ -88,8 +90,6 @@ const TimeScroller: React.FC<TimeScrollerProps> = ({ value, onChange }) => {
         propagateChange(hour, formattedMinute, period);
     };
 
-    const paddedHour = hour === '' ? '' : String(parseInt(hour, 10) || 0).padStart(2, '0');
-    const paddedMinute = minute === '' ? '' : String(parseInt(minute, 10) || 0).padStart(2, '0');
     const handleHourInput = handleHourChange;
     const handleMinuteInput = handleMinuteChange;
 

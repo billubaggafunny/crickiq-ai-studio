@@ -131,7 +131,7 @@ const BowlingChart: React.FC<{ data: { matchName: string; wickets: number; runs:
         return <div style={{ height: 250, width: '100%', minHeight: 250, minWidth: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#666' }}>No data available</div>;
     }
     return (
-        <div style={{ width: '100%', height: 250, minHeight: 250, minWidth: 0 }}>
+        <div className="w-full h-[250px] min-h-[250px]">
             <SafeChartWrapper>
                 <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={data} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>

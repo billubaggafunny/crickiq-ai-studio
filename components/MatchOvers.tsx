@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { Innings, Team } from '../types';
 import { getBallDisplay, getBallOutcomeChipClass } from '../utils/cricketLogic';
+import { formatOvers } from '../utils/scoreFormatters';
 
 interface MatchOversProps {
  innings: Innings;
@@ -51,7 +52,7 @@ const MatchOvers: React.FC<MatchOversProps> = ({ innings, battingTeam }) => {
  </div>
  {safeBattingTeamName} Overs
  </h3>
- <div className="text-sm font-mono font-medium text-gray-500">Overs: {innings.overs}</div>
+ <div className="text-sm font-mono font-medium text-gray-500">Overs: {formatOvers(innings.overs)}</div>
  </div>
  <div className="p-4 md:p-6 space-y-4 max-h-[600px] overflow-y-auto">
  {oversData.map(({ over, balls, totalRuns, wickets }) => (

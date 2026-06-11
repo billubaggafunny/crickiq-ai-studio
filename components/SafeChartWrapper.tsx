@@ -2,23 +2,27 @@ import React, { useState, useEffect, useRef } from 'react';
 
 interface SafeChartWrapperProps {
     children: React.ReactNode;
+    className?: string;
 }
 
-export const SafeChartWrapper: React.FC<SafeChartWrapperProps> = ({ children }) => {
+export const SafeChartWrapper: React.FC<SafeChartWrapperProps> = ({ children, className = "" }) => {
     const containerRef = useRef<HTMLDivElement>(null);
-    const [hasDimensions, setHasDimensions] = useState(false);
+    const [size, setSize] = useState({ width: 0, height: 0 });
 
     useEffect(() => {
         if (!containerRef.current) return;
         
-        const observer = new ResizeObserver((entries) => {
-            for (const entry of entries) {
-                if (entry.contentRect.width > 0 && entry.contentRect.height > 0) {
-                    setHasDimensions(true);
-                } else {
-                    setHasDimensions(false);
-                }
-            }
+        const updateSize = () => {
+             if (containerRef.current) {
+                const { width, height } = containerRef.current.getBoundingClientRect();
+                setSize({ width, height });
+             }
+        };
+        
+        updateSize();
+
+        const observer = new ResizeObserver(() => {
+            updateSize();
         });
 
         observer.observe(containerRef.current);
@@ -26,9 +30,21 @@ export const SafeChartWrapper: React.FC<SafeChartWrapperProps> = ({ children }) 
         return () => observer.disconnect();
     }, []);
 
+    const isValidSize =
+        size.width > 0 &&
+        size.height > 0 &&
+        Number.isFinite(size.width) &&
+        Number.isFinite(size.height);
+
     return (
-        <div ref={containerRef} style={{ width: '100%', height: '100%', minWidth: 0, minHeight: 0 }}>
-            {hasDimensions && children}
+        <div ref={containerRef} className={`relative w-full h-full min-w-0 min-h-0 overflow-hidden ${className}`}>
+            {isValidSize ? (
+                children
+            ) : (
+                <div className="w-full h-full flex items-center justify-center text-text-secondary text-xs">
+                   Chart loading...
+                </div>
+            )}
         </div>
     );
 };

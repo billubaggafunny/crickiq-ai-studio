@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Match, Team, Tournament } from '../types';
-import { ChevronLeft, Calendar, Trophy, Target, Activity } from 'lucide-react';
+import { ChevronLeft, Calendar, Activity } from 'lucide-react';
 import CrickIQCard from './CrickIQCard';
 import MatchScorecard from './MatchScorecard';
 import MatchOvers from './MatchOvers';
@@ -222,11 +222,6 @@ const MatchDetailsHub: React.FC<MatchDetailsHubProps> = ({
  return `${winner.name} won`;
  };
 
- const getScoreString = (innings?: typeof match.innings1) => {
- if (!innings) return 'Yet to bat';
- return `${innings.score}/${innings.wickets} (${innings.overs} ov)`;
- };
-
  const team1Score = match.innings1?.battingTeamId === team1.id ? match.innings1 : match.innings2?.battingTeamId === team1.id ? match.innings2 : undefined;
  const team2Score = match.innings1?.battingTeamId === team2.id ? match.innings1 : match.innings2?.battingTeamId === team2.id ? match.innings2 : undefined;
 
@@ -361,7 +356,146 @@ const MatchDetailsHub: React.FC<MatchDetailsHubProps> = ({
  {activeTab === 'overview' ? (
  <div className="p-4 md:p-6 pb-24 max-w-4xl mx-auto space-y-6">
  
- {/* Lineups Card */}
+ 
+        {/* Modern Match / Score Summary Card */}
+        <CrickIQCard className="p-0 bg-secondary shadow-sm rounded-3xl overflow-hidden relative border border-border/20 mb-6">
+          {/* Top Row: Info & Status */}
+          <div className="p-5 pb-0">
+            <div className="flex justify-between items-start mb-4 pr-1 relative z-10">
+                <div className="flex flex-col gap-1.5">
+                    <div className="flex flex-wrap items-center gap-2">
+                        {displayState.type === 'live' ? (
+                            <span className="flex items-center gap-1.5 bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-400 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border border-red-100 dark:border-red-900/30">
+                                <span className="w-1.5 h-1.5 rounded-full bg-red-600 dark:bg-red-500"></span>
+                                LIVE
+                            </span>
+                        ) : displayState.type === 'draft' ? (
+                            <span className="bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border border-amber-100 dark:border-amber-900/30">
+                                Draft
+                            </span>
+                        ) : displayState.type === 'abandoned' ? (
+                            <span className="bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-400 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border border-red-100 dark:border-red-900/30">
+                                Abandoned
+                            </span>
+                        ) : (
+                            <span className="bg-black/5 dark:bg-white/10 text-text-secondary px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider">
+                                {displayState.label}
+                            </span>
+                        )}
+                        
+                        <span className="bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-300 px-2 py-0.5 rounded font-bold text-[10px] uppercase tracking-wider border border-sky-100 dark:border-sky-900/30">
+                            {matchTypeLabel}
+                        </span>
+                        
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">
+                            {match.oversPerInnings} Overs
+                        </span>
+                    </div>
+                    
+                    <span className="text-[10px] text-text-secondary uppercase tracking-wider">
+                        {new Date(match.date).toLocaleDateString()} {match.time ? `• ${match.time}` : ''}
+                        {tournament?.location && ` • ${tournament.location}`}
+                    </span>
+                </div>
+            </div>
+
+            <div className="space-y-4 pt-2 relative z-10 flex flex-col">
+                {displayState.type !== 'draft' ? (
+                    <>
+                        <div className="flex justify-between items-center bg-tertiary/20 p-2 -mx-2 rounded-xl">
+                            <div className="flex items-center gap-3 overflow-hidden min-w-0 mr-2">
+                                <div 
+                                    className="shrink-0 w-8 h-8 flex items-center justify-center rounded-lg text-white font-bold text-sm"
+                                    style={{ backgroundColor: team1.logo || '#3B82F6' }}
+                                >
+                                    {team1.name.substring(0, 2).toUpperCase()}
+                                </div>
+                                <span className={`text-sm md:text-base font-semibold truncate ${displayState.type !== 'completed' || isWinner(team1) || match.winnerId === 'draw' ? 'text-text-primary' : 'text-text-secondary'}`}>
+                                    {team1.name} <span className="text-[10px] font-bold text-text-secondary ml-1 bg-black/5 dark:bg-secondary/5 px-1.5 py-0.5 rounded align-middle">Home</span>
+                                </span>
+                            </div>
+                            <div className="flex items-baseline gap-1.5 shrink-0">
+                                {team1Score ? (
+                                    <>
+                                        <span className={`font-mono font-bold text-lg md:text-xl tracking-tighter ${displayState.type !== 'completed' || isWinner(team1) || match.winnerId === 'draw' ? 'text-text-primary' : 'text-text-secondary'}`}>
+                                            {team1Score.score}/{team1Score.wickets ?? 0}
+                                        </span>
+                                        <span className="font-mono text-xs text-text-secondary">
+                                            ({team1Score.overs ?? 0})
+                                        </span>
+                                    </>
+                                ) : (
+                                    <span className="font-mono font-bold text-lg md:text-xl text-text-secondary opacity-50">DNB</span>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="flex justify-between items-center bg-tertiary/20 p-2 -mx-2 rounded-xl">
+                            <div className="flex items-center gap-3 overflow-hidden min-w-0 mr-2">
+                                <div 
+                                    className="shrink-0 w-8 h-8 flex items-center justify-center rounded-lg text-white font-bold text-sm"
+                                    style={{ backgroundColor: team2.logo || '#EF4444' }}
+                                >
+                                    {team2.name.substring(0, 2).toUpperCase()}
+                                </div>
+                                <span className={`text-sm md:text-base font-semibold truncate ${displayState.type !== 'completed' || isWinner(team2) || match.winnerId === 'draw' ? 'text-text-primary' : 'text-text-secondary'}`}>
+                                    {team2.name}
+                                </span>
+                            </div>
+                            <div className="flex items-baseline gap-1.5 shrink-0">
+                                {team2Score ? (
+                                    <>
+                                        <span className={`font-mono font-bold text-lg md:text-xl tracking-tighter ${displayState.type !== 'completed' || isWinner(team2) || match.winnerId === 'draw' ? 'text-text-primary' : 'text-text-secondary'}`}>
+                                            {team2Score.score}/{team2Score.wickets ?? 0}
+                                        </span>
+                                        <span className="font-mono text-xs text-text-secondary">
+                                            ({team2Score.overs ?? 0})
+                                        </span>
+                                    </>
+                                ) : (
+                                    <span className="font-mono font-bold text-lg md:text-xl text-text-secondary opacity-50">DNB</span>
+                                )}
+                            </div>
+                        </div>
+                    </>
+                ) : (
+                    <div className="flex flex-col items-center py-2 gap-3 opacity-70">
+                        <span className="text-[11px] font-bold text-text-secondary uppercase tracking-wider">
+                            Setup Required
+                        </span>
+                    </div>
+                )}
+            </div>
+
+            {displayState.type === 'live' && renderLiveTargetInfo()}
+          </div>
+
+          <div className="bg-tertiary p-4 mt-5">
+              {match.toss && displayState.type !== 'draft' ? (
+                  <p className="text-[11px] font-medium text-text-secondary uppercase tracking-wider text-center">
+                      {renderTossInfo()}
+                  </p>
+              ) : (
+                  <p className="text-[11px] font-medium text-text-secondary uppercase tracking-wider text-center flex items-center justify-center gap-1.5">
+                     <Calendar className="w-3 h-3" /> Awaiting Toss
+                  </p>
+              )}
+              {(displayState.type === 'completed' || displayState.type === 'abandoned' || displayState.type === 'live') && (
+                  <div className="mt-3 flex flex-col items-center gap-1">
+                      <span className={`text-[13px] font-bold uppercase tracking-tight text-center ${displayState.type === 'abandoned' ? 'text-red-500' : 'text-text-primary'}`}>
+                          {displayState.type === 'abandoned' ? 'Match Abandoned' : getWinnerMessage() || 'Match in Progress'}
+                      </span>
+                      {match.manOfTheMatchId && displayState.type === 'completed' && (
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-brand-blue flex items-center justify-center gap-1 text-center">
+                              🌟 Player of the Match: {[...team1.players, ...team2.players].find(p => p.id === match.manOfTheMatchId)?.name || 'Unknown'}
+                          </span>
+                      )}
+                  </div>
+              )}
+          </div>
+        </CrickIQCard>
+
+        {/* Lineups Card */}
  <CrickIQCard className="p-0 overflow-hidden shadow-sm bg-secondary rounded-3xl">
  <div className="p-3 bg-tertiary border-b border-border flex items-center justify-between">
  <h3 className="text-lg tracking-tight font-bold text-text-primary">Lineups</h3>
@@ -488,112 +622,148 @@ const MatchDetailsHub: React.FC<MatchDetailsHubProps> = ({
  </div>
  ) : activeTab === 'matchCenter' ? (
  <div className="p-4 md:p-6 pb-24 max-w-4xl mx-auto space-y-6">
- 
- {/* Match Info Card */}
- <CrickIQCard className="p-0 overflow-hidden shadow-sm bg-secondary rounded-3xl">
- <div className="p-5 flex flex-col gap-4">
- 
- <div className="flex justify-between items-start mb-2">
- <div>
- <h3 className="font-bold text-text-primary text-lg">{matchTypeLabel}</h3>
- <div className="flex items-center text-text-secondary text-sm mt-1 gap-1">
- <Calendar className="w-4 h-4" />
- <span>{new Date(match.date).toLocaleDateString()} {match.time ? `• ${match.time}` : ''}</span>
- </div>
- </div>
- <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
- displayState.type === 'live' ? 'bg-orange-100 text-orange-600' : 
- displayState.type === 'completed' ? 'bg-green-100 text-green-700' :
- displayState.type === 'abandoned' ? 'bg-red-100 text-red-600' :
- 'bg-tertiary text-text-secondary'
- }`}>
- {displayState.label}
- </span>
- </div>
 
- <div className="p-4 bg-tertiary rounded-xl flex items-center justify-center text-center">
- <p className="text-sm font-medium text-text-secondary">
- {renderTossInfo()}
- </p>
- </div>
- 
- <div className="grid grid-cols-2 gap-4 mt-2">
- <div className="text-center p-4 rounded-xl bg-tertiary">
- <p className="text-xs text-text-secondary uppercase tracking-wider mb-1">Overs</p>
- <p className="font-bold text-lg text-text-primary">{match.oversPerInnings}</p>
- </div>
- <div className="text-center p-4 rounded-xl bg-tertiary">
- <p className="text-xs text-text-secondary uppercase tracking-wider mb-1">Max Overs/Bowler</p>
- <p className="font-bold text-lg text-text-primary">{match.maxOversPerBowler || Math.ceil(match.oversPerInnings / 5)}</p>
- </div>
- </div>
- 
- {renderMatchActions()}
+        {/* Modern Match / Score Summary Card */}
+        <CrickIQCard className="p-0 bg-secondary shadow-sm rounded-3xl overflow-hidden relative border border-border/20 mb-6">
+          {/* Top Row: Info & Status */}
+          <div className="p-5 pb-0">
+            <div className="flex justify-between items-start mb-4 pr-1 relative z-10">
+                <div className="flex flex-col gap-1.5">
+                    <div className="flex flex-wrap items-center gap-2">
+                        {displayState.type === 'live' ? (
+                            <span className="flex items-center gap-1.5 bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-400 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border border-red-100 dark:border-red-900/30">
+                                <span className="w-1.5 h-1.5 rounded-full bg-red-600 dark:bg-red-500"></span>
+                                LIVE
+                            </span>
+                        ) : displayState.type === 'draft' ? (
+                            <span className="bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border border-amber-100 dark:border-amber-900/30">
+                                Draft
+                            </span>
+                        ) : displayState.type === 'abandoned' ? (
+                            <span className="bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-400 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border border-red-100 dark:border-red-900/30">
+                                Abandoned
+                            </span>
+                        ) : (
+                            <span className="bg-black/5 dark:bg-white/10 text-text-secondary px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider">
+                                {displayState.label}
+                            </span>
+                        )}
+                        
+                        <span className="bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-300 px-2 py-0.5 rounded font-bold text-[10px] uppercase tracking-wider border border-sky-100 dark:border-sky-900/30">
+                            {matchTypeLabel}
+                        </span>
+                        
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">
+                            {match.oversPerInnings} Overs
+                        </span>
+                    </div>
+                    
+                    <span className="text-[10px] text-text-secondary uppercase tracking-wider">
+                        {new Date(match.date).toLocaleDateString()} {match.time ? `• ${match.time}` : ''}
+                        {tournament?.location && ` • ${tournament.location}`}
+                    </span>
+                </div>
+            </div>
 
- </div>
- </CrickIQCard>
+            <div className="space-y-4 pt-2 relative z-10 flex flex-col">
+                {displayState.type !== 'draft' ? (
+                    <>
+                        <div className="flex justify-between items-center bg-tertiary/20 p-2 -mx-2 rounded-xl">
+                            <div className="flex items-center gap-3 overflow-hidden min-w-0 mr-2">
+                                <div 
+                                    className="shrink-0 w-8 h-8 flex items-center justify-center rounded-lg text-white font-bold text-sm"
+                                    style={{ backgroundColor: team1.logo || '#3B82F6' }}
+                                >
+                                    {team1.name.substring(0, 2).toUpperCase()}
+                                </div>
+                                <span className={`text-sm md:text-base font-semibold truncate ${displayState.type !== 'completed' || isWinner(team1) || match.winnerId === 'draw' ? 'text-text-primary' : 'text-text-secondary'}`}>
+                                    {team1.name} <span className="text-[10px] font-bold text-text-secondary ml-1 bg-black/5 dark:bg-secondary/5 px-1.5 py-0.5 rounded align-middle">Home</span>
+                                </span>
+                            </div>
+                            <div className="flex items-baseline gap-1.5 shrink-0">
+                                {team1Score ? (
+                                    <>
+                                        <span className={`font-mono font-bold text-lg md:text-xl tracking-tighter ${displayState.type !== 'completed' || isWinner(team1) || match.winnerId === 'draw' ? 'text-text-primary' : 'text-text-secondary'}`}>
+                                            {team1Score.score}/{team1Score.wickets ?? 0}
+                                        </span>
+                                        <span className="font-mono text-xs text-text-secondary">
+                                            ({team1Score.overs ?? 0})
+                                        </span>
+                                    </>
+                                ) : (
+                                    <span className="font-mono font-bold text-lg md:text-xl text-text-secondary opacity-50">DNB</span>
+                                )}
+                            </div>
+                        </div>
 
- {/* Result / Score Summary */}
- {(displayState.type === 'completed' || displayState.type === 'abandoned' || displayState.type === 'live') && (
- <CrickIQCard className="p-0 overflow-hidden shadow-sm bg-secondary rounded-3xl">
- <div className="p-5">
- <div className="flex items-center gap-2 mb-6">
- {displayState.type === 'live' ? (
- <Activity className="w-5 h-5 text-orange-500" />
- ) : (
- <Trophy className={`w-5 h-5 ${displayState.type === 'abandoned' ? 'text-red-500' : 'text-brand-yellow'}`} />
- )}
- <h3 className="font-bold text-text-primary text-lg">
- {displayState.type === 'live' ? 'Live Score' : 'Final Score'}
- </h3>
- </div>
+                        <div className="flex justify-between items-center bg-tertiary/20 p-2 -mx-2 rounded-xl">
+                            <div className="flex items-center gap-3 overflow-hidden min-w-0 mr-2">
+                                <div 
+                                    className="shrink-0 w-8 h-8 flex items-center justify-center rounded-lg text-white font-bold text-sm"
+                                    style={{ backgroundColor: team2.logo || '#EF4444' }}
+                                >
+                                    {team2.name.substring(0, 2).toUpperCase()}
+                                </div>
+                                <span className={`text-sm md:text-base font-semibold truncate ${displayState.type !== 'completed' || isWinner(team2) || match.winnerId === 'draw' ? 'text-text-primary' : 'text-text-secondary'}`}>
+                                    {team2.name}
+                                </span>
+                            </div>
+                            <div className="flex items-baseline gap-1.5 shrink-0">
+                                {team2Score ? (
+                                    <>
+                                        <span className={`font-mono font-bold text-lg md:text-xl tracking-tighter ${displayState.type !== 'completed' || isWinner(team2) || match.winnerId === 'draw' ? 'text-text-primary' : 'text-text-secondary'}`}>
+                                            {team2Score.score}/{team2Score.wickets ?? 0}
+                                        </span>
+                                        <span className="font-mono text-xs text-text-secondary">
+                                            ({team2Score.overs ?? 0})
+                                        </span>
+                                    </>
+                                ) : (
+                                    <span className="font-mono font-bold text-lg md:text-xl text-text-secondary opacity-50">DNB</span>
+                                )}
+                            </div>
+                        </div>
+                    </>
+                ) : (
+                    <div className="flex flex-col items-center py-2 gap-3 opacity-70">
+                        <span className="text-[11px] font-bold text-text-secondary uppercase tracking-wider">
+                            Setup Required
+                        </span>
+                    </div>
+                )}
+            </div>
 
- <div className="space-y-4">
- {/* Team 1 Score */}
- <div className="flex justify-between items-center px-4 py-3 bg-tertiary rounded-xl">
- <div className="flex items-center gap-3 font-semibold">
- <div className="w-8 h-8 flex items-center justify-center rounded-lg text-white font-bold text-sm" style={{ backgroundColor: team1.logo }}>
- {team1.name.substring(0, 2).toUpperCase()}
- </div>
- <span className={`text-lg font-bold ${isWinner(team1) ? 'text-text-primary font-bold' : 'text-text-secondary'}`}>{team1.name}</span>
- </div>
- <span className="font-mono font-bold text-lg text-text-primary">{getScoreString(team1Score)}</span>
- </div>
+            {displayState.type === 'live' && renderLiveTargetInfo()}
+          </div>
 
- {/* Team 2 Score */}
- <div className="flex justify-between items-center px-4 py-3 bg-tertiary rounded-xl">
- <div className="flex items-center gap-3 font-semibold">
- <div className="w-8 h-8 flex items-center justify-center rounded-lg text-white font-bold text-sm" style={{ backgroundColor: team2.logo }}>
- {team2.name.substring(0, 2).toUpperCase()}
- </div>
- <span className={`text-lg font-bold ${isWinner(team2) ? 'text-text-primary font-bold' : 'text-text-secondary'}`}>{team2.name}</span>
- </div>
- <span className="font-mono font-bold text-lg text-text-primary">{getScoreString(team2Score)}</span>
- </div>
- </div>
+          <div className="bg-tertiary p-4 mt-5">
+              {match.toss && displayState.type !== 'draft' ? (
+                  <p className="text-[11px] font-medium text-text-secondary uppercase tracking-wider text-center">
+                      {renderTossInfo()}
+                  </p>
+              ) : (
+                  <p className="text-[11px] font-medium text-text-secondary uppercase tracking-wider text-center flex items-center justify-center gap-1.5">
+                     <Calendar className="w-3 h-3" /> Awaiting Toss
+                  </p>
+              )}
+              {(displayState.type === 'completed' || displayState.type === 'abandoned' || displayState.type === 'live') && (
+                  <div className="mt-3 flex flex-col items-center gap-1">
+                      <span className={`text-[13px] font-bold uppercase tracking-tight text-center ${displayState.type === 'abandoned' ? 'text-red-500' : 'text-text-primary'}`}>
+                          {displayState.type === 'abandoned' ? 'Match Abandoned' : getWinnerMessage() || 'Match in Progress'}
+                      </span>
+                      {match.manOfTheMatchId && displayState.type === 'completed' && (
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-brand-blue flex items-center justify-center gap-1 text-center">
+                              🌟 Player of the Match: {[...team1.players, ...team2.players].find(p => p.id === match.manOfTheMatchId)?.name || 'Unknown'}
+                          </span>
+                      )}
+                  </div>
+              )}
+          </div>
+        </CrickIQCard>
 
- {displayState.type === 'live' && renderLiveTargetInfo()}
+        {renderMatchActions()}
 
- {displayState.type === 'completed' && (
- <div className="mt-6 pt-4 border-t border-border text-center">
- <p className="font-bold text-brand-blue text-lg mb-1">{getWinnerMessage()}</p>
- {match.manOfTheMatchId && (
- <p className="text-sm text-text-secondary flex items-center justify-center gap-1">
- <Target className="w-4 h-4" />
- MOM: {[...team1.players, ...team2.players].find(p => p.id === match.manOfTheMatchId)?.name || 'Unknown'}
- </p>
- )}
- </div>
- )}
-
- {displayState.type === 'abandoned' && (
- <div className="mt-6 pt-4 border-t border-border text-center">
- <p className="font-bold text-red-500 text-lg">Match Abandoned</p>
- </div>
- )}
- </div>
- </CrickIQCard>
- )}
+  
 
  </div>
  ) : activeTab === 'scorecard' ? (

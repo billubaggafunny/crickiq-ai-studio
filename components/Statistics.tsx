@@ -377,7 +377,7 @@ const Statistics: React.FC<StatisticsProps> = ({
                   </p>
                 </div>
                 
-        <div className="flex-1 w-full min-h-[300px]" style={{ width: '100%', height: 300, minHeight: 300, minWidth: 0 }}>
+        <div className="flex-1 w-full h-[300px] min-h-[300px]">
             {(!topBattersData || topBattersData.length === 0) ? (
                 <div className="flex items-center justify-center h-full w-full text-text-secondary">No data available</div>
             ) : (
@@ -425,7 +425,7 @@ const Statistics: React.FC<StatisticsProps> = ({
                   </p>
                 </div>
                 
-        <div className="flex-1 w-full min-h-[300px]" style={{ width: '100%', height: 300, minHeight: 300, minWidth: 0 }}>
+        <div className="flex-1 w-full h-[300px] min-h-[300px]">
             {(!topBowlersData || topBowlersData.length === 0) ? (
                 <div className="flex items-center justify-center h-full w-full text-text-secondary">No data available</div>
             ) : (

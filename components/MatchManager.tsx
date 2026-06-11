@@ -1677,83 +1677,91 @@ const MatchManager: React.FC<MatchManagerProps> = (props) => {
 
  return (
  <CrickIQCard
- key={match.id}
- accentColor={team1.logo}
- className="flex flex-col space-y-4 cursor-pointer hover:-translate-y-1 transition-transform duration-300"
- onClick={() => onViewMatchResult(match.id)}
- >
- <div className="pb-2 border-b border-brand-blue/15">
- <h4 className="font-bold text-text-primary truncate">
- {tournament?.name}
- </h4>
- <div className="flex justify-between items-center mt-1">
- <p className="text-caption text-text-secondary">
- {tournament?.location}
- </p>
- {getStageTag(match)}
- </div>
- {match.toss && (
- <p className="text-caption text-text-secondary mt-1">
- {getTeamById(match.toss.winner)?.name} won the
- toss and chose to {match.toss.decision}.
- </p>
- )}
- </div>
- <div className="space-y-1">
- <div
- className={`flex justify-between items-center py-1.5 px-2 transition-colors`}
- >
- <div className="flex items-center gap-2 font-bold text-text-primary">
- <div
- className="w-6 h-6 flex items-center justify-center rounded-md text-button text-white text-caption"
- style={{ backgroundColor: team1.logo }}
- >
- {team1.name.substring(0, 2).toUpperCase()}
- </div>
- <span className="text-base font-bold text-text-primary">{team1.name}</span>
- </div>
- <span className="font-mono font-bold text-text-primary">
- {team1Score
- ? `${team1Score.score}/${team1Score.wickets} (${team1Score.overs})`
- : "DNB"}
- </span>
- </div>
- <div
- className={`flex justify-between items-center py-1.5 px-2 transition-colors`}
- >
- <div className="flex items-center gap-2 font-bold text-text-primary">
- <div
- className="w-6 h-6 flex items-center justify-center rounded-md text-button text-white text-caption"
- style={{ backgroundColor: team2.logo }}
- >
- {team2.name.substring(0, 2).toUpperCase()}
- </div>
- <span className="text-base font-bold text-text-primary">{team2.name}</span>
- </div>
- <span className="font-mono font-bold text-text-primary">
- {team2Score
- ? `${team2Score.score}/${team2Score.wickets} (${team2Score.overs})`
- : "DNB"}
- </span>
- </div>
- </div>
+            key={match.id}
+            className="p-0 bg-secondary shadow-sm rounded-3xl overflow-hidden relative border border-border/20 cursor-pointer hover:-translate-y-1 transition-transform duration-300"
+            onClick={() => onViewMatchResult(match.id)}
+        >
+            <div className="absolute top-0 left-0 bottom-0 w-1.5 opacity-80" style={{ backgroundColor: team1.logo || '#4285F4' }}></div>
+            <div className="p-4 pb-0 pl-5">
+                <div className="flex justify-between items-start mb-3">
+                    <div className="flex items-center gap-1.5">
+                        <span className="bg-black/5 dark:bg-white/10 text-text-secondary px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider">
+                            {match.wasAbandoned ? 'Abandoned' : 'Completed'}
+                        </span>
+                        {getStageTag(match)}
+                    </div>
+                </div>
 
- <div className="text-center text-body font-semibold py-1.5 px-2">
- {winnerMessage}
- </div>
+                <div className="space-y-3">
+                    <div className="flex justify-between items-center bg-tertiary/20 p-2 -mx-2 rounded-xl border border-black/5 dark:border-white/5">
+                        <div className="flex items-center gap-3 overflow-hidden min-w-0 mr-2 flex-1">
+                            <div 
+                                className="shrink-0 w-8 h-8 flex items-center justify-center rounded-lg text-white font-bold text-sm"
+                                style={{ backgroundColor: team1.logo || '#3B82F6' }}
+                            >
+                                {team1.name.substring(0, 2).toUpperCase()}
+                            </div>
+                            <span className="text-sm md:text-base font-semibold truncate text-text-primary">
+                                {team1.name}
+                            </span>
+                        </div>
+                        <div className="flex items-baseline gap-1.5 shrink-0">
+                            {team1Score ? (
+                                <>
+                                    <span className="font-mono font-bold text-lg md:text-xl tracking-tighter text-text-primary">
+                                        {team1Score.score}/{team1Score.wickets ?? 0}
+                                    </span>
+                                    <span className="font-mono text-xs text-text-secondary">
+                                        ({team1Score.overs ?? 0})
+                                    </span>
+                                </>
+                            ) : (
+                                <span className="font-mono font-bold text-lg md:text-xl text-text-secondary opacity-50">DNB</span>
+                            )}
+                        </div>
+                    </div>
 
- {manOfTheMatchPlayer && (
- <div className="pt-2 border-t border-brand-blue/15 text-center">
- <p className="text-xs font-semibold text-text-secondary uppercase tracking-wider">
- Man of the Match
- </p>
- <p className="font-bold text-brand-blue flex items-center justify-center gap-2 mt-1">
- <TrophyIcon className="w-4 h-4 text-warning" />
- {manOfTheMatchPlayer.name}
- </p>
- </div>
- )}
- </CrickIQCard>
+                    <div className="flex justify-between items-center bg-tertiary/20 p-2 -mx-2 rounded-xl border border-black/5 dark:border-white/5">
+                        <div className="flex items-center gap-3 overflow-hidden min-w-0 mr-2 flex-1">
+                            <div 
+                                className="shrink-0 w-8 h-8 flex items-center justify-center rounded-lg text-white font-bold text-sm"
+                                style={{ backgroundColor: team2.logo || '#EF4444' }}
+                            >
+                                {team2.name.substring(0, 2).toUpperCase()}
+                            </div>
+                            <span className="text-sm md:text-base font-semibold truncate text-text-primary">
+                                {team2.name}
+                            </span>
+                        </div>
+                        <div className="flex items-baseline gap-1.5 shrink-0">
+                            {team2Score ? (
+                                <>
+                                    <span className="font-mono font-bold text-lg md:text-xl tracking-tighter text-text-primary">
+                                        {team2Score.score}/{team2Score.wickets ?? 0}
+                                    </span>
+                                    <span className="font-mono text-xs text-text-secondary">
+                                        ({team2Score.overs ?? 0})
+                                    </span>
+                                </>
+                            ) : (
+                                <span className="font-mono font-bold text-lg md:text-xl text-text-secondary opacity-50">DNB</span>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div className="bg-tertiary/50 border-t border-black/5 dark:border-white/5 p-3 pl-5 mt-4 text-center">
+                <span className={`text-[12px] font-bold uppercase tracking-tight ${match.wasAbandoned ? 'text-red-500' : 'text-text-primary'}`}>
+                    {winnerMessage}
+                </span>
+                {manOfTheMatchPlayer && (
+                    <span className="block text-[10px] font-bold uppercase tracking-wider text-brand-blue mt-1">
+                        🌟 Player of the Match: {manOfTheMatchPlayer.name}
+                    </span>
+                )}
+            </div>
+        </CrickIQCard>
  );
  })}
  </div>

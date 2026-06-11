@@ -4,6 +4,7 @@ import { CalendarIcon } from '../constants';
 import type { Match, Team, Tournament } from '../types';
 import { getRequiredSquadSize } from '../utils/matchConfig';
 import { canEnableSetToss } from '../utils/validation';
+import { formatScore } from '../utils/scoreFormatters';
 
 export interface MatchTableProps {
  list: Match[];
@@ -142,112 +143,186 @@ const MatchTable: React.FC<MatchTableProps> = ({
  }
  }}
  >
- <div className="flex justify-between items-center mb-4">
- <div className="flex gap-1.5 items-center">
- <span className="bg-tertiary px-2 py-0.5 rounded font-bold text-[10px] uppercase text-text-secondary tracking-wider">
- {displayState.label}
- </span>
- {match.tournamentId && match.tournamentId !== 't_quick_matches' && match.matchNumber !== undefined && match.matchNumber !== null && (
- <span className="bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-300 px-2 py-0.5 rounded font-bold text-[10px] uppercase tracking-wider border border-sky-100 dark:border-sky-900/30">
- Match {match.matchNumber}
- </span>
- )}
- {(!match.tournamentId || match.tournamentId === 't_quick_matches' || match.isQuickMatch) && match.rivalryMatchNumber !== undefined && match.rivalryMatchNumber !== null && (
- <span className="bg-emerald-50 dark:bg-emerald-950/45 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded font-bold text-[10px] uppercase tracking-wider border border-emerald-100 dark:border-emerald-900/30">
- Match - {match.rivalryMatchNumber}
- </span>
- )}
- {focusTeamId && (match.team1Id === focusTeamId || match.team2Id === focusTeamId) && (
- <span className="bg-brand-blue/10 text-brand-blue px-2 py-0.5 rounded font-bold text-[10px] uppercase tracking-wider border border-brand-blue/20">
- Team Match
- </span>
- )}
- </div>
- <span className={`text-xs font-medium text-text-secondary ${isDeleteEligible && handleDeleteMatch ? 'mr-7' : ''}`}>
- {match.oversPerInnings} Overs
- </span>
- </div>
- <div className="text-text-secondary text-xs text-center -mt-3 mb-3">
- {new Date(match.date).toLocaleDateString()} {match.time ? `• ${match.time}` : ''}
- </div>
+ <div className="flex justify-between items-start mb-4 pr-8">
+    <div className="flex flex-col gap-1.5">
+        <div className="flex flex-wrap items-center gap-2">
+            {(() => {
+                if (displayState.type === 'abandoned') return <span className="bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-400 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border border-red-100 dark:border-red-900/30">Abandoned</span>;
+                if (displayState.type === 'draft') return <span className="bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border border-amber-100 dark:border-amber-900/30">Draft</span>;
+                if (displayState.type === 'live') return (
+                    <span className="flex items-center gap-1.5 bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-400 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border border-red-100 dark:border-red-900/30">
+                        <span className="w-1.5 h-1.5 rounded-full bg-red-600 dark:bg-red-500"></span>
+                        LIVE
+                    </span>
+                );
+                if (displayState.type === 'completed') return <span className="bg-black/5 dark:bg-white/10 text-text-secondary px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider">Completed</span>;
+                if (displayState.type === 'readyToToss') return <span className="bg-brand-blue/10 text-brand-blue px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider">Toss</span>;
+                if (displayState.type === 'readyToStart') return <span className="bg-brand-blue/10 text-brand-blue px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider">Ready</span>;
+                return <span className="bg-black/5 dark:bg-white/10 text-text-secondary px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider">{displayState.label}</span>;
+            })()}
+            {match.tournamentId && match.tournamentId !== 't_quick_matches' && match.matchNumber !== undefined && match.matchNumber !== null && (
+                <span className="bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-300 px-2 py-0.5 rounded font-bold text-[10px] uppercase tracking-wider border border-sky-100 dark:border-sky-900/30">
+                    Match {match.matchNumber}
+                </span>
+            )}
+            {(!match.tournamentId || match.tournamentId === 't_quick_matches' || match.isQuickMatch) && match.rivalryMatchNumber !== undefined && match.rivalryMatchNumber !== null && (
+                <span className="bg-emerald-50 dark:bg-emerald-950/45 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded font-bold text-[10px] uppercase tracking-wider border border-emerald-100 dark:border-emerald-900/30">
+                    Match - {match.rivalryMatchNumber}
+                </span>
+            )}
+            {focusTeamId && (match.team1Id === focusTeamId || match.team2Id === focusTeamId) && (
+                <span className="bg-brand-blue/10 text-brand-blue px-2 py-0.5 rounded font-bold text-[10px] uppercase tracking-wider border border-brand-blue/20">
+                    Team Match
+                </span>
+            )}
+            <span className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">
+                {match.oversPerInnings} Overs
+            </span>
+        </div>
+        <span className="text-[10px] text-text-secondary uppercase tracking-wider">
+            {new Date(match.date).toLocaleDateString()} {match.time ? `• ${match.time}` : ''}
+            {tournament ? (
+                <> • {tournament.name} {match.knockoutType ? (match.knockoutType === 'semifinal' ? 'Semi Final' : 'Final') : match.groupId ? `(Group ${match.groupId.toUpperCase()})` : ''}</>
+            ) : (!match.isDraft && (
+                <> • Quick Match</>
+            ))}
+        </span>
+    </div>
+</div>
  
- <h3 className="text-center font-bold tracking-tight text-text-primary text-2xl mb-4">
- {team1.name} vs {team2.name}
- </h3>
+ {displayState.type === 'draft' ? (
+    <div className="flex flex-col items-center py-5 gap-3">
+        <div className="text-center font-bold text-text-secondary text-xs uppercase tracking-wider">Setup Pending</div>
+        <div className="flex flex-col w-full px-4 gap-2">
+            <div className="flex items-center gap-3 overflow-hidden">
+                <div className="shrink-0 w-8 h-8 flex items-center justify-center rounded-lg text-white font-bold text-xs" style={{ backgroundColor: team1.logo }}>
+                    {team1.name.substring(0, 2).toUpperCase()}
+                </div>
+                <span className="text-sm md:text-base font-semibold truncate text-text-primary">{team1.name}</span>
+            </div>
+            <div className="flex items-center gap-3 overflow-hidden mt-1">
+                <div className="shrink-0 w-8 h-8 flex items-center justify-center rounded-lg text-white font-bold text-xs" style={{ backgroundColor: team2.logo }}>
+                    {team2.name.substring(0, 2).toUpperCase()}
+                </div>
+                <span className="text-sm md:text-base font-semibold truncate text-text-primary">{team2.name}</span>
+            </div>
+        </div>
+    </div>
+) : (
+    <></>
+)}
  
- {tournament && (
- <div className="text-center text-sm font-bold text-text-primary mt-4 mb-2">
- {tournament.name} • {match.knockoutType ? (match.knockoutType === 'semifinal' ? 'Semi Final' : 'Final') : match.groupId ? `Group ${match.groupId.toUpperCase()}` : 'League Match'}
+ <div className="space-y-4 pt-2">
+     {displayState.type !== 'draft' && (() => {
+         const isWinner = (team: Team) => match.winnerId !== 'draw' && match.winnerId === team.id;
+         const getTeamTextStyle = (team: Team) => {
+             if (match.status !== 'completed' && !match.wasAbandoned) return 'text-text-primary';
+             if (match.winnerId === 'draw') return 'text-text-primary';
+             return isWinner(team) ? 'text-text-primary' : 'text-text-secondary';
+         };
+
+         const getScoreText = (teamMatchId: string) => {
+             if (match.status === 'scheduled' || match.isDraft) return null;
+             if (teamMatchId === match.innings1?.battingTeamId) {
+                 return { score: match.innings1.score ?? 0, wickets: match.innings1.wickets ?? 0, overs: match.innings1.overs ?? 0 };
+             }
+             if (teamMatchId === match.innings2?.battingTeamId) {
+                 return { score: match.innings2.score ?? 0, wickets: match.innings2.wickets ?? 0, overs: match.innings2.overs ?? 0 };
+             }
+             return null;
+         };
+
+         const team1Score = getScoreText(team1.id);
+         const team2Score = getScoreText(team2.id);
+
+         return (
+             <>
+                 <div className="flex justify-between items-center">
+                     <div className="flex items-center gap-3 overflow-hidden min-w-0 mr-2">
+                         <div className="shrink-0 w-8 h-8 flex items-center justify-center rounded-lg text-white font-bold text-sm" style={{ backgroundColor: team1.logo }}>
+                             {team1.name.substring(0, 2).toUpperCase()}
+                         </div>
+                         <span className={`text-sm md:text-base font-semibold truncate ${getTeamTextStyle(team1)}`}>{team1.name}</span>
+                     </div>
+                     <div className="flex items-baseline gap-1.5 shrink-0">
+                         {team1Score ? (
+                             <>
+                                 <span className={`font-mono font-bold text-lg md:text-xl tracking-tighter ${getTeamTextStyle(team1)}`}>
+                                     {formatScore(team1Score.score, team1Score.wickets)}
+                                 </span>
+                                 <span className="font-mono text-xs text-text-secondary">
+                                     ({team1Score.overs})
+                                 </span>
+                             </>
+                         ) : (
+                             <span className="font-mono font-bold text-lg md:text-xl text-text-secondary opacity-50">DNB</span>
+                         )}
+                     </div>
+                 </div>
+                 
+                 <div className="flex justify-between items-center">
+                     <div className="flex items-center gap-3 overflow-hidden min-w-0 mr-2">
+                         <div className="shrink-0 w-8 h-8 flex items-center justify-center rounded-lg text-white font-bold text-sm" style={{ backgroundColor: team2.logo }}>
+                             {team2.name.substring(0, 2).toUpperCase()}
+                         </div>
+                         <span className={`text-sm md:text-base font-semibold truncate ${getTeamTextStyle(team2)}`}>{team2.name}</span>
+                     </div>
+                     <div className="flex items-baseline gap-1.5 shrink-0">
+                         {team2Score ? (
+                             <>
+                                 <span className={`font-mono font-bold text-lg md:text-xl tracking-tighter ${getTeamTextStyle(team2)}`}>
+                                     {formatScore(team2Score.score, team2Score.wickets)}
+                                 </span>
+                                 <span className="font-mono text-xs text-text-secondary">
+                                     ({team2Score.overs})
+                                 </span>
+                             </>
+                         ) : (
+                             <span className="font-mono font-bold text-lg md:text-xl text-text-secondary opacity-50">DNB</span>
+                         )}
+                     </div>
+                 </div>
+             </>
+         );
+     })()}
  </div>
+
+ {match.toss && displayState.type !== 'live' && (
+     <p className="text-xs text-text-secondary mt-5 uppercase tracking-wider text-center">
+         {getTeamById(match.toss.winner)?.name} won the toss and chose to {match.toss.decision}
+     </p>
  )}
- {!tournament && !match.isDraft && (
- <div className="text-center text-xs font-medium text-text-secondary mb-4 uppercase tracking-wider">
- Quick Match
- </div>
+
+ {(displayState.type === 'completed' || displayState.type === 'abandoned') && (
+     <div className={`mt-4 pt-3 border-t border-border text-sm font-medium ${displayState.type === 'completed' ? 'text-brand-blue dark:text-text-primary' : 'text-red-500'}`}>
+         {displayState.type === 'completed' ? (
+             <div>
+                 <p className="font-bold text-text-primary text-center tracking-tight uppercase">{getTeamById(match.winnerId)?.name} won</p>
+                 {match.manOfTheMatchId && (
+                     <p className="text-xs font-medium text-text-secondary mt-0.5 normal-case text-center">
+                         🌟 MOM: {getTeamById(match.team1Id)?.players.find(p => p.id === match.manOfTheMatchId)?.name || getTeamById(match.team2Id)?.players.find(p => p.id === match.manOfTheMatchId)?.name}
+                     </p>
+                 )}
+             </div>
+         ) : (
+             <p className="text-center font-bold uppercase">Match Abandoned</p>
+         )}
+     </div>
  )}
- 
- {displayState.type === 'live' ? (
- <div className="flex justify-center mb-4">
- <span className="text-xs font-bold text-red-600 bg-red-100 px-3 py-1 rounded-full flex items-center gap-1.5 animate-pulse">
- <span className="flex h-2 w-2 rounded-full bg-red-500"></span>
- LIVE
- </span>
- </div>
- ) : match.toss ? (
- <p className="text-sm text-center text-text-secondary mb-4 px-2">
- {getTeamById(match.toss.winner)?.name} won the toss and chose to {match.toss.decision}.
- </p>
- ) : null}
- 
- <div className="space-y-3 mb-4">
- <div className="flex justify-between items-center text-text-primary font-bold">
- <div className="flex items-center gap-3">
- <div className="w-8 h-8 flex items-center justify-center rounded-lg text-white font-bold text-xs" style={{ backgroundColor: team1.logo }}>
- {team1.name.substring(0, 2).toUpperCase()}
- </div>
- <span className="text-lg font-bold text-text-primary">{team1.name}</span>
- </div>
- <span className="font-extrabold text-2xl tracking-tighter text-text-primary">
- {(match.status !== 'scheduled' && !match.isDraft) ? `${team1.id === match.innings1?.battingTeamId ? (match.innings1?.score ?? 0) : (match.innings2?.score ?? 0)}/${team1.id === match.innings1?.battingTeamId ? (match.innings1?.wickets ?? 0) : (match.innings2?.wickets ?? 0)}` : 'DNB'}
- </span>
- </div>
- <div className="flex justify-between items-center text-text-primary font-bold">
- <div className="flex items-center gap-3">
- <div className="w-8 h-8 flex items-center justify-center rounded-lg text-white font-bold text-xs" style={{ backgroundColor: team2.logo }}>
- {team2.name.substring(0, 2).toUpperCase()}
- </div>
- <span className="text-lg font-bold text-text-primary">{team2.name}</span>
- </div>
- <span className="font-extrabold text-2xl tracking-tighter text-text-primary">
- {(match.status !== 'scheduled' && !match.isDraft) ? `${team2.id === match.innings1?.battingTeamId ? (match.innings1?.score ?? 0) : (match.innings2?.score ?? 0)}/${team2.id === match.innings1?.battingTeamId ? (match.innings1?.wickets ?? 0) : (match.innings2?.wickets ?? 0)}` : 'DNB'}
- </span>
- </div>
- </div>
- 
- <div className="mt-4 text-center text-md font-bold text-text-primary pt-3 border-t border-border uppercase tracking-wider">
- {displayState.type === 'completed' ? (
- <div className="text-center text-base font-bold text-text-primary tracking-tight">
- <p className="font-bold">{getTeamById(match.winnerId)?.name} won</p>
- {match.manOfTheMatchId && (
- <p className="text-sm font-medium text-text-secondary mt-1 normal-case">MOM: {getTeamById(match.team1Id)?.players.find(p => p.id === match.manOfTheMatchId)?.name || getTeamById(match.team2Id)?.players.find(p => p.id === match.manOfTheMatchId)?.name}</p>
- )}
- </div>
- ) : displayState.type === 'abandoned' ? 'Match Abandoned' : displayState.label}
- </div>
  
  <div className="mt-4">
  {displayState.type === 'completed' ? (
- <button onClick={(e) => { e.stopPropagation(); onViewMatchResult(match.id); }} className="w-full px-4 py-3 text-sm rounded-xl font-bold bg-tertiary text-text-primary shadow-sm hover:bg-black/5 dark:hover:bg-white/5">
+ <button onClick={(e) => { e.stopPropagation(); onViewMatchResult(match.id); }} className="w-full px-4 py-3 text-sm rounded-xl font-bold bg-tertiary text-text-primary shadow-sm hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
  View Scorecard
  </button>
  ) : displayState.type === 'live' ? (
- <button onClick={(e) => { e.stopPropagation(); onContinueMatch(match); }} className="w-full px-4 py-3 text-sm rounded-xl font-bold bg-brand-blue text-white shadow-md">Continue Live Match</button>
+ <button onClick={(e) => { e.stopPropagation(); onContinueMatch(match); }} className="w-full px-4 py-3 text-sm rounded-xl font-bold bg-brand-blue text-white shadow-md hover:bg-brand-blue/90 transition-colors">Continue Live Match</button>
  ) : displayState.type === 'draft' ? (
- <button onClick={(e) => { e.stopPropagation(); setEditingMatch(match); }} className="w-full px-4 py-3 text-sm rounded-xl font-bold bg-brand-blue text-white shadow-md">Setup Teams</button>
+ <button onClick={(e) => { e.stopPropagation(); setEditingMatch(match); }} className="w-full px-4 py-3 text-sm rounded-xl font-bold bg-brand-blue text-white shadow-md hover:bg-brand-blue/90 transition-colors">Setup Teams</button>
  ) : displayState.type === 'readyToToss' ? (
- <button disabled={isMatchLive || !canToss} onClick={(e) => { e.stopPropagation(); setTossMatch(match); }} className="w-full px-4 py-3 text-sm rounded-xl font-bold bg-brand-blue text-white shadow-md disabled:opacity-60" title={!canToss ? playerMismatchTitle : (isMatchLive ? 'Another match is live' : 'Set Toss')}>{isMatchLive ? 'Match Live' : (canToss ? 'Set Toss' : 'Squads Incomplete')}</button>
+ <button disabled={isMatchLive || !canToss} onClick={(e) => { e.stopPropagation(); setTossMatch(match); }} className="w-full px-4 py-3 text-sm rounded-xl font-bold bg-brand-blue text-white shadow-md disabled:opacity-60 hover:bg-brand-blue/90 transition-colors" title={!canToss ? playerMismatchTitle : (isMatchLive ? 'Another match is live' : 'Set Toss')}>{isMatchLive ? 'Match Live' : (canToss ? 'Set Toss' : 'Squads Incomplete')}</button>
  ) : displayState.type === 'readyToStart' ? (
- <button onClick={(e) => { e.stopPropagation(); onStartMatch(match); }} className="w-full px-4 py-3 text-sm rounded-xl font-bold bg-brand-blue text-white shadow-md">Start Match</button>
+ <button onClick={(e) => { e.stopPropagation(); onStartMatch(match); }} className="w-full px-4 py-3 text-sm rounded-xl font-bold bg-brand-blue text-white shadow-md hover:bg-brand-blue/90 transition-colors">Start Match</button>
  ) : null}
  </div>
  </div>

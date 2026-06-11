@@ -137,7 +137,7 @@ const PlayerStatsModal: React.FC<PlayerStatsModalProps> = ({ player, matches, te
                                  <div className="mb-4">
                                     <h4 className="text-base font-semibold text-text-secondary mb-2">Runs per Match</h4>
                                     
-        <div style={{ width: '100%', height: 200, minHeight: 200, minWidth: 0 }}>
+        <div className="w-full h-[200px] min-h-[200px]">
             {(!performanceData || performanceData.length === 0) ? (
                 <div className="flex items-center justify-center h-full w-full text-text-secondary">No data available</div>
             ) : (
@@ -167,7 +167,7 @@ const PlayerStatsModal: React.FC<PlayerStatsModalProps> = ({ player, matches, te
                                  <div>
                                     <h4 className="text-base font-semibold text-text-secondary mb-2">Wickets per Match</h4>
                                     
-        <div style={{ width: '100%', height: 200, minHeight: 200, minWidth: 0 }}>
+        <div className="w-full h-[200px] min-h-[200px]">
             {(!performanceData || performanceData.length === 0) ? (
                 <div className="flex items-center justify-center h-full w-full text-text-secondary">No data available</div>
             ) : (

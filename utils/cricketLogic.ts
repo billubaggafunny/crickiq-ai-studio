@@ -644,30 +644,30 @@ export const getBallDisplay = (ball: Ball, isCurrent: boolean = false) => {
 
 export const getBallOutcomeChipClass = (ball: Ball): string => {
     if (ball.isWicket) {
-        return "dark:!bg-danger dark:!text-white";
+        return "bg-red-100 text-red-700 dark:!bg-danger dark:!text-white";
     }
 
     if (ball.isWide || ball.isNoBall || ball.isBye || ball.isLegBye) {
-        return "dark:!bg-draft dark:!text-black";
+        return "bg-orange-100 text-orange-800 dark:!bg-draft dark:!text-black";
     }
 
     if (ball.runs === 0) {
-        return "dark:!bg-white dark:!text-black";
+        return "bg-gray-100 text-gray-700 dark:!bg-white dark:!text-black";
     }
 
     if ([1, 2, 3].includes(ball.runs)) {
-         return "dark:!bg-accent dark:!text-black";
+         return "bg-blue-100 text-blue-700 dark:!bg-accent dark:!text-black";
     }
 
     if (ball.runs === 4) {
-        return "dark:!bg-info dark:!text-white";
+        return "bg-green-100 text-green-700 dark:!bg-info dark:!text-white";
     }
 
     if (ball.runs === 6) {
-        return "dark:!bg-purple dark:!text-white";
+        return "bg-purple-100 text-purple-700 dark:!bg-purple dark:!text-white";
     }
 
-    return "dark:!bg-tertiary dark:!text-text-primary";
+    return "bg-gray-100 text-gray-700 dark:!bg-tertiary dark:!text-text-primary";
 };
 
 export const generateCommentaryForBall = (ball: Ball, getPlayerName: (id: string) => string): string => {

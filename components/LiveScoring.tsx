@@ -27,6 +27,7 @@ import { useNotification } from "../hooks/useNotification";
 import ImpactPlayerModal from "./ImpactPlayerModal";
 import { ChevronLeft, ArrowRight } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
+import { formatScore, formatOvers } from "../utils/scoreFormatters";
 
 // FIX: Define LiveScoringProps interface to resolve TypeScript error.
 interface LiveScoringProps extends UseCrickIQStateReturn {
@@ -1243,32 +1244,32 @@ const LiveScoring: React.FC<LiveScoringProps> = ({
               <ChevronLeft className="w-5 h-5 text-inherit" />
             </button>
             {!isMatchOver && (
-              <div className="flex items-center gap-1.5 bg-green-50 dark:bg-accent/8 text-green-600 dark:text-accent px-2 py-0.5 rounded-full border border-green-200 dark:border-accent/20 shadow-sm ml-auto">
-                <span className="w-2 h-2 rounded-full bg-green-600 dark:bg-accent dark:animate-pulse animate-[pulse_2s_ease-in-out_infinite]" />
-                <span className="text-[10px] font-bold uppercase tracking-wider">
-                  Live Match
-                </span>
+              <div className="flex items-center gap-1.5 bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-400 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border border-red-100 dark:border-red-900/30">
+                <span className="w-1.5 h-1.5 rounded-full bg-red-600 dark:bg-red-500"></span>
+                LIVE
               </div>
             )}
           </div>
 
-          <div className="flex justify-between items-center">
-            <div>
-              <h2 className="text-lg font-bold text-text-primary flex items-center gap-2">
+          <div className="flex justify-between items-end">
+            <div className="flex flex-col gap-1.5">
+              <h2 className="text-sm font-semibold text-text-secondary flex items-center gap-2">
                 <div
-                  className="w-8 h-8 flex items-center justify-center rounded-lg text-button text-white text-body shadow-sm"
+                  className="w-6 h-6 flex items-center justify-center rounded-md text-white font-bold text-[10px] shadow-sm"
                   style={{ backgroundColor: battingTeam.logo }}
                 >
                   {battingTeam.name.substring(0, 2).toUpperCase()}
                 </div>
                 {battingTeam.name}
               </h2>
-              <p className="text-5xl sm:text-6xl font-extrabold tracking-tight text-text-primary selectable-text py-1 leading-tight my-1">
-                {currentInnings.score} - {currentInnings.wickets}
-              </p>
-              <p className="text-base text-text-secondary font-medium">
-                Overs: {currentInnings.overs} / {match.oversPerInnings}
-              </p>
+              <div className="flex items-baseline gap-2">
+                <p className="font-mono font-bold text-4xl sm:text-5xl tracking-tighter text-text-primary">
+                  {formatScore(currentInnings.score, currentInnings.wickets)}
+                </p>
+                <p className="font-mono text-sm text-text-secondary font-bold mb-1">
+                  ({formatOvers(currentInnings.overs)})
+                </p>
+              </div>
             </div>
             <div className="text-right">
               <h2 className="text-lg font-bold text-text-primary flex items-center justify-end gap-2">

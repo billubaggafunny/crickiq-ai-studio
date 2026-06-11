@@ -119,7 +119,7 @@ const QuickMatchStats: React.FC<UseCrickIQStateReturn> = ({ matches, teams }) =>
                 <CrickIQCard>
                     <h3 className="text-xl font-bold text-text-primary mb-4">Top Run Scorers</h3>
                      
-        <div style={{ width: '100%', height: 300, minHeight: 300, minWidth: 0 }}>
+        <div className="w-full h-[300px] min-h-[300px]">
             {(!topBattersData || topBattersData.length === 0) ? (
                 <div className="flex items-center justify-center h-full w-full text-text-secondary">No data available</div>
             ) : (
@@ -147,7 +147,7 @@ const QuickMatchStats: React.FC<UseCrickIQStateReturn> = ({ matches, teams }) =>
                 <CrickIQCard>
                     <h3 className="text-xl font-bold text-text-primary mb-4">Top Wicket Takers</h3>
                      
-        <div style={{ width: '100%', height: 300, minHeight: 300, minWidth: 0 }}>
+        <div className="w-full h-[300px] min-h-[300px]">
             {(!topBowlersData || topBowlersData.length === 0) ? (
                 <div className="flex items-center justify-center h-full w-full text-text-secondary">No data available</div>
             ) : (

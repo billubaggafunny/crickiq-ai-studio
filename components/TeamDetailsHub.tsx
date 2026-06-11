@@ -13,6 +13,7 @@ import { calculatePointsTable } from '../utils/cricketLogic';
 import { EditTeamSheet } from './EditTeamSheet';
 import { AddPlayerSheet } from './AddPlayerSheet';
 import type { DeleteEligibility } from '../hooks/useTeamState';
+import { formatScore } from '../utils/scoreFormatters';
 
 interface ExtendedPlayer extends Player {
  isWicketKeeper?: boolean;
@@ -809,8 +810,8 @@ const TeamDetailsHub: React.FC<TeamDetailsHubProps> = ({
 
  return {
  totalRuns,
- highestScore: highestScoreObj ? `${highestScoreObj.score}/${highestScoreObj.wickets}` : '—',
- lowestScore: lowestScoreObj ? `${lowestScoreObj.score}/${lowestScoreObj.wickets}` : '—',
+ highestScore: highestScoreObj ? formatScore(highestScoreObj.score, highestScoreObj.wickets) : '—',
+ lowestScore: lowestScoreObj ? formatScore(lowestScoreObj.score, lowestScoreObj.wickets) : '—',
  averageScore: battingInningsList.length > 0 ? averageScoreValue.toString() : '—',
  count100Plus,
  count150Plus,
@@ -1653,109 +1654,186 @@ const TeamDetailsHub: React.FC<TeamDetailsHubProps> = ({
  : 'opacity-95'
  }`}
  >
- {/* Top row: Match Type label & Status badge */}
- <div className="flex items-center justify-between gap-2 border-b border-brand-blue/5 dark:border-brand-blue/10 pb-2.5 mb-3">
- <div className="flex items-center gap-1.5 min-w-0">
- <span className="text-[10px] font-extrabold uppercase bg-brand-blue/5 text-brand-blue dark:bg-brand-blue/10 px-2 py-0.5 rounded leading-none">
- {tournament ? 'League Match' : 'Quick Match'}
- </span>
- {tournament && (
- <span className="text-xs font-bold text-text-secondary truncate max-w-[120px] sm:max-w-[200px]">
- {tournament.name}
- </span>
- )}
- </div>
- <span className={`text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full ${statusInfo.colorClass}`}>
- {statusInfo.label}
- </span>
- </div>
+ 
+  {/* Top Row: Info & Status */}
+  <div className="flex justify-between items-start mb-4 pr-1">
+      <div className="flex flex-col gap-1.5">
+          <div className="flex flex-wrap items-center gap-2">
+              {match.status === 'live' ? (
+                  <span className="flex items-center gap-1.5 bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-400 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border border-red-100 dark:border-red-900/30">
+                      <span className="w-1.5 h-1.5 rounded-full bg-red-600 dark:bg-red-500"></span>
+                      LIVE
+                  </span>
+              ) : match.status === 'draft' ? (
+                  <span className="bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border border-amber-100 dark:border-amber-900/30">
+                      Draft
+                  </span>
+              ) : match.wasAbandoned ? (
+                  <span className="bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-400 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border border-red-100 dark:border-red-900/30">
+                      Abandoned
+                  </span>
+              ) : (
+                  <span className="bg-black/5 dark:bg-white/10 text-text-secondary px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider">
+                      {statusInfo.label}
+                  </span>
+              )}
+              
+              {tournament ? (
+                  <span className="bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-300 px-2 py-0.5 rounded font-bold text-[10px] uppercase tracking-wider border border-sky-100 dark:border-sky-900/30">
+                      League Match
+                  </span>
+              ) : (
+                  <span className="bg-emerald-50 dark:bg-emerald-950/45 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded font-bold text-[10px] uppercase tracking-wider border border-emerald-100 dark:border-emerald-900/30">
+                      Quick Match
+                  </span>
+              )}
+              
+              <span className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">
+                  {match.oversPerInnings} Overs
+              </span>
+          </div>
+          
+          <span className="text-[10px] text-text-secondary uppercase tracking-wider">
+              {new Date(match.date).toLocaleDateString()} {match.time ? `• ${match.time}` : ''}
+              {tournament && ` • ${tournament.name}`}
+          </span>
+      </div>
+      
+      {hasTapAction && (
+          <div className="w-7 h-7 rounded-full bg-black/5 hover:bg-black/10 dark:bg-white/5 dark:hover:bg-white/10 text-text-secondary flex items-center justify-center shrink-0 transition-colors hidden sm:flex">
+               {/* Icon should be imported but let's use SVG to avoid missing import */}
+               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><path d="m9 18 6-6-6-6"/></svg>
+          </div>
+      )}
+  </div>
 
- {/* Middle row: Team vs Opponent name & score comparison */}
- <div className="flex items-center justify-between gap-4">
- <div className="space-y-2.5 flex-1 min-w-0">
- {/* Our Team Score Row */}
- <div className="flex items-center justify-between gap-2.5">
- <div className="flex items-center gap-2.5 min-w-0">
- <div 
- className="w-7 h-7 rounded-lg flex items-center justify-center text-[10px] font-extrabold text-white uppercase shrink-0 border border-white/10"
- style={{ backgroundColor: team.logoColor || team.logo || '#3B82F6' }}
- >
- {team.teamInitials || 'TM'}
- </div>
- <span className="text-sm font-extrabold text-brand-blue truncate">
- {team.name}
- <span className="text-[10px] font-bold text-text-secondary ml-1 bg-black/5 dark:bg-secondary/5 px-1 py-0.5 rounded">Home</span>
- </span>
- </div>
- {hasScores && myInnings ? (
- <div className="font-mono text-sm font-bold text-text-primary text-right whitespace-nowrap">
- {myInnings.score}/{myInnings.wickets} <span className="text-[10px] text-text-secondary font-medium">({myInnings.oversBowled ?? 0})</span>
- </div>
- ) : (
- <span className="text-xs text-text-secondary font-medium uppercase tracking-wide">DNB</span>
- )}
- </div>
+  <div className="space-y-4 pt-2">
+      {match.status !== 'draft' ? (() => {
+          const isWinner = (tid) => match.winnerId !== 'draw' && match.winnerId === tid;
+          const getTeamTextStyle = (tid) => {
+              if (match.status !== 'completed' && !match.wasAbandoned) return 'text-text-primary';
+              if (match.winnerId === 'draw') return 'text-text-primary';
+              return isWinner(tid) ? 'text-text-primary' : 'text-text-secondary';
+          };
 
- {/* Opponent Team Score Row */}
- <div className="flex items-center justify-between gap-2.5">
- <div className="flex items-center gap-2.5 min-w-0">
- <div 
- className="w-7 h-7 rounded-lg flex items-center justify-center text-[10px] font-extrabold text-white uppercase shrink-0 border border-white/10"
- style={{ backgroundColor: opponentColor }}
- >
- {opponentInitials}
- </div>
- <span className="text-sm font-extrabold text-text-primary truncate">
- {opponentName}
- </span>
- </div>
- {hasScores && opInnings ? (
- <div className="font-mono text-sm font-bold text-text-primary text-right whitespace-nowrap">
- {opInnings.score}/{opInnings.wickets} <span className="text-[10px] text-text-secondary font-medium">({opInnings.oversBowled ?? 0})</span>
- </div>
- ) : (
- <span className="text-xs text-text-secondary font-medium uppercase tracking-wide">DNB</span>
- )}
- </div>
- </div>
+          return (
+              <>
+                  <div className="flex justify-between items-center">
+                      <div className="flex items-center gap-3 overflow-hidden min-w-0 mr-2">
+                          <div 
+                              className="shrink-0 w-8 h-8 flex items-center justify-center rounded-lg text-white font-bold text-sm"
+                              style={{ backgroundColor: team.logoColor || team.logo || '#3B82F6' }}
+                          >
+                              {team.teamInitials || team.name.substring(0,2).toUpperCase() || 'TM'}
+                          </div>
+                          <span className={`text-sm md:text-base font-semibold truncate ${getTeamTextStyle(team.id)}`}>
+                              {team.name} <span className="text-[10px] font-bold text-text-secondary ml-1 bg-black/5 dark:bg-secondary/5 px-1.5 py-0.5 rounded align-middle">Home</span>
+                          </span>
+                      </div>
+                      <div className="flex items-baseline gap-1.5 shrink-0">
+                          {hasScores && myInnings ? (
+                              <>
+                                  <span className={`font-mono font-bold text-lg md:text-xl tracking-tighter ${getTeamTextStyle(team.id)}`}>
+                                      {formatScore(myInnings.score, myInnings.wickets)}
+                                  </span>
+                                  <span className="font-mono text-xs text-text-secondary">
+                                      ({myInnings.oversBowled ?? 0})
+                                  </span>
+                              </>
+                          ) : (
+                              <span className="font-mono font-bold text-lg md:text-xl text-text-secondary opacity-50">DNB</span>
+                          )}
+                      </div>
+                  </div>
 
- {/* Right Navigation Arrow if safe to open */}
- {hasTapAction && (
- <div className="w-8 h-8 rounded-full bg-brand-blue/5 hover:bg-brand-blue/10 text-brand-blue flex items-center justify-center shrink-0 border border-brand-blue/10">
- <ChevronRight className="w-4 h-4" />
- </div>
- )}
- </div>
+                  <div className="flex justify-between items-center">
+                      <div className="flex items-center gap-3 overflow-hidden min-w-0 mr-2">
+                          <div 
+                              className="shrink-0 w-8 h-8 flex items-center justify-center rounded-lg text-white font-bold text-sm"
+                              style={{ backgroundColor: opponentColor }}
+                          >
+                              {opponentInitials}
+                          </div>
+                          <span className={`text-sm md:text-base font-semibold truncate ${getTeamTextStyle(opponentId)}`}>
+                              {opponentName}
+                          </span>
+                      </div>
+                      <div className="flex items-baseline gap-1.5 shrink-0">
+                          {hasScores && opInnings ? (
+                              <>
+                                  <span className={`font-mono font-bold text-lg md:text-xl tracking-tighter ${getTeamTextStyle(opponentId)}`}>
+                                      {formatScore(opInnings.score, opInnings.wickets)}
+                                  </span>
+                                  <span className="font-mono text-xs text-text-secondary">
+                                      ({opInnings.oversBowled ?? 0})
+                                  </span>
+                              </>
+                          ) : (
+                              <span className="font-mono font-bold text-lg md:text-xl text-text-secondary opacity-50">DNB</span>
+                          )}
+                      </div>
+                  </div>
+              </>
+          );
+      })() : (
+          <div className="flex flex-col items-center py-2 gap-3 opacity-70">
+              <div className="flex flex-col w-full gap-2">
+                  <div className="flex items-center gap-3 overflow-hidden">
+                      <div className="shrink-0 w-8 h-8 flex items-center justify-center rounded-lg text-white font-bold text-xs" style={{ backgroundColor: team.logoColor || team.logo || '#3B82F6' }}>
+                          {team.teamInitials || team.name.substring(0,2).toUpperCase() || 'TM'}
+                      </div>
+                      <span className="text-sm md:text-base font-semibold truncate text-text-primary">{team.name}</span>
+                  </div>
+                  <div className="flex items-center gap-3 overflow-hidden mt-1">
+                      <div className="shrink-0 w-8 h-8 flex items-center justify-center rounded-lg text-white font-bold text-xs" style={{ backgroundColor: opponentColor }}>
+                          {opponentInitials}
+                      </div>
+                      <span className="text-sm md:text-base font-semibold truncate text-text-primary">{opponentName}</span>
+                  </div>
+              </div>
+          </div>
+      )}
+  </div>
 
- {/* Bottom Row / Date / Summary Ribbon */}
- <div className="mt-3 pt-2.5 border-t border-brand-blue/5 dark:border-brand-blue/10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
- <div className="text-[10px] font-semibold text-text-secondary flex items-center gap-1">
- <Calendar className="w-3.5 h-3.5 shrink-0 text-text-secondary" />
- <span>
- {new Date(match.date).toLocaleDateString()} {match.time ? `• ${match.time}` : ''}
- </span>
- <span className="mx-1 text-text-secondary">•</span>
- <span>
- {match.oversPerInnings} Overs
- </span>
- </div>
- {resultText && (
- <div className="text-xs font-bold text-brand-blue bg-brand-blue/5 dark:bg-brand-blue/10 px-2.5 py-1 rounded-xl border border-brand-blue/10">
- {resultText}
- </div>
- )}
- {match.status === 'draft' && (
- <div className="text-[10px] font-semibold text-amber-600 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/15">
- Match details from Team Hub will be connected later.
- </div>
- )}
- </div>
+  {/* Result / Outcome */}
+  {match.status === 'draft' ? (
+      <div className="mt-4 pt-3 border-t border-border/50 text-center">
+          <p className="text-[10px] font-semibold text-amber-600 bg-amber-500/5 inline-block px-2 py-0.5 rounded border border-amber-500/10 uppercase tracking-wider">
+              Setup Required
+          </p>
+      </div>
+  ) : (match.status === 'completed' || match.wasAbandoned) ? (
+      <div className={`mt-4 pt-3 border-t border-border/50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2`}>
+          <span className={`text-sm font-bold uppercase tracking-tight ${match.status === 'completed' ? 'text-text-primary' : 'text-red-500'}`}>
+              {match.status === 'completed' ? (
+                  resultText
+              ) : (
+                  'Match Abandoned'
+              )}
+          </span>
+          {match.status === 'completed' && match.winnerId && (
+              <span className={`self-start sm:self-auto px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${
+                  match.winnerId === team.id 
+                      ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400 border-emerald-100 dark:border-emerald-900/30' 
+                  : match.winnerId === 'draw'
+                      ? 'bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400 border-amber-100 dark:border-amber-900/30'
+                  : 'bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400 border-rose-100 dark:border-rose-900/30'
+              }`}>
+                  {match.winnerId === team.id ? 'Won' : match.winnerId === 'draw' ? 'Draw' : 'Lost'}
+              </span>
+          )}
+      </div>
+  ) : match.status === 'live' && resultText ? (
+      <div className="mt-4 pt-3 border-t border-border/50">
+          <span className="font-bold text-text-primary text-xs uppercase tracking-tight">{resultText}</span>
+      </div>
+  ) : null}
  </div>
  );
- })}
- </div>
+})}
+</div>
 
- {/* Show More Pagination Button */}
+{/* Show More Pagination Button */}
  {sortedMatches.length > visibleMatchCount && (
  <div className="flex justify-center pt-2">
  <button

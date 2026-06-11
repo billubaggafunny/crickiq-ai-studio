@@ -12,7 +12,7 @@ interface Props {
 const statusConfig = {
  'pending': { label: 'Pending', color: 'text-text-secondary', bg: 'bg-tertiary ', icon: <ClockIcon className="w-4 h-4" /> },
  'ready': { label: 'Ready', color: 'text-blue-500', bg: 'bg-blue-50 dark:bg-blue-900/20', icon: <ClockIcon className="w-4 h-4" /> },
- 'in-progress': { label: 'In Progress', color: 'text-amber-500', bg: 'bg-amber-50 dark:bg-amber-900/20', icon: <ClockIcon className="w-4 h-4 animate-pulse" /> },
+ 'in-progress': { label: 'In Progress', color: 'text-amber-500', bg: 'bg-amber-50 dark:bg-amber-900/20', icon: <ClockIcon className="w-4 h-4" /> },
  'completed': { label: 'Completed', color: 'text-green-500', bg: 'bg-green-50 dark:bg-green-900/20', icon: <CheckIcon className="w-4 h-4" /> },
 };
 

@@ -263,8 +263,9 @@ const TournamentManager: React.FC<TournamentManagerProps> = (props) => {
                                 </h3>
                                 <div className="flex items-center gap-2">
                                     {liveQuickMatch && (
-                                         <span className="text-xs font-bold text-success bg-success/20 dark:bg-green-900/30 px-2 py-1 rounded-2xl animate-pulse">
-                                            Live
+                                         <span className="flex items-center gap-1.5 bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-400 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border border-red-100 dark:border-red-900/30">
+                                            <span className="w-1.5 h-1.5 rounded-full bg-red-600 dark:bg-red-500"></span>
+                                            LIVE
                                         </span>
                                     )}
                                     <button
@@ -282,39 +283,72 @@ const TournamentManager: React.FC<TournamentManagerProps> = (props) => {
                                     {liveQuickMatch ? (
                                         <div className="flex flex-col flex-grow">
                                             {liveMatchSummary ? (
-                                                <div className="space-y-4 text-body flex-grow">
-                                                    <div className="text-center bg-tertiary p-4 rounded-xl border border-black/5 dark:border-white/5">
-                                                        <p className="text-xs font-semibold text-text-secondary">{liveMatchSummary.battingTeam.name} Batting</p>
-                                                        <p className="text-4xl md:text-5xl font-bold tracking-tight text-brand-blue py-1">{liveMatchSummary.score}-{liveMatchSummary.wickets}</p>
-                                                        <p className="text-sm font-bold text-text-secondary">Overs: {liveMatchSummary.overs}</p>
+                                                <div className="space-y-4 flex-grow">
+                                                    <div className="bg-tertiary/30 p-4 rounded-xl border border-black/5 dark:border-white/5">
+                                                        <div className="flex justify-between items-start mb-2">
+                                                            <div className="flex items-center gap-2">
+                                                                <div 
+                                                                    className="shrink-0 w-6 h-6 flex items-center justify-center rounded-md text-white font-bold text-xs"
+                                                                    style={{ backgroundColor: liveMatchSummary.battingTeam.logo || '#3B82F6' }}
+                                                                >
+                                                                    {liveMatchSummary.battingTeam.name.substring(0, 2).toUpperCase()}
+                                                                </div>
+                                                                <span className="text-sm font-semibold truncate text-text-primary text-left">
+                                                                    {liveMatchSummary.battingTeam.name} <span className="text-xs text-text-secondary font-normal uppercase tracking-wider ml-1">Batting</span>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex items-baseline gap-2 mt-1 shrink-0">
+                                                            <span className="font-mono font-bold text-3xl md:text-4xl tracking-tighter text-text-primary">
+                                                                {liveMatchSummary.score}/{liveMatchSummary.wickets}
+                                                            </span>
+                                                            <span className="font-mono text-sm text-text-secondary font-bold">
+                                                                ({liveMatchSummary.overs} ov)
+                                                            </span>
+                                                        </div>
                                                     </div>
-                                                    
-                                                    <div className="space-y-1">
+
+                                                    <div className="bg-tertiary/20 p-3 rounded-xl border border-black/5 dark:border-white/5 space-y-2">
+                                                        <div className="space-y-1">
                                                         {liveMatchSummary.onStrike && (
-                                                            <div className="grid grid-cols-[1fr_auto_auto] gap-x-3 items-center">
-                                                                <span className="truncate font-semibold">{liveMatchSummary.onStrike.name}*</span>
-                                                                <span className="font-bold text-brand-blue">{liveMatchSummary.onStrike.runs}</span>
-                                                                <span className="text-text-secondary">({liveMatchSummary.onStrike.balls})</span>
+                                                            <div className="flex justify-between items-center bg-black/5 dark:bg-white/5 px-2 py-1.5 rounded-lg">
+                                                                <span className="text-sm font-semibold text-text-primary truncate pr-2 flex items-center gap-1.5">
+                                                                    {liveMatchSummary.onStrike.name}
+                                                                    <span className="text-brand-blue text-xs font-bold shrink-0">*</span>
+                                                                </span>
+                                                                <div className="flex items-baseline gap-1.5 shrink-0">
+                                                                    <span className="font-mono font-bold text-base text-text-primary">{liveMatchSummary.onStrike.runs}</span>
+                                                                    <span className="font-mono text-xs text-text-secondary">({liveMatchSummary.onStrike.balls})</span>
+                                                                </div>
                                                             </div>
                                                         )}
                                                         {liveMatchSummary.nonStriker && (
-                                                            <div className="grid grid-cols-[1fr_auto_auto] gap-x-3 items-center">
-                                                                <span className="truncate font-semibold">{liveMatchSummary.nonStriker.name}</span>
-                                                                <span className="font-bold text-brand-blue">{liveMatchSummary.nonStriker.runs}</span>
-                                                                <span className="text-text-secondary">({liveMatchSummary.nonStriker.balls})</span>
+                                                            <div className="flex justify-between items-center px-2 py-1">
+                                                                <span className="text-sm text-text-secondary truncate pr-2">
+                                                                    {liveMatchSummary.nonStriker.name}
+                                                                </span>
+                                                                <div className="flex items-baseline gap-1.5 shrink-0">
+                                                                    <span className="font-mono font-bold text-sm text-text-secondary">{liveMatchSummary.nonStriker.runs}</span>
+                                                                    <span className="font-mono text-xs text-text-secondary">({liveMatchSummary.nonStriker.balls})</span>
+                                                                </div>
                                                             </div>
                                                         )}
-                                                    </div>
-                
-                                                    <div className="border-t border-brand-blue/15 my-2"></div>
-                
-                                                    {liveMatchSummary.bowler && (
-                                                        <div className="grid grid-cols-[1fr_auto_auto] gap-x-3 items-center">
-                                                            <span className="truncate font-semibold">{liveMatchSummary.bowler.name}</span>
-                                                            <span className="font-bold text-brand-blue">{liveMatchSummary.bowler.wickets}/{liveMatchSummary.bowler.runsConceded}</span>
-                                                            <span className="text-text-secondary">({liveMatchSummary.bowler.overs})</span>
                                                         </div>
-                                                    )}
+
+                                                        {liveMatchSummary.bowler && (
+                                                        <div className="pt-2 border-t border-black/5 dark:border-white/5">
+                                                            <div className="flex justify-between items-center px-2 py-1">
+                                                                <span className="text-sm text-text-primary capitalize truncate pr-2">
+                                                                    {liveMatchSummary.bowler.name} <span className="text-[10px] uppercase text-text-secondary ml-1 tracking-wider">Bowling</span>
+                                                                </span>
+                                                                <div className="flex items-baseline gap-1.5 shrink-0">
+                                                                    <span className="font-mono font-bold text-sm text-text-primary">{liveMatchSummary.bowler.wickets}/{liveMatchSummary.bowler.runsConceded}</span>
+                                                                    <span className="font-mono text-xs text-text-secondary">({liveMatchSummary.bowler.overs} ov)</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             ) : (
                                                 <div className="flex-grow flex items-center justify-center">
