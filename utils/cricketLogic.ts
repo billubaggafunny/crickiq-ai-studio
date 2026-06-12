@@ -203,8 +203,9 @@ export const calculateStats = (innings: Innings, ballInput: Omit<Ball, 'ballNumb
     // --- Automatic Strike & Bowler Rotation Logic ---
     let [newOnStrike, newNonStriker] = updatedInnings.currentBatsmen;
 
-    // 1. Swap for runs if no wicket
-    if (!newBall.isWicket && newOnStrike && newNonStriker) {
+    // 1. Swap for runs
+    const isRunOut = newBall.isWicket && newBall.wicket?.type === WicketType.RUN_OUT;
+    if (!newBall.isWicket || isRunOut) {
         const batsmenCrossed = newBall.runs > 0 && newBall.runs % 2 !== 0;
         if (batsmenCrossed) {
             [newOnStrike, newNonStriker] = [newNonStriker, newOnStrike];
@@ -217,7 +218,7 @@ export const calculateStats = (innings: Innings, ballInput: Omit<Ball, 'ballNumb
         [newOnStrike, newNonStriker] = [newNonStriker, newOnStrike];
     }
     
-    updatedInnings.currentBatsmen = [newOnStrike, newNonStriker];
+    updatedInnings.currentBatsmen = [newOnStrike as string, newNonStriker as string | null];
     
     if(isOverEnd) {
         const ballsInCompletedOver = [];
